@@ -4,26 +4,31 @@
 
 Base ERP funcional con autenticación, shell principal, MySQL/MariaDB, Inteligencia de Insumos, carga documental, extracción inicial, trazabilidad, auditoría básica, validación funcional completa y respaldo en GitHub.
 
-## Incremento 2 - Especificado, pendiente de aprobación
+## Incremento 2 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
 
 Gestor de Formulaciones:
 
 - Listado de formulaciones.
 - Identificador permanente.
-- Nombre, categoría, estado y versión.
+- Nombre, categoria, estado y version.
 - Ingredientes visibles desde el listado.
-- Chips por función cosmética.
-- Vista rápida.
+- Chips por funcion cosmetica.
+- Vista rapida.
 - Modo aprendizaje.
-- Creación de borradores.
+- Creacion de borradores.
 - Versionado.
-- Aprobación.
+- Aprobacion.
 - Inmutabilidad de versiones aprobadas.
-- Comparación entre versiones.
+- Comparacion entre versiones.
 - Trazabilidad.
 - Historial de cambios.
-- Relación con materias primas maestras.
-- Preparación para costeo y producción futuros.
+- Relacion con materias primas maestras.
+- Preparacion para costeo y produccion futuros.
+- Validacion documentada en `docs/18_Validacion_Incremento_2.md`.
+
+## Incremento 3 - Pendiente de especificacion
+
+No iniciar hasta aprobacion formal del Incremento 2.
 
 ## Fases posteriores
 

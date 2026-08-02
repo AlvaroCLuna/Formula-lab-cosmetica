@@ -8,25 +8,19 @@ No realizar más cambios sobre Incremento 1 salvo correcciones críticas futuras
 
 ## Incremento 2 - Gestor de Formulaciones
 
-Pendiente de aprobación antes de programar:
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 
-- Crear modelo de familias de formulación.
-- Crear modelo de versiones de formulación.
-- Crear modelo de ingredientes por versión.
-- Relacionar ingredientes con materias primas maestras.
-- Crear listado de formulaciones.
-- Mostrar identificador permanente.
-- Mostrar estado y versión actual.
-- Mostrar ingredientes desde el listado.
-- Mostrar chips por función cosmética.
-- Crear vista rápida lateral.
-- Integrar modo aprendizaje.
-- Crear flujo de borrador.
-- Crear flujo de aprobación.
-- Impedir edición de versiones aprobadas.
-- Crear comparación entre versiones.
-- Registrar historial en `audit_log`.
-- Preparar campos para costeo y producción futuros sin implementarlos.
+- Modelo de familias de formulacion implementado.
+- Modelo de versiones de formulacion implementado.
+- Modelo de ingredientes por version implementado.
+- Relacion con materias primas maestras implementada.
+- Listado, busqueda, filtros, vista rapida y chips implementados.
+- Modo aprendizaje implementado sin inventar informacion tecnica.
+- Flujo de borrador, revision, aprobacion, rechazo y nueva version implementado.
+- Inmutabilidad de versiones aprobadas implementada con bloqueo 409.
+- Comparacion entre versiones implementada.
+- Historial en `audit_log` implementado.
+- Campos preparatorios para costeo y produccion agregados sin implementar esos modulos.
 
 ## Pendiente para fases posteriores
 

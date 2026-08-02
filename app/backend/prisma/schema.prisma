@@ -47,6 +47,26 @@ enum ValidationStatus {
   rechazado
 }
 
+enum FormulationFamilyStatus {
+  activa
+  en_desarrollo
+  archivada
+  obsoleta
+}
+
+enum FormulationVersionStatus {
+  borrador
+  en_revision
+  aprobada
+  rechazada
+  obsoleta
+}
+
+enum IngredientSourceType {
+  materia_prima_maestra
+  provisional
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -57,6 +77,11 @@ model Organization {
   documents Document[]
   drafts    RawMaterialDraft[]
   auditLogs AuditLog[]
+  rawMaterialMasters RawMaterialMaster[]
+  formulationFamilies FormulationFamily[]
+  formulationVersions FormulationVersion[]
+  formulationIngredients FormulationIngredient[]
+  formulationComparisons FormulationVersionComparison[]
 
   @@map("organizations")
 }
@@ -77,6 +102,10 @@ model User {
   approvals      RawMaterialValidatedVersion[]
   auditLogs      AuditLog[]
   resetRequests  PasswordResetRequest[]
+  formulationFamilies FormulationFamily[]
+  formulationVersions FormulationVersion[]
+  formulationApprovals FormulationVersion[] @relation("FormulationApprovals")
+  formulationComparisons FormulationVersionComparison[]
 
   @@index([organizationId])
   @@map("users")
@@ -212,4 +241,123 @@ model AuditLog {
   @@index([userId])
   @@index([entityType, entityId])
   @@map("audit_log")
+}
+
+model RawMaterialMaster {
+  id            String       @id @default(uuid())
+  organizationId String     @map("organization_id")
+  permanentCode String      @map("permanent_code")
+  commonName    String      @map("common_name")
+  inci          String?
+  status        EntityStatus @default(activo)
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @default(now()) @updatedAt @map("updated_at")
+  organization  Organization @relation(fields: [organizationId], references: [id])
+  ingredients   FormulationIngredient[]
+
+  @@unique([organizationId, permanentCode])
+  @@index([organizationId])
+  @@map("raw_material_masters")
+}
+
+model FormulationFamily {
+  id              String                  @id @default(uuid())
+  organizationId  String                  @map("organization_id")
+  permanentCode   String                  @map("permanent_code")
+  name            String
+  category        String
+  status          FormulationFamilyStatus @default(en_desarrollo)
+  currentVersionId String?                @map("current_version_id")
+  createdByUserId String                  @map("created_by_user_id")
+  createdAt       DateTime                @default(now()) @map("created_at")
+  updatedAt       DateTime                @default(now()) @updatedAt @map("updated_at")
+  organization    Organization            @relation(fields: [organizationId], references: [id])
+  createdBy       User                    @relation(fields: [createdByUserId], references: [id])
+  versions        FormulationVersion[]
+
+  @@unique([organizationId, permanentCode])
+  @@index([organizationId])
+  @@index([createdByUserId])
+  @@map("formulation_families")
+}
+
+model FormulationVersion {
+  id                  String                   @id @default(uuid())
+  organizationId      String                   @map("organization_id")
+  formulationFamilyId String                   @map("formulation_family_id")
+  versionNumber       Int                      @map("version_number")
+  status              FormulationVersionStatus @default(borrador)
+  name                String
+  category            String
+  objective           String?                  @db.Text
+  notes               String?                  @db.Text
+  approvedByUserId    String?                  @map("approved_by_user_id")
+  approvedAt          DateTime?                @map("approved_at")
+  snapshotJson        Json?                    @map("snapshot_json")
+  createdByUserId     String                   @map("created_by_user_id")
+  createdAt           DateTime                 @default(now()) @map("created_at")
+  updatedAt           DateTime                 @default(now()) @updatedAt @map("updated_at")
+  organization        Organization             @relation(fields: [organizationId], references: [id])
+  family              FormulationFamily        @relation(fields: [formulationFamilyId], references: [id])
+  createdBy           User                     @relation(fields: [createdByUserId], references: [id])
+  approvedBy          User?                    @relation("FormulationApprovals", fields: [approvedByUserId], references: [id])
+  ingredients         FormulationIngredient[]
+  baseComparisons     FormulationVersionComparison[] @relation("BaseVersion")
+  targetComparisons   FormulationVersionComparison[] @relation("TargetVersion")
+
+  @@unique([formulationFamilyId, versionNumber])
+  @@index([organizationId])
+  @@index([formulationFamilyId])
+  @@index([createdByUserId])
+  @@map("formulation_versions")
+}
+
+model FormulationIngredient {
+  id                   String               @id @default(uuid())
+  organizationId       String               @map("organization_id")
+  formulationVersionId String               @map("formulation_version_id")
+  rawMaterialMasterId  String?              @map("raw_material_master_id")
+  displayName          String               @map("display_name")
+  inci                 String?
+  cosmeticFunction     String               @map("cosmetic_function")
+  phase                String
+  percentage           Float
+  baseQuantity         Float                @map("base_quantity")
+  unit                 String               @default("g")
+  orderIndex           Int                  @map("order_index")
+  sourceType           IngredientSourceType @default(provisional) @map("source_type")
+  sourceReference      String?              @map("source_reference")
+  estimatedCost        Float?               @map("estimated_cost")
+  productionNotes      String?              @db.Text @map("production_notes")
+  inventoryLockPolicy  String?              @map("inventory_lock_policy")
+  status               EntityStatus         @default(activo)
+  createdAt            DateTime             @default(now()) @map("created_at")
+  updatedAt            DateTime             @default(now()) @updatedAt @map("updated_at")
+  organization         Organization         @relation(fields: [organizationId], references: [id])
+  version              FormulationVersion   @relation(fields: [formulationVersionId], references: [id])
+  rawMaterialMaster    RawMaterialMaster?   @relation(fields: [rawMaterialMasterId], references: [id])
+
+  @@index([organizationId])
+  @@index([formulationVersionId])
+  @@index([rawMaterialMasterId])
+  @@map("formulation_ingredients")
+}
+
+model FormulationVersionComparison {
+  id              String             @id @default(uuid())
+  organizationId  String             @map("organization_id")
+  baseVersionId   String             @map("base_version_id")
+  targetVersionId String             @map("target_version_id")
+  summaryJson     Json               @map("summary_json")
+  createdByUserId String             @map("created_by_user_id")
+  createdAt       DateTime           @default(now()) @map("created_at")
+  organization    Organization       @relation(fields: [organizationId], references: [id])
+  baseVersion     FormulationVersion @relation("BaseVersion", fields: [baseVersionId], references: [id])
+  targetVersion   FormulationVersion @relation("TargetVersion", fields: [targetVersionId], references: [id])
+  createdBy       User               @relation(fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([baseVersionId])
+  @@index([targetVersionId])
+  @@map("formulation_version_comparisons")
 }

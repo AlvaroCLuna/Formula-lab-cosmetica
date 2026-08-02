@@ -4,6 +4,7 @@ import { api } from "./api/client";
 import { AppShell } from "./components/AppShell";
 import { LoginPage } from "./pages/LoginPage";
 import { IngredientIntelligencePage } from "./pages/IngredientIntelligencePage";
+import { FormulationListPage } from "./pages/FormulationListPage";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -41,7 +42,7 @@ export function App() {
         setUser(null);
       }}
     >
-      <IngredientIntelligencePage />
+      {view === "formulaciones" ? <FormulationListPage /> : <IngredientIntelligencePage />}
     </AppShell>
   );
 }

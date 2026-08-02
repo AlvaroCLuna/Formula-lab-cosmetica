@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.0 - Incremento 2 implementado
+
+- Se implemento el Gestor de Formulaciones con listado, busqueda, filtros, vista rapida, chips por funcion cosmetica y modo aprendizaje.
+- Se agregaron familias de formulacion con identificador permanente y versiones con estado, snapshot de aprobacion e inmutabilidad.
+- Se agregaron ingredientes por fase con orden de incorporacion, porcentaje, cantidad base y relacion opcional con materias primas maestras.
+- Se agregaron APIs para crear borradores, editar versiones editables, enviar a revision, aprobar, rechazar, crear nueva version y comparar versiones.
+- Se agregaron materias primas maestras minimas para relacionar ingredientes sin implementar inventario operativo.
+- Se registro auditoria para acciones relevantes de formulacion, versiones, ingredientes y comparaciones.
+- Se agregaron migraciones Prisma y SQL espejo del Incremento 2.
+- Se actualizaron datos demo con una formulacion aprobada y materias primas maestras.
+- Se agregaron pruebas de versionado y comparacion.
+- Se documento la validacion del Incremento 2 en `docs/18_Validacion_Incremento_2.md`.
+
 ## 0.1.2 - Aprobación formal del Incremento 1
 
 - Se marcó el Incremento 1 como COMPLETADO Y APROBADO.

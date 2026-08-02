@@ -5,6 +5,7 @@ import { config } from "./config.js";
 import { authRouter } from "./routes/auth.routes.js";
 import { documentsRouter } from "./routes/documents.routes.js";
 import { draftsRouter } from "./routes/drafts.routes.js";
+import { formulationsRouter } from "./routes/formulations.routes.js";
 import { ensureStorageFolders } from "./services/storage.service.js";
 
 const app = express();
@@ -19,6 +20,7 @@ app.get("/health", (_req, res) => {
 app.use("/auth", authRouter);
 app.use("/documents", documentsRouter);
 app.use("/drafts", draftsRouter);
+app.use("/formulations", formulationsRouter);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
   if (error instanceof ZodError) {
