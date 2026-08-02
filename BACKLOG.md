@@ -8,7 +8,7 @@ No realizar más cambios sobre Incremento 1 salvo correcciones críticas futuras
 
 ## Incremento 2 - Gestor de Formulaciones
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Modelo de familias de formulacion implementado.
 - Modelo de versiones de formulacion implementado.
@@ -21,6 +21,20 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Comparacion entre versiones implementada.
 - Historial en `audit_log` implementado.
 - Campos preparatorios para costeo y produccion agregados sin implementar esos modulos.
+
+## Incremento 3 - Materias Primas Maestras
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Catalogo maestro implementado como base de conocimiento.
+- Busqueda, filtros, categorias, familias y estados implementados.
+- Ficha tecnica completa versionada implementada.
+- Relaciones con fabricantes, proveedores, productos comerciales, documentos y lotes preparados.
+- Inteligencia de uso en formulaciones, proveedores, documentos, costo promedio preparado y ultima actualizacion implementada.
+- Vista rapida lateral y modo aprendizaje implementados.
+- Auditoria de creacion, edicion, aprobacion y archivado implementada.
+- Seeds con 30 materias primas demo agregados.
+- Pendiente: aprobacion formal del usuario antes de iniciar Incremento 4.
 
 ## Pendiente para fases posteriores
 

@@ -40,12 +40,93 @@ export type Draft = {
   extractedValues: ExtractedValue[];
 };
 
+export type RawMaterialVersionStatus = "borrador" | "en_revision" | "validada" | "rechazada" | "obsoleta";
+
+export type RawMaterialMasterVersion = {
+  id: string;
+  rawMaterialMasterId: string;
+  versionNumber: number;
+  status: RawMaterialVersionStatus;
+  commercialName: string | null;
+  commonName: string;
+  inci: string | null;
+  cas: string | null;
+  ec: string | null;
+  category: string;
+  family: string | null;
+  cosmeticFunction: string;
+  description: string | null;
+  appearance: string | null;
+  color: string | null;
+  odor: string | null;
+  solubility: string | null;
+  density: string | null;
+  ph: string | null;
+  maxTemperature: string | null;
+  recommendedTemperature: string | null;
+  usageRange: string | null;
+  storageConditions: string | null;
+  shelfLife: string | null;
+  contraindications: string | null;
+  compatibilities: string | null;
+  incompatibilities: string | null;
+  allergens: string | null;
+  observations: string | null;
+  examplesOfUse: string | null;
+  evidenceSummary: string | null;
+  confidenceLevel: string;
+};
+
+export type RawMaterialRelation = {
+  id: string;
+  name?: string;
+  tradeName?: string;
+  title?: string;
+  documentType?: string;
+  averageCost?: number | null;
+  status: string;
+};
+
+export type RawMaterialIntelligence = {
+  formulationCount: number;
+  averageUsage?: number | null;
+  supplierCount: number;
+  documentCount: number;
+  averageCost?: number | null;
+  lastUpdatedAt: string;
+  formulations?: Array<{ id: string; name: string; versionNumber: number; percentage: number }>;
+};
+
+export type RawMaterialLearning = {
+  name: string;
+  inci: string;
+  function: string;
+  description: string;
+  examplesOfUse: string;
+  formulations: Array<{ id: string; name: string; versionNumber: number; percentage: number }>;
+};
+
 export type RawMaterialMaster = {
   id: string;
   permanentCode: string;
+  commercialName: string | null;
   commonName: string;
   inci: string | null;
-  status: string;
+  cas?: string | null;
+  ec?: string | null;
+  category?: string | null;
+  family?: string | null;
+  cosmeticFunction?: string | null;
+  status: "borrador" | "en_revision" | "validada" | "archivada" | string;
+  currentVersionId?: string | null;
+  updatedAt?: string;
+  versions?: RawMaterialMasterVersion[];
+  suppliers?: RawMaterialRelation[];
+  manufacturers?: RawMaterialRelation[];
+  products?: RawMaterialRelation[];
+  documents?: RawMaterialRelation[];
+  lots?: RawMaterialRelation[];
+  intelligence?: RawMaterialIntelligence;
 };
 
 export type FormulationIngredient = {

@@ -1,4 +1,4 @@
-import type { Draft, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, LearningCard, LoadedDocument, RawMaterialMaster, User, ValidationStatus } from "../types";
+import type { Draft, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -139,5 +139,43 @@ export const api = {
   },
   async listRawMaterials() {
     return request<{ rawMaterials: RawMaterialMaster[] }>("/formulations/catalog/raw-materials");
+  },
+  async listMasterRawMaterials(filters: { search?: string; status?: string; category?: string; family?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    const suffix = params.toString() ? `?${params}` : "";
+    return request<{ rawMaterials: RawMaterialMaster[] }>(`/raw-materials${suffix}`);
+  },
+  async createMasterRawMaterial(input: Partial<RawMaterialMasterVersion>) {
+    return request<{ rawMaterial: RawMaterialMaster }>("/raw-materials", {
+      method: "POST",
+      body: JSON.stringify(input)
+    });
+  },
+  async getMasterRawMaterial(id: string) {
+    return request<{ rawMaterial: RawMaterialMaster; intelligence: NonNullable<RawMaterialMaster["intelligence"]> }>(`/raw-materials/${id}`);
+  },
+  async quickRawMaterial(id: string) {
+    return request<{ rawMaterial: RawMaterialMaster; intelligence: NonNullable<RawMaterialMaster["intelligence"]>; learning: RawMaterialLearning }>(`/raw-materials/${id}/quick-view`);
+  },
+  async updateRawMaterialVersion(id: string, input: Partial<RawMaterialMasterVersion>) {
+    return request<{ version: RawMaterialMasterVersion }>(`/raw-materials/versions/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(input)
+    });
+  },
+  async submitRawMaterialVersion(id: string) {
+    return request<{ version: RawMaterialMasterVersion }>(`/raw-materials/versions/${id}/submit-review`, { method: "POST" });
+  },
+  async approveRawMaterialVersion(id: string) {
+    return request<{ version: RawMaterialMasterVersion; snapshot: unknown }>(`/raw-materials/versions/${id}/approve`, { method: "POST" });
+  },
+  async createRawMaterialVersion(id: string) {
+    return request<{ version: RawMaterialMasterVersion }>(`/raw-materials/${id}/versions`, { method: "POST" });
+  },
+  async archiveRawMaterial(id: string) {
+    return request<{ rawMaterial: RawMaterialMaster }>(`/raw-materials/${id}/archive`, { method: "POST" });
   }
 };

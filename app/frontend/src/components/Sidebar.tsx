@@ -4,7 +4,7 @@ const items = [
   { id: "panel", label: "Panel", icon: LayoutDashboard, disabled: true },
   { id: "inteligencia", label: "Inteligencia", icon: UploadCloud },
   { id: "formulaciones", label: "Formulaciones", icon: FileStack },
-  { id: "materias", label: "Materias primas", icon: Boxes, disabled: true },
+  { id: "materias", label: "Materias primas", icon: Boxes },
   { id: "calidad", label: "Calidad", icon: ClipboardCheck, disabled: true },
   { id: "aprendizaje", label: "Aprendizaje", icon: BookOpen, disabled: true }
 ];

@@ -24,20 +24,102 @@ async function main() {
   });
 
   const rawMaterials = [
-    { id: "rm-sci", permanentCode: "MP-0001", commonName: "SCI", inci: "Sodium Cocoyl Isethionate" },
-    { id: "rm-betaina", permanentCode: "MP-0002", commonName: "Betaina de coco", inci: "Cocamidopropyl Betaine" },
-    { id: "rm-karite", permanentCode: "MP-0003", commonName: "Manteca de karite", inci: "Butyrospermum Parkii Butter" },
-    { id: "rm-jojoba", permanentCode: "MP-0004", commonName: "Aceite de jojoba", inci: "Simmondsia Chinensis Seed Oil" },
-    { id: "rm-kaolin", permanentCode: "MP-0005", commonName: "Arcilla blanca", inci: "Kaolin" },
-    { id: "rm-pantenol", permanentCode: "MP-0006", commonName: "Pantenol", inci: "Panthenol" },
-    { id: "rm-agua", permanentCode: "MP-0007", commonName: "Agua purificada", inci: "Aqua" }
-  ];
+    ["rm-sci", "MP-00001", "SCI", "Sodium Cocoyl Isethionate", "Tensioactivos", "Anionicos", "Tensioactivo"],
+    ["rm-scs", "MP-00002", "SCS", "Sodium Coco Sulfate", "Tensioactivos", "Anionicos", "Tensioactivo"],
+    ["rm-sodium-coco-sulfate", "MP-00003", "Sodium Coco Sulfate", "Sodium Coco Sulfate", "Tensioactivos", "Anionicos", "Tensioactivo"],
+    ["rm-betaina", "MP-00004", "Cocamidopropyl Betaine", "Cocamidopropyl Betaine", "Tensioactivos", "Anfotericos", "Co-tensioactivo"],
+    ["rm-btms", "MP-00005", "BTMS", "Behentrimonium Methosulfate (and) Cetearyl Alcohol", "Acondicionadores", "Cationicos", "Acondicionador"],
+    ["rm-cetilico", "MP-00006", "Alcohol Cetilico", "Cetyl Alcohol", "Alcoholes grasos", "Estructurantes", "Co-emulsionante"],
+    ["rm-cetearico", "MP-00007", "Alcohol Ceteárico", "Cetearyl Alcohol", "Alcoholes grasos", "Estructurantes", "Co-emulsionante"],
+    ["rm-karite", "MP-00008", "Manteca de Karite", "Butyrospermum Parkii Butter", "Lipidos", "Mantecas", "Emoliente"],
+    ["rm-argan", "MP-00009", "Aceite de Argan", "Argania Spinosa Kernel Oil", "Lipidos", "Aceites vegetales", "Emoliente"],
+    ["rm-coco", "MP-00010", "Aceite de Coco", "Cocos Nucifera Oil", "Lipidos", "Aceites vegetales", "Emoliente"],
+    ["rm-glicerina", "MP-00011", "Glicerina", "Glycerin", "Humectantes", "Polioles", "Humectante"],
+    ["rm-pantenol", "MP-00012", "Pantenol", "Panthenol", "Activos", "Vitaminas", "Acondicionador"],
+    ["rm-proteina", "MP-00013", "Proteina Hidrolizada", "Hydrolyzed Wheat Protein", "Activos", "Proteinas", "Acondicionador"],
+    ["rm-arcilla-verde", "MP-00014", "Arcilla Verde", "Illite", "Minerales", "Arcillas", "Absorbente"],
+    ["rm-kaolin", "MP-00015", "Arcilla Blanca", "Kaolin", "Minerales", "Arcillas", "Absorbente"],
+    ["rm-romero", "MP-00016", "Romero", "Rosmarinus Officinalis Leaf Extract", "Extractos", "Botanicos", "Acondicionador"],
+    ["rm-ortiga", "MP-00017", "Ortiga", "Urtica Dioica Extract", "Extractos", "Botanicos", "Acondicionador"],
+    ["rm-aloe", "MP-00018", "Aloe Vera", "Aloe Barbadensis Leaf Juice", "Activos", "Botanicos", "Calmante"],
+    ["rm-vitamina-e", "MP-00019", "Vitamina E", "Tocopherol", "Activos", "Antioxidantes", "Antioxidante"],
+    ["rm-cosgard", "MP-00020", "Cosgard", "Benzyl Alcohol (and) Dehydroacetic Acid", "Conservantes", "Conservantes", "Conservante"],
+    ["rm-agua", "MP-00021", "Agua purificada", "Aqua", "Vehiculos", "Acuosos", "Vehiculo"],
+    ["rm-xantana", "MP-00022", "Goma Xantana", "Xanthan Gum", "Gelificantes", "Gomas", "Modificador reologico"],
+    ["rm-olivem", "MP-00023", "Olivem 1000", "Cetearyl Olivate (and) Sorbitan Olivate", "Emulsionantes", "No ionicos", "Emulsionante"],
+    ["rm-emulsifying-wax", "MP-00024", "Cera emulsionante", "Cetearyl Alcohol (and) Polysorbate 60", "Emulsionantes", "No ionicos", "Emulsionante"],
+    ["rm-acido-estearico", "MP-00025", "Acido estearico", "Stearic Acid", "Estructurantes", "Acidos grasos", "Estructurante"],
+    ["rm-niacinamida", "MP-00026", "Niacinamida", "Niacinamide", "Activos", "Vitaminas", "Acondicionador cutaneo"],
+    ["rm-acido-hialuronico", "MP-00027", "Acido hialuronico", "Sodium Hyaluronate", "Activos", "Humectantes", "Humectante"],
+    ["rm-miel", "MP-00028", "Miel", "Mel", "Activos", "Naturales", "Humectante"],
+    ["rm-carbon-activado", "MP-00029", "Carbon activado", "Charcoal Powder", "Minerales", "Polvos", "Absorbente"],
+    ["rm-aceite-ricino", "MP-00030", "Aceite de Ricino", "Ricinus Communis Seed Oil", "Lipidos", "Aceites vegetales", "Emoliente"]
+  ].map(([id, permanentCode, commonName, inci, category, family, cosmeticFunction]) => ({ id, permanentCode, commonName, inci, category, family, cosmeticFunction }));
 
   for (const material of rawMaterials) {
     await prisma.rawMaterialMaster.upsert({
-      where: { organizationId_permanentCode: { organizationId: organization.id, permanentCode: material.permanentCode } },
-      update: { commonName: material.commonName, inci: material.inci, status: "activo" },
-      create: { ...material, organizationId: organization.id, status: "activo" }
+      where: { id: material.id },
+      update: { permanentCode: material.permanentCode, commonName: material.commonName, inci: material.inci, category: material.category, family: material.family, cosmeticFunction: material.cosmeticFunction, status: "validada", currentVersionId: `${material.id}-v1` },
+      create: { ...material, organizationId: organization.id, status: "validada", currentVersionId: `${material.id}-v1`, createdByUserId: "demo-user" }
+    });
+    await prisma.rawMaterialMasterVersion.upsert({
+      where: { rawMaterialMasterId_versionNumber: { rawMaterialMasterId: material.id, versionNumber: 1 } },
+      update: {
+        commonName: material.commonName,
+        inci: material.inci,
+        category: material.category,
+        family: material.family,
+        cosmeticFunction: material.cosmeticFunction,
+        status: "validada"
+      },
+      create: {
+        id: `${material.id}-v1`,
+        organizationId: organization.id,
+        rawMaterialMasterId: material.id,
+        versionNumber: 1,
+        status: "validada",
+        commercialName: material.commonName,
+        commonName: material.commonName,
+        inci: material.inci,
+        category: material.category,
+        family: material.family,
+        cosmeticFunction: material.cosmeticFunction,
+        description: `Ficha demo de ${material.commonName}. Informacion base para validar el modulo de conocimiento; requiere evidencia documental real antes de uso tecnico definitivo.`,
+        appearance: "Informacion pendiente de documento tecnico",
+        color: "Informacion pendiente de documento tecnico",
+        odor: "Informacion pendiente de documento tecnico",
+        solubility: "Informacion pendiente de documento tecnico",
+        usageRange: "Informacion pendiente de documento tecnico",
+        storageConditions: "Conservar segun ficha tecnica del proveedor.",
+        shelfLife: "Informacion pendiente de documento tecnico",
+        contraindications: "Informacion insuficiente para evaluar.",
+        compatibilities: "Informacion insuficiente para evaluar.",
+        incompatibilities: "Informacion insuficiente para evaluar.",
+        allergens: "Informacion insuficiente para evaluar.",
+        observations: "Dato demo. No sustituye SDS, TDS ni COA.",
+        examplesOfUse: "Formulaciones cosmeticas donde su funcion declarada sea aplicable y exista validacion tecnica.",
+        evidenceSummary: "Seed demo sin documento fuente adjunto.",
+        confidenceLevel: "demo",
+        approvedByUserId: "demo-user",
+        approvedAt: new Date("2026-08-02T12:00:00.000Z"),
+        snapshotJson: { seed: true, commonName: material.commonName, inci: material.inci },
+        createdByUserId: "demo-user"
+      }
+    });
+    await prisma.rawMaterialSupplier.upsert({
+      where: { id: `${material.id}-supplier` },
+      update: { name: "Proveedor demo", status: "activo" },
+      create: { id: `${material.id}-supplier`, organizationId: organization.id, rawMaterialMasterId: material.id, name: "Proveedor demo", contact: "Pendiente" }
+    });
+    await prisma.rawMaterialCommercialProduct.upsert({
+      where: { id: `${material.id}-product` },
+      update: { tradeName: material.commonName, status: "activo" },
+      create: { id: `${material.id}-product`, organizationId: organization.id, rawMaterialMasterId: material.id, supplierId: `${material.id}-supplier`, tradeName: material.commonName, averageCost: null, currency: "MXN" }
+    });
+    await prisma.rawMaterialDocument.upsert({
+      where: { id: `${material.id}-doc` },
+      update: { title: `Ficha pendiente ${material.commonName}`, status: "activo" },
+      create: { id: `${material.id}-doc`, organizationId: organization.id, rawMaterialMasterId: material.id, title: `Ficha pendiente ${material.commonName}`, documentType: "tds", externalReference: "Documento demo pendiente de carga" }
     });
   }
 

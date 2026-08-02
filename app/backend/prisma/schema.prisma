@@ -67,6 +67,31 @@ enum IngredientSourceType {
   provisional
 }
 
+enum RawMaterialMasterStatus {
+  borrador
+  en_revision
+  validada
+  archivada
+}
+
+enum RawMaterialVersionStatus {
+  borrador
+  en_revision
+  validada
+  rechazada
+  obsoleta
+}
+
+enum RawMaterialDocumentType {
+  pdf
+  tds
+  sds
+  coa
+  imagen
+  articulo
+  otro
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -82,6 +107,12 @@ model Organization {
   formulationVersions FormulationVersion[]
   formulationIngredients FormulationIngredient[]
   formulationComparisons FormulationVersionComparison[]
+  rawMaterialVersions RawMaterialMasterVersion[]
+  rawMaterialManufacturers RawMaterialManufacturer[]
+  rawMaterialSuppliers RawMaterialSupplier[]
+  rawMaterialProducts RawMaterialCommercialProduct[]
+  rawMaterialDocuments RawMaterialDocument[]
+  rawMaterialLots RawMaterialLot[]
 
   @@map("organizations")
 }
@@ -106,6 +137,9 @@ model User {
   formulationVersions FormulationVersion[]
   formulationApprovals FormulationVersion[] @relation("FormulationApprovals")
   formulationComparisons FormulationVersionComparison[]
+  createdRawMaterialMasters RawMaterialMaster[]
+  rawMaterialVersions RawMaterialMasterVersion[]
+  rawMaterialApprovals RawMaterialMasterVersion[] @relation("RawMaterialApprovals")
 
   @@index([organizationId])
   @@map("users")
@@ -143,6 +177,7 @@ model Document {
   uploadedBy        User                   @relation(fields: [uploadedByUserId], references: [id])
   processingJobs    DocumentProcessingJob[]
   extractedValues   ExtractedValue[]
+  rawMaterialLinks  RawMaterialDocument[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -244,20 +279,188 @@ model AuditLog {
 }
 
 model RawMaterialMaster {
-  id            String       @id @default(uuid())
-  organizationId String     @map("organization_id")
-  permanentCode String      @map("permanent_code")
-  commonName    String      @map("common_name")
-  inci          String?
-  status        EntityStatus @default(activo)
-  createdAt     DateTime    @default(now()) @map("created_at")
-  updatedAt     DateTime    @default(now()) @updatedAt @map("updated_at")
-  organization  Organization @relation(fields: [organizationId], references: [id])
-  ingredients   FormulationIngredient[]
+  id               String                  @id @default(uuid())
+  organizationId   String                  @map("organization_id")
+  permanentCode    String                  @map("permanent_code")
+  commercialName   String?                 @map("commercial_name")
+  commonName       String                  @map("common_name")
+  inci             String?
+  cas              String?
+  ec               String?
+  category         String?
+  family           String?
+  cosmeticFunction String?                 @map("cosmetic_function")
+  status           RawMaterialMasterStatus @default(borrador)
+  currentVersionId String?                 @map("current_version_id")
+  createdByUserId  String?                 @map("created_by_user_id")
+  createdAt        DateTime                @default(now()) @map("created_at")
+  updatedAt        DateTime                @default(now()) @updatedAt @map("updated_at")
+  organization     Organization            @relation(fields: [organizationId], references: [id])
+  createdBy        User?                   @relation(fields: [createdByUserId], references: [id])
+  ingredients      FormulationIngredient[]
+  versions         RawMaterialMasterVersion[]
+  manufacturers    RawMaterialManufacturer[]
+  suppliers        RawMaterialSupplier[]
+  products         RawMaterialCommercialProduct[]
+  documents        RawMaterialDocument[]
+  lots             RawMaterialLot[]
 
   @@unique([organizationId, permanentCode])
   @@index([organizationId])
+  @@index([createdByUserId])
   @@map("raw_material_masters")
+}
+
+model RawMaterialMasterVersion {
+  id                   String                   @id @default(uuid())
+  organizationId       String                   @map("organization_id")
+  rawMaterialMasterId  String                   @map("raw_material_master_id")
+  versionNumber        Int                      @map("version_number")
+  status               RawMaterialVersionStatus @default(borrador)
+  commercialName       String?                  @map("commercial_name")
+  commonName           String                   @map("common_name")
+  inci                 String?
+  cas                  String?
+  ec                   String?
+  category             String
+  family               String?
+  cosmeticFunction     String                   @map("cosmetic_function")
+  description          String?                  @db.Text
+  appearance           String?
+  color                String?
+  odor                 String?
+  solubility           String?
+  density              String?
+  ph                   String?                  @map("pH")
+  maxTemperature       String?                  @map("max_temperature")
+  recommendedTemperature String?                @map("recommended_temperature")
+  usageRange           String?                  @map("usage_range")
+  storageConditions    String?                  @db.Text @map("storage_conditions")
+  shelfLife            String?                  @map("shelf_life")
+  contraindications    String?                  @db.Text
+  compatibilities      String?                  @db.Text
+  incompatibilities    String?                  @db.Text
+  allergens            String?                  @db.Text
+  observations         String?                  @db.Text
+  examplesOfUse        String?                  @db.Text @map("examples_of_use")
+  evidenceSummary      String?                  @db.Text @map("evidence_summary")
+  confidenceLevel      String                   @default("pendiente") @map("confidence_level")
+  approvedByUserId     String?                  @map("approved_by_user_id")
+  approvedAt           DateTime?                @map("approved_at")
+  snapshotJson         Json?                    @map("snapshot_json")
+  createdByUserId      String                   @map("created_by_user_id")
+  createdAt            DateTime                 @default(now()) @map("created_at")
+  updatedAt            DateTime                 @default(now()) @updatedAt @map("updated_at")
+  organization         Organization             @relation(fields: [organizationId], references: [id])
+  rawMaterial          RawMaterialMaster        @relation(fields: [rawMaterialMasterId], references: [id])
+  createdBy            User                     @relation(fields: [createdByUserId], references: [id])
+  approvedBy           User?                    @relation("RawMaterialApprovals", fields: [approvedByUserId], references: [id])
+
+  @@unique([rawMaterialMasterId, versionNumber])
+  @@index([organizationId])
+  @@index([rawMaterialMasterId])
+  @@index([createdByUserId])
+  @@map("raw_material_master_versions")
+}
+
+model RawMaterialManufacturer {
+  id                  String            @id @default(uuid())
+  organizationId      String            @map("organization_id")
+  rawMaterialMasterId String            @map("raw_material_master_id")
+  name                String
+  country             String?
+  status              EntityStatus      @default(activo)
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at")
+  organization        Organization      @relation(fields: [organizationId], references: [id])
+  rawMaterial         RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
+  products            RawMaterialCommercialProduct[]
+
+  @@index([organizationId])
+  @@index([rawMaterialMasterId])
+  @@map("raw_material_manufacturers")
+}
+
+model RawMaterialSupplier {
+  id                  String            @id @default(uuid())
+  organizationId      String            @map("organization_id")
+  rawMaterialMasterId String            @map("raw_material_master_id")
+  name                String
+  contact             String?
+  status              EntityStatus      @default(activo)
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at")
+  organization        Organization      @relation(fields: [organizationId], references: [id])
+  rawMaterial         RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
+  products            RawMaterialCommercialProduct[]
+
+  @@index([organizationId])
+  @@index([rawMaterialMasterId])
+  @@map("raw_material_suppliers")
+}
+
+model RawMaterialCommercialProduct {
+  id                  String                   @id @default(uuid())
+  organizationId      String                   @map("organization_id")
+  rawMaterialMasterId String                   @map("raw_material_master_id")
+  manufacturerId      String?                  @map("manufacturer_id")
+  supplierId          String?                  @map("supplier_id")
+  tradeName           String                   @map("trade_name")
+  sku                 String?
+  averageCost         Float?                   @map("average_cost")
+  currency            String?                  @default("MXN")
+  status              EntityStatus             @default(activo)
+  createdAt           DateTime                 @default(now()) @map("created_at")
+  updatedAt           DateTime                 @default(now()) @updatedAt @map("updated_at")
+  organization        Organization             @relation(fields: [organizationId], references: [id])
+  rawMaterial         RawMaterialMaster        @relation(fields: [rawMaterialMasterId], references: [id])
+  manufacturer        RawMaterialManufacturer? @relation(fields: [manufacturerId], references: [id])
+  supplier            RawMaterialSupplier?     @relation(fields: [supplierId], references: [id])
+
+  @@index([organizationId])
+  @@index([rawMaterialMasterId])
+  @@index([manufacturerId])
+  @@index([supplierId])
+  @@map("raw_material_commercial_products")
+}
+
+model RawMaterialDocument {
+  id                  String                  @id @default(uuid())
+  organizationId      String                  @map("organization_id")
+  rawMaterialMasterId String                  @map("raw_material_master_id")
+  documentId          String?                 @map("document_id")
+  title               String
+  documentType        RawMaterialDocumentType @map("document_type")
+  externalReference   String?                 @map("external_reference")
+  status              EntityStatus            @default(activo)
+  createdAt           DateTime                @default(now()) @map("created_at")
+  updatedAt           DateTime                @default(now()) @updatedAt @map("updated_at")
+  organization        Organization            @relation(fields: [organizationId], references: [id])
+  rawMaterial         RawMaterialMaster       @relation(fields: [rawMaterialMasterId], references: [id])
+  document            Document?               @relation(fields: [documentId], references: [id])
+
+  @@unique([rawMaterialMasterId, documentId])
+  @@index([organizationId])
+  @@index([rawMaterialMasterId])
+  @@index([documentId])
+  @@map("raw_material_documents")
+}
+
+model RawMaterialLot {
+  id                  String            @id @default(uuid())
+  organizationId      String            @map("organization_id")
+  rawMaterialMasterId String            @map("raw_material_master_id")
+  lotCode             String            @map("lot_code")
+  expirationDate      DateTime?         @map("expiration_date")
+  status              EntityStatus      @default(activo)
+  createdAt           DateTime          @default(now()) @map("created_at")
+  updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at")
+  organization        Organization      @relation(fields: [organizationId], references: [id])
+  rawMaterial         RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
+
+  @@index([organizationId])
+  @@index([rawMaterialMasterId])
+  @@map("raw_material_lots")
 }
 
 model FormulationFamily {

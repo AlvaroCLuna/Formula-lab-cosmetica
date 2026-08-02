@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 - Incremento 3 implementado
+
+- Se implemento el modulo Materias Primas Maestras como base de conocimiento de ingredientes.
+- Se amplio `RawMaterialMaster` con codigo permanente, categoria, familia, funcion, estado y version vigente.
+- Se agrego ficha tecnica versionada con propiedades, seguridad, compatibilidades, incompatibilidades, alergenos, observaciones, evidencia y confianza.
+- Se agregaron relaciones para fabricantes, proveedores, productos comerciales, documentos y lotes preparados.
+- Se integraron metricas automaticas: formulaciones asociadas, uso promedio, proveedores, documentos, costo promedio preparado y ultima actualizacion.
+- Se agregaron APIs para listado, busqueda, filtros, vista rapida, creacion, edicion, aprobacion, archivado y nueva version.
+- Se habilito el modulo en el AppShell y se agrego UI ERP responsive con modo aprendizaje.
+- Se cargaron 30 materias primas demo representativas y versionadas.
+- Se agregaron pruebas del servicio de Materias Primas Maestras.
+- Se documento la validacion en `docs/19_Validacion_Incremento_3.md`.
+
 ## 0.2.0 - Incremento 2 implementado
 
 - Se implemento el Gestor de Formulaciones con listado, busqueda, filtros, vista rapida, chips por funcion cosmetica y modo aprendizaje.

@@ -399,7 +399,7 @@ formulationsRouter.delete("/ingredients/:id", async (req, res, next) => {
 formulationsRouter.get("/catalog/raw-materials", async (req, res, next) => {
   try {
     const rawMaterials = await prisma.rawMaterialMaster.findMany({
-      where: { organizationId: req.user!.organizationId, status: "activo" },
+      where: { organizationId: req.user!.organizationId, status: "validada" },
       orderBy: { commonName: "asc" }
     });
     return res.json({ rawMaterials });

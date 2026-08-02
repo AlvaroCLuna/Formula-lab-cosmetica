@@ -16,6 +16,7 @@ const labels: Record<string, string> = {
   activa: "Activa",
   en_desarrollo: "En desarrollo",
   archivada: "Archivada",
+  validada: "Validada",
   documental: "Documental",
   inferido: "Inferido"
 };

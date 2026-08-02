@@ -26,9 +26,22 @@ Gestor de Formulaciones:
 - Preparacion para costeo y produccion futuros.
 - Validacion documentada en `docs/18_Validacion_Incremento_2.md`.
 
-## Incremento 3 - Pendiente de especificacion
+## Incremento 3 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
 
-No iniciar hasta aprobacion formal del Incremento 2.
+Materias Primas Maestras:
+
+- Base de conocimiento de ingredientes.
+- Listado, busqueda, filtros, categorias, familias y estados.
+- Ficha tecnica completa versionada.
+- Inmutabilidad de fichas validadas.
+- Relaciones con fabricantes, proveedores, productos, documentos, formulaciones y lotes preparados.
+- Vista rapida lateral y modo aprendizaje.
+- Inteligencia operativa: formulaciones asociadas, uso promedio, proveedores, documentos, costo promedio preparado y ultima actualizacion.
+- Validacion documentada en `docs/19_Validacion_Incremento_3.md`.
+
+## Incremento 4 - Pendiente de especificacion
+
+No iniciar hasta aprobacion formal del Incremento 3.
 
 ## Fases posteriores
 

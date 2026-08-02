@@ -568,7 +568,8 @@ textarea {
 .status-badge.validado,
 .status-badge.documental,
 .status-badge.aprobada,
-.status-badge.activa {
+.status-badge.activa,
+.status-badge.validada {
   background: #e4f5ed;
   color: #126444;
 }
@@ -600,6 +601,9 @@ textarea {
 .filters-bar,
 .formulation-table,
 .formulation-quick-view,
+.raw-material-table,
+.raw-material-quick-view,
+.knowledge-editor,
 .draft-editor,
 .compare-panel {
   border: 1px solid var(--line);
@@ -652,13 +656,77 @@ textarea {
   align-items: start;
 }
 
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 18px;
+  align-items: start;
+}
+
 .formulation-rows,
+.raw-material-rows,
 .learning-stack,
 .quick-content,
 .compare-results {
   display: grid;
   gap: 10px;
   padding: 12px;
+}
+
+.raw-material-row {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.2fr) minmax(150px, 0.8fr) minmax(210px, 0.8fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+  color: var(--text);
+  text-align: left;
+}
+
+.raw-material-row.selected {
+  border-color: var(--primary);
+  background: #eff8f4;
+}
+
+.raw-material-row h3 {
+  margin: 3px 0;
+  font-size: 17px;
+  letter-spacing: 0;
+}
+
+.raw-material-row span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.knowledge-tags,
+.knowledge-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.knowledge-tags span,
+.knowledge-metrics span,
+.relation-pill {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 10px;
+  background: #eef5f3;
+  color: var(--primary-strong);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.knowledge-metrics.compact span {
+  background: #f4f8f6;
+  color: var(--muted);
 }
 
 .formulation-row {
@@ -745,7 +813,8 @@ textarea {
   align-items: center;
 }
 
-.formulation-quick-view {
+.formulation-quick-view,
+.raw-material-quick-view {
   position: sticky;
   top: 16px;
 }
@@ -790,6 +859,44 @@ textarea {
 .learning-card dd {
   margin: 2px 0 0;
   overflow-wrap: anywhere;
+}
+
+.knowledge-dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0;
+}
+
+.knowledge-dl dt {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.knowledge-dl dd {
+  margin: 2px 0 0;
+  overflow-wrap: anywhere;
+}
+
+.knowledge-editor {
+  margin-top: 18px;
+}
+
+.knowledge-form {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+}
+
+.knowledge-form textarea {
+  min-height: 100px;
+}
+
+.knowledge-form label:has(textarea),
+.knowledge-form .draft-actions {
+  grid-column: span 3;
 }
 
 .draft-form,
@@ -881,21 +988,30 @@ textarea {
   .hybrid-dashboard,
   .intelligence-grid,
   .formulations-grid,
+  .knowledge-grid,
   .module-hero,
   .filters-bar {
     grid-template-columns: 1fr;
   }
 
   .field-preview,
-  .formulation-quick-view {
+  .formulation-quick-view,
+  .raw-material-quick-view {
     position: static;
     max-height: none;
   }
 
   .draft-form,
   .ingredient-form,
-  .ingredient-line {
+  .ingredient-line,
+  .raw-material-row,
+  .knowledge-form {
     grid-template-columns: 1fr;
+  }
+
+  .knowledge-form label:has(textarea),
+  .knowledge-form .draft-actions {
+    grid-column: 1;
   }
 }
 
