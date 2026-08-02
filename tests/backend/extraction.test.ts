@@ -21,4 +21,14 @@ describe("mapFieldsFromLines", () => {
     const values = mapFieldsFromLines([{ text: "Documento sin campos reconocibles", reference: "línea 1" }]);
     expect(values).toEqual([]);
   });
+
+  it("reconoce filas CSV normalizadas como campo valor", () => {
+    const values = mapFieldsFromLines([
+      { text: "Nombre comercial: Aceite de Jojoba Refinado", reference: "fila 2" },
+      { text: "CAS: 61789-91-1", reference: "fila 5" }
+    ]);
+
+    expect(values.map((value) => value.fieldKey)).toEqual(["nombre_comercial", "cas"]);
+    expect(values[1].sourceReference).toBe("fila 5");
+  });
 });

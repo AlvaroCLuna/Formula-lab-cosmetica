@@ -52,7 +52,7 @@ model Organization {
   name      String
   status    EntityStatus @default(activo)
   createdAt DateTime     @default(now()) @map("created_at")
-  updatedAt DateTime     @updatedAt @map("updated_at")
+  updatedAt DateTime     @default(now()) @updatedAt @map("updated_at")
   users     User[]
   documents Document[]
   drafts    RawMaterialDraft[]
@@ -70,7 +70,7 @@ model User {
   status         EntityStatus @default(activo)
   lastLoginAt    DateTime?    @map("last_login_at")
   createdAt      DateTime     @default(now()) @map("created_at")
-  updatedAt      DateTime     @updatedAt @map("updated_at")
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at")
   organization   Organization @relation(fields: [organizationId], references: [id])
   documents      Document[]
   drafts         RawMaterialDraft[]
@@ -109,7 +109,7 @@ model Document {
   status            DocumentStatus         @default(pendiente)
   rejectionReason   String?                @map("rejection_reason")
   createdAt         DateTime               @default(now()) @map("created_at")
-  updatedAt         DateTime               @updatedAt @map("updated_at")
+  updatedAt         DateTime               @default(now()) @updatedAt @map("updated_at")
   organization      Organization           @relation(fields: [organizationId], references: [id])
   uploadedBy        User                   @relation(fields: [uploadedByUserId], references: [id])
   processingJobs    DocumentProcessingJob[]
@@ -143,7 +143,7 @@ model RawMaterialDraft {
   status            DraftStatus                    @default(borrador)
   approvedVersionId String?                        @map("approved_version_id")
   createdAt         DateTime                       @default(now()) @map("created_at")
-  updatedAt         DateTime                       @updatedAt @map("updated_at")
+  updatedAt         DateTime                       @default(now()) @updatedAt @map("updated_at")
   organization      Organization                   @relation(fields: [organizationId], references: [id])
   createdBy         User                           @relation(fields: [createdByUserId], references: [id])
   extractedValues   ExtractedValue[]
@@ -169,7 +169,7 @@ model ExtractedValue {
   confidence         Float
   validationStatus   ValidationStatus @default(pendiente) @map("validation_status")
   createdAt          DateTime         @default(now()) @map("created_at")
-  updatedAt          DateTime         @updatedAt @map("updated_at")
+  updatedAt          DateTime         @default(now()) @updatedAt @map("updated_at")
   draft              RawMaterialDraft @relation(fields: [draftId], references: [id])
   document           Document         @relation(fields: [documentId], references: [id])
 

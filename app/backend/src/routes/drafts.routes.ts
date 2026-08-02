@@ -25,8 +25,13 @@ draftsRouter.patch("/values/:id", async (req, res, next) => {
   try {
     const input = updateExtractedValueSchema.parse(req.body);
     const before = await prisma.extractedValue.findFirstOrThrow({
-      where: { id: req.params.id, organizationId: req.user!.organizationId }
+      where: { id: req.params.id, organizationId: req.user!.organizationId },
+      include: { draft: true }
     });
+    if (before.draft.status !== "borrador") {
+      return res.status(409).json({ message: "Solo se pueden corregir fichas en borrador. Una ficha aprobada requiere una nueva versión." });
+    }
+    const { draft: _beforeDraft, ...beforeValue } = before;
     const after = await prisma.extractedValue.update({
       where: { id: before.id },
       data: { value: input.value, validationStatus: input.validationStatus }
@@ -37,9 +42,9 @@ draftsRouter.patch("/values/:id", async (req, res, next) => {
       entityType: "extracted_value",
       entityId: after.id,
       action: "valor_corregido",
-      before,
-      after
-    });
+        before: beforeValue,
+        after
+      });
     return res.json({ value: after });
   } catch (error) {
     return next(error);
@@ -55,6 +60,9 @@ draftsRouter.post("/:id/actions", async (req, res, next) => {
     });
 
     if (input.action === "guardar_borrador") {
+      if (draft.status !== "borrador") {
+        return res.status(409).json({ message: "Una ficha aprobada o rechazada no puede guardarse como borrador." });
+      }
       await recordAudit({
         organizationId: req.user!.organizationId,
         userId: req.user!.id,
@@ -67,6 +75,9 @@ draftsRouter.post("/:id/actions", async (req, res, next) => {
     }
 
     if (input.action === "rechazar") {
+      if (draft.status !== "borrador") {
+        return res.status(409).json({ message: "Solo se pueden rechazar fichas en borrador." });
+      }
       const updated = await prisma.rawMaterialDraft.update({ where: { id: draft.id }, data: { status: "rechazado" } });
       await recordAudit({
         organizationId: req.user!.organizationId,
@@ -78,6 +89,13 @@ draftsRouter.post("/:id/actions", async (req, res, next) => {
         after: updated
       });
       return res.json({ draft: updated });
+    }
+
+    if (draft.status !== "borrador") {
+      return res.status(409).json({ message: "Esta ficha ya no está en borrador. Para cambiarla debe crearse una nueva versión." });
+    }
+    if (draft.extractedValues.length === 0) {
+      return res.status(409).json({ message: "No se puede aprobar una ficha sin evidencia documental extraída." });
     }
 
     const versionNumber = draft.versions.length + 1;

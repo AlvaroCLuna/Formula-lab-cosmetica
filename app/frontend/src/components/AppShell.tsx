@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useState } from "react";
 import { Bell, Moon, Search, Sun } from "lucide-react";
 import type { User } from "../types";
 import { Sidebar } from "./Sidebar";
@@ -13,8 +14,10 @@ type Props = {
 };
 
 export function AppShell({ user, activeView, onNavigate, onLogout, children }: Props) {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-theme={theme}>
       <Sidebar activeView={activeView} onNavigate={onNavigate} />
       <div className="workspace">
         <header className="topbar">
@@ -30,9 +33,13 @@ export function AppShell({ user, activeView, onNavigate, onLogout, children }: P
             <button className="icon-button" title="Notificaciones" aria-label="Notificaciones">
               <Bell size={18} />
             </button>
-            <button className="icon-button theme-pair" title="Tema claro/oscuro preparado" aria-label="Tema preparado">
-              <Sun size={16} />
-              <Moon size={16} />
+            <button
+              className="icon-button theme-pair"
+              title="Cambiar tema claro/oscuro"
+              aria-label="Cambiar tema claro/oscuro"
+              onClick={() => setTheme((current) => (current === "light" ? "dark" : "light"))}
+            >
+              {theme === "light" ? <Sun size={16} /> : <Moon size={16} />}
             </button>
             <div className="user-chip">
               <span>{user.fullName}</span>

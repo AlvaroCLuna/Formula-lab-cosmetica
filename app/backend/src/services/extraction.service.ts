@@ -25,13 +25,19 @@ export async function extractDocument(filePath: string, extension: string): Prom
   if (extension === "csv") {
     const text = await fs.readFile(filePath, "utf8");
     const records = parse(text, { relax_column_count: true, skip_empty_lines: true }) as string[][];
-    const lines = records.flatMap((row, rowIndex) =>
+    const keyValueLines = records
+      .filter((row) => row.length >= 2)
+      .map((row, rowIndex) => ({
+        text: `${String(row[0]).trim()}: ${String(row[1]).trim()}`,
+        reference: `fila ${rowIndex + 1}`
+      }));
+    const cellLines = records.flatMap((row, rowIndex) =>
       row.map((cell, cellIndex) => ({
         text: String(cell).trim(),
         reference: `celda F${rowIndex + 1}C${cellIndex + 1}`
       }))
     );
-    return mapFieldsFromLines(lines);
+    return mapFieldsFromLines([...keyValueLines, ...cellLines]);
   }
 
   if (extension === "pdf") {

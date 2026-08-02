@@ -206,6 +206,21 @@ textarea {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
   min-height: 100vh;
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.app-shell[data-theme="dark"] {
+  --surface: #14221e;
+  --surface-2: #0d1714;
+  --line: #29413a;
+  --muted: #9eb2ac;
+  --text: #edf6f3;
+  --primary: #37b99e;
+  --primary-strong: #6de0c9;
+  --danger: #ff8a82;
+  --warning: #ffc05c;
+  --shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
 }
 
 .sidebar {
@@ -286,7 +301,7 @@ textarea {
   padding: 0 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: white;
+  background: var(--surface);
 }
 
 .search-box input {
