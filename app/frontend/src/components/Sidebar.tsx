@@ -1,0 +1,42 @@
+import { BookOpen, Boxes, ClipboardCheck, FlaskConical, LayoutDashboard, UploadCloud } from "lucide-react";
+
+const items = [
+  { id: "panel", label: "Panel", icon: LayoutDashboard, disabled: true },
+  { id: "inteligencia", label: "Inteligencia", icon: UploadCloud },
+  { id: "materias", label: "Materias primas", icon: Boxes, disabled: true },
+  { id: "calidad", label: "Calidad", icon: ClipboardCheck, disabled: true },
+  { id: "aprendizaje", label: "Aprendizaje", icon: BookOpen, disabled: true }
+];
+
+type Props = {
+  activeView: string;
+  onNavigate: (view: string) => void;
+};
+
+export function Sidebar({ activeView, onNavigate }: Props) {
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <FlaskConical size={25} />
+        <span>Formula Lab</span>
+      </div>
+      <nav>
+        {items.map((item) => {
+          const Icon = item.icon;
+          return (
+            <button
+              key={item.id}
+              className={activeView === item.id ? "nav-item active" : "nav-item"}
+              disabled={item.disabled}
+              title={item.disabled ? "Preparado para incrementos futuros" : item.label}
+              onClick={() => onNavigate(item.id)}
+            >
+              <Icon size={18} />
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+    </aside>
+  );
+}

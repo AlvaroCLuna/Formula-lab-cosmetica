@@ -1,0 +1,215 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum EntityStatus {
+  activo
+  inactivo
+  archivado
+}
+
+enum DocumentStatus {
+  pendiente
+  procesando
+  procesado
+  requiere_revision
+  rechazado
+}
+
+enum JobStatus {
+  pendiente
+  procesando
+  completado
+  fallido
+}
+
+enum DraftStatus {
+  borrador
+  aprobado
+  rechazado
+}
+
+enum EvidenceType {
+  documental
+  inferido
+}
+
+enum ValidationStatus {
+  pendiente
+  validado
+  corregido
+  en_conflicto
+  rechazado
+}
+
+model Organization {
+  id        String       @id @default(uuid())
+  name      String
+  status    EntityStatus @default(activo)
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  users     User[]
+  documents Document[]
+  drafts    RawMaterialDraft[]
+  auditLogs AuditLog[]
+
+  @@map("organizations")
+}
+
+model User {
+  id             String       @id @default(uuid())
+  organizationId String      @map("organization_id")
+  email          String       @unique
+  passwordHash   String       @map("password_hash")
+  fullName       String       @map("full_name")
+  status         EntityStatus @default(activo)
+  lastLoginAt    DateTime?    @map("last_login_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  documents      Document[]
+  drafts         RawMaterialDraft[]
+  approvals      RawMaterialValidatedVersion[]
+  auditLogs      AuditLog[]
+  resetRequests  PasswordResetRequest[]
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+model PasswordResetRequest {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @map("token_hash")
+  status    String    @default("preparado")
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("password_reset_requests")
+}
+
+model Document {
+  id                String                 @id @default(uuid())
+  organizationId    String                 @map("organization_id")
+  uploadedByUserId  String                 @map("uploaded_by_user_id")
+  originalFilename  String                 @map("original_filename")
+  storedFilename    String                 @map("stored_filename")
+  mimeType          String                 @map("mime_type")
+  fileExtension     String                 @map("file_extension")
+  sizeBytes         Int                    @map("size_bytes")
+  storagePath       String                 @map("storage_path")
+  status            DocumentStatus         @default(pendiente)
+  rejectionReason   String?                @map("rejection_reason")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
+  organization      Organization           @relation(fields: [organizationId], references: [id])
+  uploadedBy        User                   @relation(fields: [uploadedByUserId], references: [id])
+  processingJobs    DocumentProcessingJob[]
+  extractedValues   ExtractedValue[]
+
+  @@index([organizationId])
+  @@index([uploadedByUserId])
+  @@map("documents")
+}
+
+model DocumentProcessingJob {
+  id             String      @id @default(uuid())
+  organizationId String      @map("organization_id")
+  documentId     String      @map("document_id")
+  status         JobStatus   @default(pendiente)
+  startedAt      DateTime?   @map("started_at")
+  finishedAt     DateTime?   @map("finished_at")
+  errorMessage   String?     @db.Text @map("error_message")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  document       Document    @relation(fields: [documentId], references: [id])
+
+  @@index([organizationId])
+  @@index([documentId])
+  @@map("document_processing_jobs")
+}
+
+model RawMaterialDraft {
+  id                String                         @id @default(uuid())
+  organizationId    String                         @map("organization_id")
+  createdByUserId   String                         @map("created_by_user_id")
+  status            DraftStatus                    @default(borrador)
+  approvedVersionId String?                        @map("approved_version_id")
+  createdAt         DateTime                       @default(now()) @map("created_at")
+  updatedAt         DateTime                       @updatedAt @map("updated_at")
+  organization      Organization                   @relation(fields: [organizationId], references: [id])
+  createdBy         User                           @relation(fields: [createdByUserId], references: [id])
+  extractedValues   ExtractedValue[]
+  versions          RawMaterialValidatedVersion[]
+
+  @@index([organizationId])
+  @@index([createdByUserId])
+  @@map("raw_material_drafts")
+}
+
+model ExtractedValue {
+  id                 String           @id @default(uuid())
+  organizationId     String           @map("organization_id")
+  draftId            String           @map("draft_id")
+  documentId         String           @map("document_id")
+  fieldKey           String           @map("field_key")
+  fieldLabel         String           @map("field_label")
+  value              String?          @db.Text
+  sourceDocumentName String           @map("source_document_name")
+  sourceReference    String           @map("source_reference")
+  dataType           String           @map("data_type")
+  evidenceType       EvidenceType     @default(documental) @map("evidence_type")
+  confidence         Float
+  validationStatus   ValidationStatus @default(pendiente) @map("validation_status")
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
+  draft              RawMaterialDraft @relation(fields: [draftId], references: [id])
+  document           Document         @relation(fields: [documentId], references: [id])
+
+  @@index([organizationId])
+  @@index([draftId])
+  @@index([documentId])
+  @@map("extracted_values")
+}
+
+model RawMaterialValidatedVersion {
+  id               String           @id @default(uuid())
+  organizationId   String           @map("organization_id")
+  draftId          String           @map("draft_id")
+  versionNumber    Int              @map("version_number")
+  approvedByUserId String           @map("approved_by_user_id")
+  approvedAt       DateTime         @default(now()) @map("approved_at")
+  snapshotJson     Json             @map("snapshot_json")
+  draft            RawMaterialDraft @relation(fields: [draftId], references: [id])
+  approvedBy       User             @relation(fields: [approvedByUserId], references: [id])
+
+  @@unique([draftId, versionNumber])
+  @@index([organizationId])
+  @@map("raw_material_validated_versions")
+}
+
+model AuditLog {
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  userId         String       @map("user_id")
+  entityType     String       @map("entity_type")
+  entityId       String       @map("entity_id")
+  action         String
+  beforeJson     Json?        @map("before_json")
+  afterJson      Json?        @map("after_json")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@map("audit_log")
+}
