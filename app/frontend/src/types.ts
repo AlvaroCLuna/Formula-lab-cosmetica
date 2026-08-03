@@ -106,6 +106,31 @@ export type LabTest = {
   evidenceDocument?: KdeDocument | null;
 };
 
+export type QualityInspection = {
+  id: string;
+  permanentCode: string;
+  supplierName?: string | null;
+  lotId?: string | null;
+  status: string;
+  initialResult?: string | null;
+  packageIntegrity?: string | null;
+  observations?: string | null;
+  specification?: { id: string; permanentCode: string; name: string; status: string };
+  releases?: Array<{ id: string; permanentCode: string; decision: string }>;
+};
+
+export type QualityRecord = {
+  id: string;
+  permanentCode: string;
+  status?: string;
+  decision?: string;
+  severity?: string;
+  description?: string;
+  actionText?: string;
+  targetDate?: string;
+  reason?: string;
+};
+
 export type Draft = {
   id: string;
   status: "borrador" | "aprobado" | "rechazado";

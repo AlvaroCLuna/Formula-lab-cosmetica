@@ -1082,6 +1082,90 @@ async function main() {
     await prisma.labSample.update({ where: { id: `lab-sample-${index}` }, data: { released: true, status: "aprobada" } });
     await prisma.labTest.updateMany({ where: { id: { in: [`lab-test-${index}`, `lab-test-${index + 12}`] } }, data: { releasedLocked: true, status: "aprobado_tecnicamente" } });
   }
+
+  for (let index = 1; index <= 10; index += 1) {
+    await prisma.qualitySpecification.upsert({
+      where: { id: `qlt-spec-${index}` },
+      update: { status: index === 10 ? "obsoleta" : "aprobada", locked: index !== 10 },
+      create: {
+        id: `qlt-spec-${index}`,
+        organizationId: organization.id,
+        permanentCode: `QLT-SPC-${String(index).padStart(6, "0")}`,
+        name: `Especificacion calidad demo ${index}`,
+        entityType: index <= 4 ? "materia_prima" : index <= 7 ? "producto_terminado" : "producto_en_proceso",
+        entityId: index <= rawMaterials.length ? rawMaterials[index - 1].id : null,
+        versionNumber: 1,
+        status: index === 10 ? "obsoleta" : "aprobada",
+        effectiveFrom: new Date("2026-08-01T00:00:00.000Z"),
+        responsibleUserId: "demo-user",
+        documentId: `kde-doc-${String(index).padStart(3, "0")}`,
+        locked: index !== 10
+      }
+    });
+    await prisma.qualitySpecificationCriterion.upsert({
+      where: { id: `qlt-spec-${index}-crit-ph` },
+      update: { minLimit: 5, maxLimit: 6.5 },
+      create: { id: `qlt-spec-${index}-crit-ph`, organizationId: organization.id, specificationId: `qlt-spec-${index}`, name: "pH", minLimit: 5, maxLimit: 6.5, unit: "pH", methodId: "lab-method-4", frequency: "por lote", criticality: "alta", orderIndex: 1 }
+    });
+  }
+
+  for (let index = 1; index <= 5; index += 1) {
+    await prisma.qualitySamplingPlan.upsert({
+      where: { id: `qlt-plan-${index}` },
+      update: { sampleQuantity: index + 1 },
+      create: { id: `qlt-plan-${index}`, organizationId: organization.id, permanentCode: `QLT-SMP-${String(index).padStart(6, "0")}`, materialType: index % 2 === 0 ? "producto terminado" : "materia prima", supplierName: "Proveedor Demo Norte", category: "Cosmetico", productName: `Producto demo ${index}`, riskLevel: index === 5 ? "alto" : "medio", lotSizeRange: "1-100 kg", inspectionLevel: "normal", method: "Muestreo aleatorio documentado", sampleQuantity: index + 1, samplingPointsJson: ["inicio", "medio", "final"], responsibleUserId: "demo-user", instructions: "Tomar muestra, identificar, fotografiar y vincular evidencia KDE.", acceptanceCriteria: "Cumplir especificacion aprobada y documentacion completa.", documentId: `kde-doc-${String(index + 10).padStart(3, "0")}` }
+    });
+  }
+
+  for (let index = 1; index <= 15; index += 1) {
+    const status = index % 7 === 0 ? "rechazado" : index % 5 === 0 ? "en_cuarentena" : index % 4 === 0 ? "aprobado_con_observaciones" : "aprobado";
+    await prisma.qualityInspection.upsert({
+      where: { id: `qlt-inspection-${index}` },
+      update: { status },
+      create: { id: `qlt-inspection-${index}`, organizationId: organization.id, permanentCode: `QLT-INS-${String(index).padStart(6, "0")}`, inspectionType: "recepcion", lotId: `lot-demo-${String(((index - 1) % 25) + 1).padStart(2, "0")}`, supplierName: index % 3 === 0 ? "Proveedor Demo Norte" : "Proveedor Demo Sur", receivedQuantity: 1000 + index * 20, unit: "g", packageIntegrity: index % 7 === 0 ? "daniado" : "integro", identification: "correcta", color: "conforme", odor: "conforme", appearance: index % 7 === 0 ? "fuera de especificacion" : "conforme", initialResult: status, observations: "Inspeccion demo trazable.", status, specificationId: `qlt-spec-${((index - 1) % 9) + 1}`, evidenceDocumentId: `kde-doc-${String(((index - 1) % 50) + 1).padStart(3, "0")}`, responsibleUserId: "demo-user", inspectedAt: new Date(`2026-08-${String((index % 24) + 1).padStart(2, "0")}T10:00:00.000Z`) }
+    });
+  }
+
+  for (let index = 1; index <= 8; index += 1) {
+    await prisma.qualityRelease.upsert({
+      where: { id: `qlt-release-${index}` },
+      update: { decision: index > 5 ? "rechazar" : "liberar" },
+      create: { id: `qlt-release-${index}`, organizationId: organization.id, permanentCode: `QLT-REL-${String(index).padStart(6, "0")}`, releaseType: index > 5 ? "rechazo" : "liberacion", entityType: index <= 4 ? "materia_prima" : "producto_terminado", entityId: `quality-entity-${index}`, inspectionId: `qlt-inspection-${index}`, specificationId: `qlt-spec-${((index - 1) % 9) + 1}`, decision: index > 5 ? "rechazar" : "liberar", conclusion: index > 5 ? "Rechazo demo por resultado fuera de especificacion." : "Liberacion demo con evidencia suficiente.", reason: "Decision demo documentada.", digitalConfirmation: "demo-user-confirmado", evidenceDocumentId: `kde-doc-${String(index + 20).padStart(3, "0")}`, responsibleUserId: "demo-user", closed: true }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    await prisma.qualityDeviation.upsert({
+      where: { id: `qlt-dev-${index}` },
+      update: { status: index === 4 ? "contenida" : "abierta" },
+      create: { id: `qlt-dev-${index}`, organizationId: organization.id, permanentCode: `QLT-DEV-${String(index).padStart(6, "0")}`, deviationType: ["proceso", "resultado", "equipo", "documento"][index - 1], description: "Desviacion demo con contencion obligatoria.", severity: index === 2 ? "alta" : "media", responsibleUserId: "demo-user", affectedEntityType: "lote", affectedEntityId: `lot-demo-${String(index).padStart(2, "0")}`, preliminaryCause: "Pendiente investigacion.", containment: "Retener lote y bloquear uso hasta decision.", evidenceDocumentId: `kde-doc-${String(index + 25).padStart(3, "0")}`, status: index === 4 ? "contenida" : "abierta" }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    await prisma.qualityNonConformity.upsert({
+      where: { id: `qlt-ncf-${index}` },
+      update: { status: index === 4 ? "cerrada" : "en_investigacion" },
+      create: { id: `qlt-ncf-${index}`, organizationId: organization.id, permanentCode: `QLT-NCF-${String(index).padStart(6, "0")}`, origin: index % 2 === 0 ? "laboratorio" : "recepcion", ncfType: "fuera_de_especificacion", severity: index === 1 ? "alta" : "media", lotId: `lot-demo-${String(index).padStart(2, "0")}`, productName: `Producto demo ${index}`, supplierName: "Proveedor Demo Norte", productionOrderId: index === 3 ? "prod-order-1" : null, labReferenceId: index === 2 ? "lab-ncf-1" : null, description: "No conformidad demo trazable.", evidenceDocumentId: `kde-doc-${String(index + 30).padStart(3, "0")}`, responsibleUserId: "demo-user", status: index === 4 ? "cerrada" : "en_investigacion" }
+    });
+  }
+
+  for (let index = 1; index <= 5; index += 1) {
+    await prisma.qualityCapaAction.upsert({
+      where: { id: `qlt-capa-${index}` },
+      update: { status: index === 5 ? "vencida" : "abierta" },
+      create: { id: `qlt-capa-${index}`, organizationId: organization.id, permanentCode: `QLT-CAP-${String(index).padStart(6, "0")}`, actionText: "CAPA demo: revisar causa raiz, ejecutar accion y verificar eficacia.", actionType: index % 2 === 0 ? "preventiva" : "correctiva", responsibleUserId: "demo-user", targetDate: new Date(`2026-${index === 5 ? "07" : "09"}-15T00:00:00.000Z`), priority: index === 1 ? "alta" : "media", rootCause: "Causa raiz demo pendiente de confirmacion.", evidenceDocumentId: `kde-doc-${String(index + 35).padStart(3, "0")}`, effectivenessCheck: "Verificar reduccion de recurrencia.", status: index === 5 ? "vencida" : "abierta", deviationId: index <= 4 ? `qlt-dev-${index}` : null, nonConformityId: index <= 4 ? `qlt-ncf-${index}` : null }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    await prisma.qualityDisposition.upsert({
+      where: { id: `qlt-dsp-${index}` },
+      update: { decision: index === 4 ? "destruir" : "mantener_en_cuarentena" },
+      create: { id: `qlt-dsp-${index}`, organizationId: organization.id, permanentCode: `QLT-DSP-${String(index).padStart(6, "0")}`, entityType: "lote", entityId: `lot-demo-${String(index).padStart(2, "0")}`, decision: index === 4 ? "destruir" : "mantener_en_cuarentena", reason: "Disposicion demo con motivo y evidencia.", responsibleUserId: "demo-user", evidenceDocumentId: `kde-doc-${String(index + 40).padStart(3, "0")}`, nonConformityId: `qlt-ncf-${index}` }
+    });
+  }
+  await prisma.qualityNonConformity.update({ where: { id: "qlt-ncf-4" }, data: { dispositionId: "qlt-dsp-4", status: "cerrada" } });
 }
 
 main()

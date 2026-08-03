@@ -118,7 +118,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 8 - LIMS
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Proyectos de laboratorio implementados.
 - Muestras implementadas.
@@ -133,7 +133,26 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - UI ERP tipo laboratorio implementada.
 - Seeds y pruebas agregadas.
 - Validacion documentada con Flowchart y ER Diagram Mermaid.
-- Pendiente: aprobacion formal antes de iniciar Incremento 9.
+
+## Incremento 9 - Control de Calidad
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Especificaciones de calidad implementadas.
+- Criterios de especificacion implementados.
+- Planes de muestreo implementados.
+- Inspeccion de recepcion implementada.
+- Controles de proceso y producto terminado preparados en modelo.
+- Liberaciones, rechazo y cuarentena implementados.
+- Desviaciones implementadas con contencion obligatoria.
+- No conformidades implementadas.
+- CAPA implementada.
+- Disposiciones implementadas.
+- Integracion con KDE por evidencia documental implementada.
+- UI ERP moderna de Calidad implementada.
+- Seeds y pruebas agregadas.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
+- Pendiente: aprobacion formal antes de iniciar Incremento 10.
 
 ## Pendiente para fases posteriores
 

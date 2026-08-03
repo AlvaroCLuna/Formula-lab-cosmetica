@@ -1,4 +1,4 @@
-import type { Draft, FormulaEnginePhase, FormulaEngineState, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, KdeDocument, LabProject, LabSample, LabTest, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
+import type { Draft, FormulaEnginePhase, FormulaEngineState, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, KdeDocument, LabProject, LabSample, LabTest, LearningCard, LoadedDocument, QualityInspection, QualityRecord, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -134,6 +134,53 @@ export const api = {
   },
   async releaseLabSample(id: string, input: Record<string, unknown>) {
     return request<{ release: any }>(`/lims/samples/${id}/release`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async qualityDashboard() {
+    return request<{ indicators: any }>("/quality/dashboard");
+  },
+  async listQualitySpecifications() {
+    return request<{ specifications: any[] }>("/quality/specifications");
+  },
+  async listQualitySamplingPlans() {
+    return request<{ plans: any[] }>("/quality/sampling-plans");
+  },
+  async listQualityInspections(filters: { search?: string; status?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ inspections: QualityInspection[] }>(`/quality/inspections${params.toString() ? `?${params}` : ""}`);
+  },
+  async createQualityInspection(input: Record<string, unknown>) {
+    return request<{ inspection: QualityInspection }>("/quality/inspections", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listQualityReleases() {
+    return request<{ releases: QualityRecord[] }>("/quality/releases");
+  },
+  async createQualityRelease(input: Record<string, unknown>) {
+    return request<{ release: QualityRecord }>("/quality/releases", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listQualityDeviations() {
+    return request<{ deviations: QualityRecord[] }>("/quality/deviations");
+  },
+  async createQualityDeviation(input: Record<string, unknown>) {
+    return request<{ deviation: QualityRecord }>("/quality/deviations", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listQualityNonConformities() {
+    return request<{ nonConformities: QualityRecord[] }>("/quality/non-conformities");
+  },
+  async createQualityNcf(input: Record<string, unknown>) {
+    return request<{ nonConformity: QualityRecord }>("/quality/non-conformities", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listQualityCapa() {
+    return request<{ capa: QualityRecord[] }>("/quality/capa");
+  },
+  async createQualityCapa(input: Record<string, unknown>) {
+    return request<{ capa: QualityRecord }>("/quality/capa", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listQualityDispositions() {
+    return request<{ dispositions: QualityRecord[] }>("/quality/dispositions");
+  },
+  async createQualityDisposition(input: Record<string, unknown>) {
+    return request<{ disposition: QualityRecord }>("/quality/dispositions", { method: "POST", body: JSON.stringify(input) });
   },
   async latestDraft() {
     return request<{ draft: Draft | null }>("/drafts/latest");

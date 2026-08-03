@@ -180,6 +180,35 @@ enum LabReleaseDecision {
   pendiente
 }
 
+enum QualitySpecStatus {
+  borrador
+  en_revision
+  aprobada
+  obsoleta
+  archivada
+}
+
+enum QualityInspectionStatus {
+  pendiente
+  en_inspeccion
+  en_cuarentena
+  aprobado
+  aprobado_con_observaciones
+  rechazado
+  bloqueado
+}
+
+enum QualityDecision {
+  liberar
+  reprocesar
+  reclasificar
+  devolver
+  destruir
+  usar_bajo_desviacion
+  mantener_en_cuarentena
+  rechazar
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -245,6 +274,18 @@ model Organization {
   labTimelineEvents LabTimelineEvent[]
   labNonConformities LabNonConformity[]
   labTechnicalReleases LabTechnicalRelease[]
+  qualitySpecifications QualitySpecification[]
+  qualitySpecificationCriteria QualitySpecificationCriterion[]
+  qualitySamplingPlans QualitySamplingPlan[]
+  qualityInspections QualityInspection[]
+  qualityProcessControls QualityProcessControl[]
+  qualityFinishedControls QualityFinishedControl[]
+  qualityReleases QualityRelease[]
+  qualityDeviations QualityDeviation[]
+  qualityNonConformities QualityNonConformity[]
+  qualityCapaActions QualityCapaAction[]
+  qualityDispositions QualityDisposition[]
+  qualityReports QualityReport[]
 
   @@map("organizations")
 }
@@ -295,6 +336,15 @@ model User {
   labTimelineEvents LabTimelineEvent[]
   labNonConformitiesResponsible LabNonConformity[] @relation("LabNonConformityResponsible")
   labTechnicalReleases LabTechnicalRelease[] @relation("LabReleaseResponsible")
+  qualitySpecificationsResponsible QualitySpecification[] @relation("QualitySpecResponsible")
+  qualitySamplingPlansResponsible QualitySamplingPlan[] @relation("QualitySamplingResponsible")
+  qualityInspectionsResponsible QualityInspection[] @relation("QualityInspectionResponsible")
+  qualityReleasesResponsible QualityRelease[] @relation("QualityReleaseResponsible")
+  qualityDeviationsResponsible QualityDeviation[] @relation("QualityDeviationResponsible")
+  qualityNonConformitiesResponsible QualityNonConformity[] @relation("QualityNcfResponsible")
+  qualityCapaActionsResponsible QualityCapaAction[] @relation("QualityCapaResponsible")
+  qualityDispositionsResponsible QualityDisposition[] @relation("QualityDispositionResponsible")
+  qualityReportsCreated QualityReport[] @relation("QualityReportCreatedBy")
 
   @@index([organizationId])
   @@map("users")
@@ -362,6 +412,14 @@ model Document {
   knowledgeSources  KnowledgeSource[]
   labTestsEvidence  LabTest[]
   labNonConformitiesEvidence LabNonConformity[]
+  qualitySpecificationsDocuments QualitySpecification[]
+  qualityInspectionsEvidence QualityInspection[]
+  qualityReleasesEvidence QualityRelease[]
+  qualityDeviationsEvidence QualityDeviation[]
+  qualityNonConformitiesEvidence QualityNonConformity[]
+  qualityCapaEvidence QualityCapaAction[]
+  qualityDispositionsEvidence QualityDisposition[]
+  qualityReportsDocuments QualityReport[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -1876,4 +1934,316 @@ model LabTechnicalRelease {
   @@index([sampleId])
   @@index([decision])
   @@map("lab_technical_releases")
+}
+
+model QualitySpecification {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  entityType String @map("entity_type")
+  entityId String? @map("entity_id")
+  versionNumber Int @default(1) @map("version_number")
+  status QualitySpecStatus @default(borrador)
+  effectiveFrom DateTime? @map("effective_from")
+  responsibleUserId String @map("responsible_user_id")
+  documentId String? @map("document_id")
+  locked Boolean @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("QualitySpecResponsible", fields: [responsibleUserId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  criteria QualitySpecificationCriterion[]
+  inspections QualityInspection[]
+  releases QualityRelease[]
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@index([status])
+  @@map("quality_specifications")
+}
+
+model QualitySpecificationCriterion {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  specificationId String @map("specification_id")
+  name String
+  minLimit Decimal? @db.Decimal(12, 4) @map("min_limit")
+  maxLimit Decimal? @db.Decimal(12, 4) @map("max_limit")
+  unit String?
+  methodId String? @map("method_id")
+  frequency String?
+  criticality String @default("media")
+  orderIndex Int @default(0) @map("order_index")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  specification QualitySpecification @relation(fields: [specificationId], references: [id])
+
+  @@index([organizationId])
+  @@index([specificationId])
+  @@map("quality_specification_criteria")
+}
+
+model QualitySamplingPlan {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  materialType String @map("material_type")
+  supplierName String? @map("supplier_name")
+  category String?
+  productName String? @map("product_name")
+  riskLevel String @default("medio") @map("risk_level")
+  lotSizeRange String? @map("lot_size_range")
+  inspectionLevel String @default("normal") @map("inspection_level")
+  method String
+  sampleQuantity Int @map("sample_quantity")
+  samplingPointsJson Json? @map("sampling_points_json")
+  responsibleUserId String @map("responsible_user_id")
+  instructions String @db.Text
+  acceptanceCriteria String @db.Text @map("acceptance_criteria")
+  documentId String? @map("document_id")
+  status EntityStatus @default(activo)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("QualitySamplingResponsible", fields: [responsibleUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([materialType])
+  @@map("quality_sampling_plans")
+}
+
+model QualityInspection {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  inspectionType String @default("recepcion") @map("inspection_type")
+  lotId String? @map("lot_id")
+  supplierName String? @map("supplier_name")
+  commercialProductId String? @map("commercial_product_id")
+  receivedQuantity Decimal? @db.Decimal(12, 3) @map("received_quantity")
+  unit String?
+  packageIntegrity String? @map("package_integrity")
+  identification String?
+  color String?
+  odor String?
+  appearance String?
+  initialResult String? @map("initial_result")
+  observations String? @db.Text
+  status QualityInspectionStatus @default(pendiente)
+  specificationId String? @map("specification_id")
+  evidenceDocumentId String? @map("evidence_document_id")
+  responsibleUserId String @map("responsible_user_id")
+  inspectedAt DateTime? @map("inspected_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  specification QualitySpecification? @relation(fields: [specificationId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  responsible User @relation("QualityInspectionResponsible", fields: [responsibleUserId], references: [id])
+  releases QualityRelease[]
+
+  @@index([organizationId])
+  @@index([lotId])
+  @@index([status])
+  @@map("quality_inspections")
+}
+
+model QualityProcessControl {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  productionOrderId String? @map("production_order_id")
+  stage String
+  lotCode String? @map("lot_code")
+  operatorUserId String? @map("operator_user_id")
+  analystUserId String? @map("analyst_user_id")
+  specificationId String? @map("specification_id")
+  methodId String? @map("method_id")
+  measuredAt DateTime @default(now()) @map("measured_at")
+  resultsJson Json @map("results_json")
+  conformityStatus String @default("pendiente") @map("conformity_status")
+  evidenceDocumentId String? @map("evidence_document_id")
+  observations String? @db.Text
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([productionOrderId])
+  @@map("quality_process_controls")
+}
+
+model QualityFinishedControl {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  productionOrderId String? @map("production_order_id")
+  finishedLotCode String? @map("finished_lot_code")
+  specificationId String? @map("specification_id")
+  resultsJson Json @map("results_json")
+  conformityStatus String @default("pendiente") @map("conformity_status")
+  evidenceDocumentId String? @map("evidence_document_id")
+  observations String? @db.Text
+  controlledAt DateTime @default(now()) @map("controlled_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([productionOrderId])
+  @@map("quality_finished_controls")
+}
+
+model QualityRelease {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  releaseType String @map("release_type")
+  entityType String @map("entity_type")
+  entityId String @map("entity_id")
+  inspectionId String? @map("inspection_id")
+  specificationId String @map("specification_id")
+  decision QualityDecision
+  conclusion String @db.Text
+  reason String @db.Text
+  digitalConfirmation String @map("digital_confirmation")
+  evidenceDocumentId String? @map("evidence_document_id")
+  responsibleUserId String @map("responsible_user_id")
+  closed Boolean @default(true)
+  decidedAt DateTime @default(now()) @map("decided_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  inspection QualityInspection? @relation(fields: [inspectionId], references: [id])
+  specification QualitySpecification @relation(fields: [specificationId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  responsible User @relation("QualityReleaseResponsible", fields: [responsibleUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@index([decision])
+  @@map("quality_releases")
+}
+
+model QualityDeviation {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  deviationType String @map("deviation_type")
+  description String @db.Text
+  severity String
+  responsibleUserId String @map("responsible_user_id")
+  affectedEntityType String @map("affected_entity_type")
+  affectedEntityId String? @map("affected_entity_id")
+  preliminaryCause String? @db.Text @map("preliminary_cause")
+  containment String @db.Text
+  evidenceDocumentId String? @map("evidence_document_id")
+  status String @default("abierta")
+  occurredAt DateTime @default(now()) @map("occurred_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("QualityDeviationResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  capas QualityCapaAction[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("quality_deviations")
+}
+
+model QualityNonConformity {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  origin String
+  ncfType String @map("ncf_type")
+  severity String
+  lotId String? @map("lot_id")
+  productName String? @map("product_name")
+  supplierName String? @map("supplier_name")
+  productionOrderId String? @map("production_order_id")
+  labReferenceId String? @map("lab_reference_id")
+  description String @db.Text
+  evidenceDocumentId String? @map("evidence_document_id")
+  responsibleUserId String @map("responsible_user_id")
+  status String @default("abierta")
+  dispositionId String? @map("disposition_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  responsible User @relation("QualityNcfResponsible", fields: [responsibleUserId], references: [id])
+  capas QualityCapaAction[]
+  dispositions QualityDisposition[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("quality_non_conformities")
+}
+
+model QualityCapaAction {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  actionText String @db.Text @map("action_text")
+  actionType String @map("action_type")
+  responsibleUserId String @map("responsible_user_id")
+  targetDate DateTime @map("target_date")
+  priority ProductionPriority @default(media)
+  rootCause String? @db.Text @map("root_cause")
+  evidenceDocumentId String? @map("evidence_document_id")
+  effectivenessCheck String? @db.Text @map("effectiveness_check")
+  status String @default("abierta")
+  deviationId String? @map("deviation_id")
+  nonConformityId String? @map("non_conformity_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("QualityCapaResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  deviation QualityDeviation? @relation(fields: [deviationId], references: [id])
+  nonConformity QualityNonConformity? @relation(fields: [nonConformityId], references: [id])
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([targetDate])
+  @@map("quality_capa_actions")
+}
+
+model QualityDisposition {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  entityType String @map("entity_type")
+  entityId String @map("entity_id")
+  decision QualityDecision
+  reason String @db.Text
+  responsibleUserId String @map("responsible_user_id")
+  evidenceDocumentId String? @map("evidence_document_id")
+  nonConformityId String? @map("non_conformity_id")
+  decidedAt DateTime @default(now()) @map("decided_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("QualityDispositionResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  nonConformity QualityNonConformity? @relation(fields: [nonConformityId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@map("quality_dispositions")
+}
+
+model QualityReport {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  reportType String @map("report_type")
+  title String
+  entityType String @map("entity_type")
+  entityId String @map("entity_id")
+  summary String @db.Text
+  documentId String? @map("document_id")
+  createdByUserId String @map("created_by_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  createdBy User @relation("QualityReportCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@map("quality_reports")
 }

@@ -86,7 +86,7 @@ Knowledge Document Engine:
 
 Validacion documentada en `docs/25_Validacion_Incremento_7_8.md`.
 
-## Incremento 8 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 8 - COMPLETADO Y APROBADO
 
 LIMS - Laboratory Information Management System:
 
@@ -100,6 +100,21 @@ LIMS - Laboratory Information Management System:
 - Dashboard, timeline, captura guiada, comparacion visual preparada y modo aprendizaje.
 
 Validacion documentada en `docs/26_Validacion_Incremento_8.md`.
+
+## Incremento 9 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+Control de Calidad:
+
+- Especificaciones versionadas para materiales, proceso y producto terminado.
+- Planes de muestreo configurables.
+- Inspeccion de recepcion con cuarentena, aprobacion y rechazo.
+- Control de producto en proceso y terminado preparado.
+- Liberaciones y rechazos trazables.
+- Desviaciones, no conformidades, CAPA y disposiciones.
+- Integracion con Inventario, Produccion, LIMS y KDE por referencias documentales y operativas.
+- Dashboard, colas, semaforos, panel lateral y modo aprendizaje.
+
+Validacion documentada en `docs/27_Validacion_Incremento_9.md`.
 
 ## Fases posteriores
 

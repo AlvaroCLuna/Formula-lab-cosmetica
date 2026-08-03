@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.0 - Incremento 9 implementado
+
+- Se implemento Control de Calidad con especificaciones versionadas, planes de muestreo, inspecciones, liberaciones, desviaciones, no conformidades, CAPA y disposiciones.
+- Se agregaron modelos Prisma, migracion MySQL, APIs, validaciones, seed y pruebas.
+- Se integro Calidad con KDE mediante evidencias documentales y con LIMS por referencias, sin duplicar resultados de laboratorio.
+- Se agregaron reglas para impedir liberacion con especificacion no aprobada, exigir contencion en desviaciones y disposicion para cierre de no conformidades.
+- Se agrego UI ERP de Calidad con dashboard, colas, semaforos, panel lateral, captura guiada y modo aprendizaje.
+- Se documento la validacion en `docs/27_Validacion_Incremento_9.md` con Flowchart y ER Diagram Mermaid.
+
 ## 0.8.0 - Incremento 8 implementado
 
 - Se implemento LIMS como modulo de laboratorio para proyectos, muestras, ensayos, estabilidad, no conformidades y liberacion tecnica.

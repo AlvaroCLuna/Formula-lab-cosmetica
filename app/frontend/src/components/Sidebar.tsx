@@ -11,7 +11,7 @@ const items = [
   { id: "inventario", label: "Inventario", icon: PackageSearch },
   { id: "produccion", label: "Laboratorio", icon: Beaker },
   { id: "lims", label: "LIMS", icon: ClipboardCheck },
-  { id: "calidad", label: "Calidad", icon: ClipboardCheck, disabled: true },
+  { id: "calidad", label: "Calidad", icon: ClipboardCheck },
   { id: "aprendizaje", label: "Aprendizaje", icon: BookOpen, disabled: true }
 ];
 
