@@ -168,6 +168,14 @@ async function main() {
     }
   });
 
+  for (const [name, orderIndex] of [["A", 1], ["B", 2], ["C", 3]] as const) {
+    await prisma.formulationPhase.upsert({
+      where: { formulationVersionId_name: { formulationVersionId: "frm-shampoo-v1", name } },
+      update: { orderIndex },
+      create: { id: `frm-shampoo-v1-phase-${name}`, organizationId: organization.id, formulationVersionId: "frm-shampoo-v1", name, orderIndex }
+    });
+  }
+
   const demoIngredients = [
     ["ing-sci", "rm-sci", "SCI", "Sodium Cocoyl Isethionate", "Tensioactivo", "A", 45, 45, 1],
     ["ing-betaina", "rm-betaina", "Betaina de coco", "Cocamidopropyl Betaine", "Co-tensioactivo", "A", 10, 10, 2],

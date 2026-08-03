@@ -144,6 +144,33 @@ export type FormulationIngredient = {
   sourceReference: string | null;
 };
 
+export type FormulaEnginePhase = {
+  id: string;
+  name: string;
+  orderIndex: number;
+};
+
+export type FormulaEngineIssue = {
+  code: string;
+  severity: "error" | "warning";
+  message: string;
+};
+
+export type FormulaEngineState = {
+  phases: FormulaEnginePhase[];
+  calculation: {
+    batchSize: number;
+    phaseTotals: Array<{ phase: string; percentage: number; grams: number }>;
+    totalPercentage: number;
+    totalGrams: number;
+  };
+  validation: {
+    isValid: boolean;
+    total: number;
+    issues: FormulaEngineIssue[];
+  };
+};
+
 export type FormulationVersion = {
   id: string;
   formulationFamilyId: string;

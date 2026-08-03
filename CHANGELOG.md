@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.4.0 - Incremento 4 implementado
+
+- Se implemento Formula Engine como motor operativo reutilizable para formulaciones.
+- Se agregaron fases estructuradas por version de formulacion.
+- Se agrego editor visual con fases, drag & drop nativo, movimiento de ingredientes y reordenamiento de fases.
+- Se agrego calculo en tiempo real para porcentajes, gramos, subtotales por fase y total escalado.
+- Se agregaron escalas 100 g, 250 g, 500 g, 1 kg, 5 kg, 20 kg y 100 kg sin alterar porcentajes.
+- Se agregaron validaciones del motor: total distinto de 100, ingrediente repetido, fase vacia, materia prima inexistente, negativos y cantidades invalidas.
+- Se agrego comparacion de engine entre versiones por ingredientes agregados, eliminados, porcentaje, orden y fase.
+- Se preparo arquitectura para reglas futuras y costeo posterior sin implementar reglas quimicas ni costos completos.
+- Se documento la validacion en `docs/20_Validacion_Incremento_4.md`.
+
 ## 0.3.0 - Incremento 3 implementado
 
 - Se implemento el modulo Materias Primas Maestras como base de conocimiento de ingredientes.

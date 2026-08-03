@@ -105,6 +105,7 @@ model Organization {
   rawMaterialMasters RawMaterialMaster[]
   formulationFamilies FormulationFamily[]
   formulationVersions FormulationVersion[]
+  formulationPhases FormulationPhase[]
   formulationIngredients FormulationIngredient[]
   formulationComparisons FormulationVersionComparison[]
   rawMaterialVersions RawMaterialMasterVersion[]
@@ -505,6 +506,7 @@ model FormulationVersion {
   createdBy           User                     @relation(fields: [createdByUserId], references: [id])
   approvedBy          User?                    @relation("FormulationApprovals", fields: [approvedByUserId], references: [id])
   ingredients         FormulationIngredient[]
+  phases              FormulationPhase[]
   baseComparisons     FormulationVersionComparison[] @relation("BaseVersion")
   targetComparisons   FormulationVersionComparison[] @relation("TargetVersion")
 
@@ -513,6 +515,23 @@ model FormulationVersion {
   @@index([formulationFamilyId])
   @@index([createdByUserId])
   @@map("formulation_versions")
+}
+
+model FormulationPhase {
+  id                   String             @id @default(uuid())
+  organizationId       String             @map("organization_id")
+  formulationVersionId String             @map("formulation_version_id")
+  name                 String
+  orderIndex           Int                @map("order_index")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  updatedAt            DateTime           @default(now()) @updatedAt @map("updated_at")
+  organization         Organization       @relation(fields: [organizationId], references: [id])
+  version              FormulationVersion @relation(fields: [formulationVersionId], references: [id])
+
+  @@unique([formulationVersionId, name])
+  @@index([organizationId])
+  @@index([formulationVersionId])
+  @@map("formulation_phases")
 }
 
 model FormulationIngredient {

@@ -26,7 +26,7 @@ Gestor de Formulaciones:
 - Preparacion para costeo y produccion futuros.
 - Validacion documentada en `docs/18_Validacion_Incremento_2.md`.
 
-## Incremento 3 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 3 - COMPLETADO Y APROBADO
 
 Materias Primas Maestras:
 
@@ -39,9 +39,22 @@ Materias Primas Maestras:
 - Inteligencia operativa: formulaciones asociadas, uso promedio, proveedores, documentos, costo promedio preparado y ultima actualizacion.
 - Validacion documentada en `docs/19_Validacion_Incremento_3.md`.
 
-## Incremento 4 - Pendiente de especificacion
+## Incremento 4 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
 
-No iniciar hasta aprobacion formal del Incremento 3.
+Formula Engine:
+
+- Editor visual de formulaciones con fases.
+- Drag & drop nativo de ingredientes entre fases.
+- Reordenamiento de fases.
+- Calculo escalado de porcentajes y gramos.
+- Validaciones automaticas del motor.
+- Comparacion avanzada de versiones por ingrediente, porcentaje, orden y fase.
+- Preparacion para reglas y costeo futuro sin implementar esos modulos.
+- Validacion documentada en `docs/20_Validacion_Incremento_4.md`.
+
+## Incremento 5 - Pendiente de especificacion
+
+No iniciar hasta aprobacion formal del Incremento 4.
 
 ## Fases posteriores
 

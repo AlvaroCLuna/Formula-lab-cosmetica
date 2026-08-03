@@ -1,4 +1,4 @@
-import type { Draft, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
+import type { Draft, FormulaEnginePhase, FormulaEngineState, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -139,6 +139,31 @@ export const api = {
   },
   async listRawMaterials() {
     return request<{ rawMaterials: RawMaterialMaster[] }>("/formulations/catalog/raw-materials");
+  },
+  async getFormulaEngine(versionId: string, batchSize = 100) {
+    return request<FormulaEngineState & { version: FormulationVersion }>(`/formula-engine/versions/${versionId}?batchSize=${batchSize}`);
+  },
+  async addFormulaPhase(versionId: string, input: { name: string; orderIndex: number }) {
+    return request<{ phase: FormulaEnginePhase }>(`/formula-engine/versions/${versionId}/phases`, {
+      method: "POST",
+      body: JSON.stringify(input)
+    });
+  },
+  async reorderFormulaPhases(versionId: string, phases: Array<{ name: string; orderIndex: number }>) {
+    return request<{ phases: FormulaEnginePhase[] }>(`/formula-engine/versions/${versionId}/phases/reorder`, {
+      method: "PATCH",
+      body: JSON.stringify({ phases })
+    });
+  },
+  async moveFormulaIngredient(id: string, input: { phase: string; orderIndex: number }) {
+    return request<{ ingredient: FormulationIngredient }>(`/formula-engine/ingredients/${id}/move`, {
+      method: "PATCH",
+      body: JSON.stringify(input)
+    });
+  },
+  async compareFormulaEngine(baseVersionId: string, targetVersionId: string) {
+    const params = new URLSearchParams({ baseVersionId, targetVersionId });
+    return request<{ comparison: unknown }>(`/formula-engine/compare?${params}`);
   },
   async listMasterRawMaterials(filters: { search?: string; status?: string; category?: string; family?: string } = {}) {
     const params = new URLSearchParams();

@@ -24,7 +24,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 3 - Materias Primas Maestras
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Catalogo maestro implementado como base de conocimiento.
 - Busqueda, filtros, categorias, familias y estados implementados.
@@ -34,7 +34,18 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Vista rapida lateral y modo aprendizaje implementados.
 - Auditoria de creacion, edicion, aprobacion y archivado implementada.
 - Seeds con 30 materias primas demo agregados.
-- Pendiente: aprobacion formal del usuario antes de iniciar Incremento 4.
+
+## Incremento 4 - Formula Engine
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Motor de calculo y validacion implementado.
+- Fases estructuradas por version implementadas.
+- Editor visual con drag & drop nativo implementado.
+- Escalado por batch implementado.
+- Comparacion avanzada de versiones implementada.
+- Preparacion para reglas y costeo futuro implementada a nivel arquitectonico.
+- Pendiente: aprobacion formal del usuario antes de iniciar Incremento 5.
 
 ## Pendiente para fases posteriores
 

@@ -21,7 +21,7 @@ export const updateVersionSchema = z.object({
 });
 
 export const ingredientSchema = z.object({
-  rawMaterialMasterId: z.string().uuid().optional().nullable(),
+  rawMaterialMasterId: z.string().trim().min(1).optional().nullable(),
   displayName: z.string().trim().min(2),
   inci: z.string().trim().optional().nullable(),
   cosmeticFunction: z.string().trim().min(2),

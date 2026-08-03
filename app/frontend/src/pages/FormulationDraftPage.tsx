@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { FormulationFamily, FormulationIngredient, FormulationVersion, RawMaterialMaster } from "../types";
 import { api } from "../api/client";
+import { FormulaEngineEditor } from "../components/FormulaEngineEditor";
 
 type Props = {
   formulation: FormulationFamily;
@@ -8,23 +9,9 @@ type Props = {
   onChanged: () => Promise<void>;
 };
 
-const emptyIngredient = {
-  rawMaterialMasterId: "",
-  displayName: "",
-  inci: "",
-  cosmeticFunction: "",
-  phase: "A",
-  percentage: 0,
-  baseQuantity: 0,
-  unit: "g",
-  orderIndex: 1,
-  sourceReference: ""
-};
-
 export function FormulationDraftPage({ formulation, onClose, onChanged }: Props) {
   const [version, setVersion] = useState<FormulationVersion>(formulation.versions[0]);
   const [rawMaterials, setRawMaterials] = useState<RawMaterialMaster[]>([]);
-  const [ingredientForm, setIngredientForm] = useState(emptyIngredient);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -51,23 +38,9 @@ export function FormulationDraftPage({ formulation, onClose, onChanged }: Props)
     await onChanged();
   }
 
-  async function addIngredient(event: FormEvent) {
-    event.preventDefault();
-    const selected = rawMaterials.find((item) => item.id === ingredientForm.rawMaterialMasterId);
-    const response = await api.addIngredient(version.id, {
-      rawMaterialMasterId: selected?.id ?? null,
-      displayName: ingredientForm.displayName || selected?.commonName || "",
-      inci: ingredientForm.inci || selected?.inci || null,
-      cosmeticFunction: ingredientForm.cosmeticFunction,
-      phase: ingredientForm.phase,
-      percentage: Number(ingredientForm.percentage),
-      baseQuantity: Number(ingredientForm.baseQuantity),
-      unit: ingredientForm.unit,
-      orderIndex: Number(ingredientForm.orderIndex),
-      sourceReference: selected?.permanentCode ?? ingredientForm.sourceReference
-    });
+  async function addIngredient(input: Parameters<typeof api.addIngredient>[1]) {
+    const response = await api.addIngredient(version.id, input);
     setVersion((current) => ({ ...current, ingredients: [...current.ingredients, response.ingredient].sort((a, b) => a.orderIndex - b.orderIndex) }));
-    setIngredientForm({ ...emptyIngredient, orderIndex: version.ingredients.length + 2 });
     setMessage("Ingrediente agregado y auditado.");
     await onChanged();
   }
@@ -125,53 +98,11 @@ export function FormulationDraftPage({ formulation, onClose, onChanged }: Props)
         </div>
       </form>
       {message ? <p className="module-message">{message}</p> : null}
-      <form className="ingredient-form" onSubmit={addIngredient}>
-        <h3>Ingredientes por fase</h3>
-        <label>
-          Materia prima maestra
-          <select
-            disabled={!editable}
-            value={ingredientForm.rawMaterialMasterId}
-            onChange={(event) => {
-              const selected = rawMaterials.find((item) => item.id === event.target.value);
-              setIngredientForm({
-                ...ingredientForm,
-                rawMaterialMasterId: event.target.value,
-                displayName: selected?.commonName ?? ingredientForm.displayName,
-                inci: selected?.inci ?? ingredientForm.inci,
-                sourceReference: selected?.permanentCode ?? ingredientForm.sourceReference
-              });
-            }}
-          >
-            <option value="">Ingrediente provisional</option>
-            {rawMaterials.map((material) => (
-              <option key={material.id} value={material.id}>{material.permanentCode} - {material.commonName}</option>
-            ))}
-          </select>
-        </label>
-        <label>Nombre<input required disabled={!editable} value={ingredientForm.displayName} onChange={(event) => setIngredientForm({ ...ingredientForm, displayName: event.target.value })} /></label>
-        <label>INCI<input disabled={!editable} value={ingredientForm.inci} onChange={(event) => setIngredientForm({ ...ingredientForm, inci: event.target.value })} /></label>
-        <label>Funcion cosmetica<input required disabled={!editable} value={ingredientForm.cosmeticFunction} onChange={(event) => setIngredientForm({ ...ingredientForm, cosmeticFunction: event.target.value })} /></label>
-        <label>Fase<input required disabled={!editable} value={ingredientForm.phase} onChange={(event) => setIngredientForm({ ...ingredientForm, phase: event.target.value })} /></label>
-        <label>Orden<input required disabled={!editable} type="number" value={ingredientForm.orderIndex} onChange={(event) => setIngredientForm({ ...ingredientForm, orderIndex: Number(event.target.value) })} /></label>
-        <label>Porcentaje<input required disabled={!editable} type="number" step="0.01" value={ingredientForm.percentage} onChange={(event) => setIngredientForm({ ...ingredientForm, percentage: Number(event.target.value) })} /></label>
-        <label>Cantidad base<input required disabled={!editable} type="number" step="0.01" value={ingredientForm.baseQuantity} onChange={(event) => setIngredientForm({ ...ingredientForm, baseQuantity: Number(event.target.value) })} /></label>
-        <button className="secondary-button" disabled={!editable} type="submit">Agregar ingrediente</button>
-      </form>
-      <div className="ingredients-table">
-        {version.ingredients.map((ingredient) => (
-          <div key={ingredient.id} className="ingredient-line">
-            <span>{ingredient.orderIndex}</span>
-            <strong>{ingredient.displayName}</strong>
-            <span>Fase {ingredient.phase}</span>
-            <span>{ingredient.percentage}%</span>
-            <span>{ingredient.baseQuantity} {ingredient.unit}</span>
-            <small>{ingredient.cosmeticFunction}</small>
-            <button className="mini-button" disabled={!editable} onClick={() => removeIngredient(ingredient)}>Archivar</button>
-          </div>
-        ))}
-        {version.ingredients.length === 0 ? <p className="empty-state">Agrega ingredientes para habilitar revision y aprobacion.</p> : null}
-      </div>
+      <FormulaEngineEditor version={version} rawMaterials={rawMaterials} editable={editable} onAddIngredient={addIngredient} onRemoveIngredient={removeIngredient} onChanged={async () => {
+        const response = await api.getFormulation(formulation.id);
+        setVersion(response.formulation.versions.find((item) => item.id === version.id) ?? response.formulation.versions[0]);
+        await onChanged();
+      }} />
     </section>
   );
 }
