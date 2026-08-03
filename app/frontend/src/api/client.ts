@@ -522,6 +522,34 @@ export const api = {
   async aiDashboard() {
     return request<any>("/ai/dashboard");
   },
+  async biExecutive() {
+    return request<any>("/bi/executive");
+  },
+  async listBiDashboards(module?: string) {
+    const suffix = module ? `?module=${encodeURIComponent(module)}` : "";
+    return request<any>(`/bi/dashboards${suffix}`);
+  },
+  async listBiReports() {
+    return request<{ reports: any[] }>("/bi/reports");
+  },
+  async createBiReport(input: Record<string, unknown>) {
+    return request<{ report: any }>("/bi/reports", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listBiSnapshots() {
+    return request<{ snapshots: any[] }>("/bi/snapshots");
+  },
+  async listBiAlerts() {
+    return request<{ alerts: any[] }>("/bi/alerts");
+  },
+  async listBiExports() {
+    return request<{ exports: any[] }>("/bi/exports");
+  },
+  async createBiExport(input: Record<string, unknown>) {
+    return request<{ export: any }>("/bi/exports", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listBiSchedules() {
+    return request<{ schedules: any[] }>("/bi/schedules");
+  },
   async listAiRules() {
     return request<{ rules: any[] }>("/ai/rules");
   },

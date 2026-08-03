@@ -1490,6 +1490,67 @@ async function main() {
       create: { id: `ai-source-${index}`, organizationId: organization.id, permanentCode: `AI-SRC-${String(index).padStart(6, "0")}`, sourceType: sourceTypes[index - 1], author: index === 9 ? "Proveedor configurable" : "Autor demo", sourceOrganization: index === 1 ? "Norma vigente demo" : "Formula Lab Demo", sourceDate: new Date("2026-08-01T00:00:00.000Z"), validUntil: index === 8 ? new Date("2026-08-02T00:00:00.000Z") : new Date("2027-08-01T00:00:00.000Z"), confidence: 0.55 + index * 0.04, priority: index, status: index === 8 ? "observacion" : "activo", responsibleUserId: "demo-user", lastReviewedAt: new Date("2026-08-03T00:00:00.000Z"), provider: index === 9 ? "configurable" : null, model: index === 9 ? "sin_clave_demo" : null, endpoint: index === 9 ? "configurado_por_entorno" : null, limitsJson: index === 9 ? { dailyQueries: 100 } : null, costPolicyJson: index === 9 ? { mode: "preparado" } : null, usagePolicy: "No guardar claves en frontend ni repositorio. No responder sin evidencia tecnica.", environment: "demo", documentId: `kde-doc-${String(index).padStart(3, "0")}` }
     });
   }
+
+  const biDashboards = [
+    ["general", "Tablero Ejecutivo Formula Lab"],
+    ["formulaciones", "Formulaciones y versiones"],
+    ["materias", "Materias primas maestras"],
+    ["inventario", "Inventario y caducidades"],
+    ["produccion", "Laboratorio y produccion"],
+    ["calidad", "Calidad y liberaciones"],
+    ["compras", "Compras y abastecimiento"],
+    ["ventas", "CRM, ventas y pedidos"]
+  ] as const;
+  for (const [index, [module, name]] of biDashboards.entries()) {
+    await prisma.biDashboard.upsert({
+      where: { id: `bi-dashboard-${index + 1}` },
+      update: { name, module, status: "activo" },
+      create: { id: `bi-dashboard-${index + 1}`, organizationId: organization.id, permanentCode: `BI-DSH-${String(index + 1).padStart(6, "0")}`, name, module, description: "Dashboard demo construido con datos operativos persistidos.", configJson: { cards: ["indicadores", "tendencias", "alertas"], chart: index % 2 === 0 ? "bar" : "line" }, filtersJson: { period: "mes_actual", organizationId: organization.id }, status: "activo" }
+    });
+  }
+
+  const reportEntities = ["formulations", "raw_materials", "inventory", "production", "quality", "purchases", "sales", "ai", "documents", "inventory", "sales", "quality"] as const;
+  for (let index = 1; index <= 12; index += 1) {
+    const entity = reportEntities[index - 1];
+    await prisma.biReport.upsert({
+      where: { id: `bi-report-${index}` },
+      update: { title: `Reporte BI demo ${index}`, status: "activo" },
+      create: { id: `bi-report-${index}`, organizationId: organization.id, permanentCode: `BI-RPT-${String(index).padStart(6, "0")}`, title: `Reporte BI demo ${index}`, description: "Reporte configurable sin SQL en frontend.", module: entity === "raw_materials" ? "materias" : entity, entity, fieldsJson: ["permanentCode", "status", "createdAt"], filtersJson: { period: "2026-08", status: "todos" }, groupByJson: ["status"], orderJson: { createdAt: "desc" }, periodJson: { start: "2026-08-01", end: "2026-08-31" }, format: index % 4 === 0 ? "json" : index % 3 === 0 ? "xlsx" : index % 2 === 0 ? "pdf" : "csv", columnsJson: ["Codigo", "Estado", "Fecha"], totalsJson: ["conteo"], createdByUserId: "demo-user", status: "activo" }
+    });
+  }
+
+  for (let index = 1; index <= 6; index += 1) {
+    await prisma.biSnapshot.upsert({
+      where: { id: `bi-snapshot-${index}` },
+      update: { metricKey: ["ventas_estimadas", "valor_inventario", "ordenes_activas", "alertas_criticas", "rendimiento_promedio", "compras_abiertas"][index - 1] },
+      create: { id: `bi-snapshot-${index}`, organizationId: organization.id, permanentCode: `BI-SNP-${String(index).padStart(6, "0")}`, module: ["ventas", "inventario", "produccion", "ia", "produccion", "compras"][index - 1], metricKey: ["ventas_estimadas", "valor_inventario", "ordenes_activas", "alertas_criticas", "rendimiento_promedio", "compras_abiertas"][index - 1], periodStart: new Date(`2026-0${Math.min(index + 2, 8)}-01T00:00:00.000Z`), periodEnd: new Date(`2026-0${Math.min(index + 2, 8)}-28T23:59:59.000Z`), valueJson: { value: 1200 * index, unit: index === 2 ? "MXN" : "conteo" }, sourceJson: { tables: ["operational"], calculation: "snapshot demo fechado; no recalculado automaticamente" } }
+    });
+  }
+
+  const biAlertModules = ["inventario", "calidad", "produccion", "ventas", "compras", "ia", "formulaciones", "materias", "documentos", "costos"] as const;
+  for (let index = 1; index <= 10; index += 1) {
+    await prisma.biExecutiveAlert.upsert({
+      where: { id: `bi-alert-${index}` },
+      update: { status: index % 4 === 0 ? "cerrada" : "abierta" },
+      create: { id: `bi-alert-${index}`, organizationId: organization.id, permanentCode: `BI-ALT-${String(index).padStart(6, "0")}`, module: biAlertModules[index - 1], alertType: index % 2 === 0 ? "riesgo_operativo" : "seguimiento_ejecutivo", title: `Alerta ejecutiva demo ${index}`, detected: "Hallazgo construido desde datos existentes del ERP.", criterion: "Criterio demo documentado: conteo, estado, vencimiento o variacion registrada supera el umbral configurado.", source: `Fuente demo: tablas operativas del modulo ${biAlertModules[index - 1]} y snapshot BI-SNP-${String(((index - 1) % 6) + 1).padStart(6, "0")}.`, severity: index % 5 === 0 ? "critica" : index % 3 === 0 ? "alta" : "media", entityType: index % 2 === 0 ? "raw_material_lot" : "sales_order", entityId: index % 2 === 0 ? `lot-demo-${String(index).padStart(2, "0")}` : `sales-order-${((index - 1) % 5) + 1}`, status: index % 4 === 0 ? "cerrada" : "abierta" }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    await prisma.biExport.upsert({
+      where: { id: `bi-export-${index}` },
+      update: { rowCount: 10 + index },
+      create: { id: `bi-export-${index}`, organizationId: organization.id, permanentCode: `BI-EXP-${String(index).padStart(6, "0")}`, reportId: `bi-report-${index}`, module: biAlertModules[index - 1], format: ["csv", "xlsx", "pdf", "json"][index - 1] as "csv" | "xlsx" | "pdf" | "json", filtersJson: { period: "2026-08", demo: true }, rowCount: 10 + index, storagePath: `exports/BI-EXP-${String(index).padStart(6, "0")}.${["csv", "xlsx", "pdf", "json"][index - 1]}`, exportedByUserId: "demo-user" }
+    });
+  }
+
+  for (let index = 1; index <= 3; index += 1) {
+    await prisma.biSchedule.upsert({
+      where: { id: `bi-schedule-${index}` },
+      update: { status: "preparado" },
+      create: { id: `bi-schedule-${index}`, organizationId: organization.id, permanentCode: `BI-SCH-${String(index).padStart(6, "0")}`, reportId: `bi-report-${index}`, frequency: ["semanal", "mensual", "trimestral"][index - 1], responsibleUserId: "demo-user", nextRunAt: new Date(`2026-09-0${index}T08:00:00.000Z`), status: "preparado" }
+    });
+  }
 }
 
 main()

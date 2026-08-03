@@ -194,7 +194,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 12 - IA Responsable y Motor de Reglas
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Reglas estructuradas versionadas implementadas.
 - Evaluador de reglas implementado.
@@ -209,7 +209,22 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Dashboard y UI ERP de inteligencia implementados.
 - Seeds y pruebas agregadas.
 - Validacion documentada con Flowchart y ER Diagram Mermaid.
-- Pendiente: aprobacion formal antes de iniciar Incremento 13.
+
+## Incremento 13 - Reportes, BI y Tablero Ejecutivo
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Tablero ejecutivo implementado.
+- Dashboards configurables por modulo implementados.
+- Constructor de reportes implementado con entidades analiticas permitidas y sin SQL en frontend.
+- Snapshots historicos fechados implementados.
+- Alertas ejecutivas implementadas con fuente, criterio y severidad.
+- Exportaciones auditadas implementadas para CSV, XLSX, PDF preparado y JSON.
+- Programaciones de reportes preparadas sin envio automatico externo.
+- Integracion BI de solo lectura con modulos operativos implementada.
+- UI ERP responsive con KPIs, graficas, panel lateral, filtros, drilldown basico y modo aprendizaje implementada.
+- Seeds y pruebas agregadas.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
 
 ## Pendiente para fases posteriores
 

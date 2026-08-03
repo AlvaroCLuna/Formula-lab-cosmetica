@@ -311,6 +311,201 @@
   gap: 18px;
 }
 
+.bi-page {
+  display: grid;
+  gap: 18px;
+}
+
+.bi-hero {
+  align-items: center;
+  background: linear-gradient(135deg, rgba(8, 101, 84, 0.94), rgba(28, 76, 125, 0.92));
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  min-height: 170px;
+  padding: 24px;
+}
+
+.bi-hero h2 {
+  font-size: 28px;
+  margin: 4px 0 8px;
+}
+
+.bi-hero p {
+  max-width: 680px;
+}
+
+.bi-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.bi-actions button,
+.bi-actions select {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+.bi-actions option {
+  color: #14213d;
+}
+
+.tab-strip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.tab-strip button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 9px 12px;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.tab-strip button.active {
+  background: #0f766e;
+  border-color: #0f766e;
+  color: #fff;
+}
+
+.bi-kpis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.metric-card {
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  min-height: 92px;
+  padding: 14px;
+  text-align: left;
+}
+
+.metric-card span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.metric-card strong {
+  color: var(--text);
+  font-size: 22px;
+}
+
+.bi-layout {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) 340px;
+}
+
+.bi-main {
+  display: grid;
+  gap: 14px;
+}
+
+.bi-chart-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.bi-mini-chart {
+  align-items: end;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  min-height: 160px;
+  padding: 14px;
+  text-align: left;
+}
+
+.bi-mini-chart div {
+  background: linear-gradient(180deg, #14b8a6, #2563eb);
+  border-radius: 6px 6px 2px 2px;
+  width: 100%;
+}
+
+.wide-card {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid #0f766e;
+  border-radius: 8px;
+  color: var(--text);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 28px minmax(86px, auto) minmax(0, 1fr) minmax(120px, auto);
+  min-height: 58px;
+  padding: 12px;
+  text-align: left;
+}
+
+.wide-card.severity-alta,
+.wide-card.severity-critica {
+  border-left-color: #dc2626;
+}
+
+.wide-card small {
+  color: var(--muted);
+}
+
+.bi-side-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  max-height: 720px;
+  overflow: auto;
+  padding: 16px;
+  position: sticky;
+  top: 14px;
+}
+
+.bi-side-panel pre {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  line-height: 1.45;
+  margin: 0;
+  max-height: 360px;
+  overflow: auto;
+  padding: 12px;
+  white-space: pre-wrap;
+}
+
+.trace-note {
+  align-items: flex-start;
+  background: rgba(20, 184, 166, 0.1);
+  border: 1px solid rgba(20, 184, 166, 0.24);
+  border-radius: 8px;
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+}
+
 .ai-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 540px);
@@ -2248,8 +2443,19 @@ textarea {
   .knowledge-search-results,
   .knowledge-card-grid,
   .module-hero,
+  .bi-layout,
+  .bi-hero,
   .filters-bar {
     grid-template-columns: 1fr;
+  }
+
+  .bi-hero {
+    align-items: stretch;
+    display: grid;
+  }
+
+  .bi-actions {
+    justify-content: flex-start;
   }
 
   .field-preview,
@@ -2271,11 +2477,17 @@ textarea {
     position: static;
   }
 
+  .bi-side-panel {
+    max-height: none;
+    position: static;
+  }
+
   .draft-form,
   .ingredient-form,
   .ingredient-line,
   .engine-ingredient-card,
   .raw-material-row,
+  .wide-card,
   .knowledge-form {
     grid-template-columns: 1fr;
   }

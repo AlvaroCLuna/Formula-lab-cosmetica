@@ -314,6 +314,13 @@ enum AiOutputType {
   informacion_insuficiente
 }
 
+enum BiExportFormat {
+  csv
+  xlsx
+  pdf
+  json
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -426,6 +433,12 @@ model Organization {
   aiResponses AiResponse[]
   learningEvents LearningEvent[]
   aiSourceConfigs AiSourceConfig[]
+  biDashboards BiDashboard[]
+  biReports BiReport[]
+  biSnapshots BiSnapshot[]
+  biExecutiveAlerts BiExecutiveAlert[]
+  biExports BiExport[]
+  biSchedules BiSchedule[]
 
   @@map("organizations")
 }
@@ -505,6 +518,9 @@ model User {
   aiQueriesUser AiQuery[] @relation("AiQueryUser")
   aiLearningEventsUser LearningEvent[] @relation("AiLearningUser")
   aiSourceConfigsResponsible AiSourceConfig[] @relation("AiSourceResponsible")
+  biReportsCreated BiReport[] @relation("BiReportCreatedBy")
+  biExportsUser BiExport[] @relation("BiExportUser")
+  biSchedulesResponsible BiSchedule[] @relation("BiScheduleResponsible")
 
   @@index([organizationId])
   @@map("users")
@@ -3355,4 +3371,135 @@ model AiSourceConfig {
   @@index([sourceType])
   @@index([status])
   @@map("ai_source_configs")
+}
+
+model BiDashboard {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  module String
+  description String? @db.Text
+  configJson Json @map("config_json")
+  filtersJson Json? @map("filters_json")
+  status String @default("activo")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([module])
+  @@map("bi_dashboards")
+}
+
+model BiReport {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  title String
+  description String? @db.Text
+  module String
+  entity String
+  fieldsJson Json @map("fields_json")
+  filtersJson Json? @map("filters_json")
+  groupByJson Json? @map("group_by_json")
+  orderJson Json? @map("order_json")
+  periodJson Json? @map("period_json")
+  format BiExportFormat @default(csv)
+  columnsJson Json? @map("columns_json")
+  totalsJson Json? @map("totals_json")
+  createdByUserId String @map("created_by_user_id")
+  status String @default("activo")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  createdBy User @relation("BiReportCreatedBy", fields: [createdByUserId], references: [id])
+  exports BiExport[]
+  schedules BiSchedule[]
+
+  @@index([organizationId])
+  @@index([module])
+  @@map("bi_reports")
+}
+
+model BiSnapshot {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  module String
+  metricKey String @map("metric_key")
+  periodStart DateTime @map("period_start")
+  periodEnd DateTime @map("period_end")
+  valueJson Json @map("value_json")
+  sourceJson Json @map("source_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([module])
+  @@index([metricKey])
+  @@map("bi_snapshots")
+}
+
+model BiExecutiveAlert {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  module String
+  alertType String @map("alert_type")
+  title String
+  detected String @db.Text
+  criterion String @db.Text
+  source String @db.Text
+  severity AiRuleSeverity @default(media)
+  entityType String? @map("entity_type")
+  entityId String? @map("entity_id")
+  status String @default("abierta")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([module])
+  @@index([status])
+  @@map("bi_executive_alerts")
+}
+
+model BiExport {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  reportId String? @map("report_id")
+  module String
+  format BiExportFormat
+  filtersJson Json? @map("filters_json")
+  rowCount Int @default(0) @map("row_count")
+  storagePath String? @map("storage_path")
+  exportedByUserId String @map("exported_by_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  report BiReport? @relation(fields: [reportId], references: [id])
+  exportedBy User @relation("BiExportUser", fields: [exportedByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([module])
+  @@map("bi_exports")
+}
+
+model BiSchedule {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  reportId String @map("report_id")
+  frequency String
+  responsibleUserId String @map("responsible_user_id")
+  nextRunAt DateTime? @map("next_run_at")
+  status String @default("preparado")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  report BiReport @relation(fields: [reportId], references: [id])
+  responsible User @relation("BiScheduleResponsible", fields: [responsibleUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("bi_schedules")
 }

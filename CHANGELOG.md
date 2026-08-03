@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.13.0 - Incremento 13 implementado
+
+- Se implemento Reportes, BI y Tablero Ejecutivo con dashboards, reportes configurables, snapshots, alertas ejecutivas, exportaciones y programaciones preparadas.
+- Se agregaron modelos Prisma, migracion MySQL, SQL espejo, APIs, validaciones, seed y pruebas.
+- Se integro BI con formulaciones, materias primas, documentos, inventario, produccion, calidad, compras, ventas, IA y auditoria mediante consultas de solo lectura operativa.
+- Se agrego constructor de reportes con entidades permitidas, sin SQL desde frontend.
+- Se agregaron snapshots fechados que no se recalculan silenciosamente y escenarios de exportacion auditados.
+- Se agrego UI ERP de tablero ejecutivo con KPIs, graficas, tabs, panel lateral, alertas, exportaciones, filtros globales y modo aprendizaje.
+- Se agregaron datos demo con 8 dashboards, 12 reportes, 6 snapshots, 10 alertas, exportaciones y programaciones preparadas.
+- Se documento la validacion en `docs/31_Validacion_Incremento_13.md` con Flowchart y ER Diagram Mermaid.
+
 ## 0.12.0 - Incremento 12 implementado
 
 - Se implemento IA Responsable y Motor de Reglas con reglas versionadas, evaluaciones, alertas explicables, consultas, respuestas con evidencia, eventos de aprendizaje y fuentes/proveedores configurables.

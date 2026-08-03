@@ -150,7 +150,7 @@ CRM, Ventas y Pedidos:
 
 Validacion documentada en `docs/29_Validacion_Incremento_11.md`.
 
-## Incremento 12 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 12 - COMPLETADO Y APROBADO
 
 IA Responsable y Motor de Reglas:
 
@@ -165,6 +165,21 @@ IA Responsable y Motor de Reglas:
 - Dashboard de inteligencia y UI ERP con panel de evidencia.
 
 Validacion documentada en `docs/30_Validacion_Incremento_12.md`.
+
+## Incremento 13 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+Reportes, BI y Tablero Ejecutivo:
+
+- Tablero ejecutivo con KPIs consolidados por modulo.
+- Dashboards por modulo y reportes configurables sin SQL en frontend.
+- Snapshots analiticos fechados que no recalculan historicos silenciosamente.
+- Alertas ejecutivas con criterio, fuente, severidad y entidad relacionada.
+- Exportaciones CSV, XLSX, PDF preparado y JSON con auditoria.
+- Programaciones de reportes preparadas sin envio automatico externo.
+- Integracion de solo lectura con formulaciones, materias primas, documentos, costos, inventario, produccion, LIMS, calidad, compras, ventas, IA y auditoria.
+- UI ERP con graficas, filtros, panel lateral, drilldown basico y modo aprendizaje.
+
+Validacion documentada en `docs/31_Validacion_Incremento_13.md`.
 
 ## Fases posteriores
 
