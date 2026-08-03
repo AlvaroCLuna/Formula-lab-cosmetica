@@ -288,6 +288,32 @@ enum SalesOrderStatus {
   cerrado
 }
 
+enum AiRuleStatus {
+  borrador
+  en_revision
+  validada
+  rechazada
+  obsoleta
+  archivada
+}
+
+enum AiRuleSeverity {
+  informativa
+  baja
+  media
+  alta
+  critica
+}
+
+enum AiOutputType {
+  dato_documental
+  calculo
+  inferencia
+  sugerencia
+  alerta
+  informacion_insuficiente
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -393,6 +419,13 @@ model Organization {
   salesOrderItems SalesOrderItem[]
   salesDeliveries SalesDelivery[]
   salesSamples SalesSample[]
+  aiRules AiRule[]
+  aiRuleEvaluations AiRuleEvaluation[]
+  aiAlerts AiAlert[]
+  aiQueries AiQuery[]
+  aiResponses AiResponse[]
+  learningEvents LearningEvent[]
+  aiSourceConfigs AiSourceConfig[]
 
   @@map("organizations")
 }
@@ -467,6 +500,11 @@ model User {
   salesOrdersResponsible SalesOrder[] @relation("SalesOrderResponsible")
   salesDeliveriesResponsible SalesDelivery[] @relation("SalesDeliveryResponsible")
   salesSamplesResponsible SalesSample[] @relation("SalesSampleResponsible")
+  aiRulesResponsible AiRule[] @relation("AiRuleResponsible")
+  aiEvaluationsUser AiRuleEvaluation[] @relation("AiEvaluationUser")
+  aiQueriesUser AiQuery[] @relation("AiQueryUser")
+  aiLearningEventsUser LearningEvent[] @relation("AiLearningUser")
+  aiSourceConfigsResponsible AiSourceConfig[] @relation("AiSourceResponsible")
 
   @@index([organizationId])
   @@map("users")
@@ -556,6 +594,10 @@ model Document {
   salesOrdersDocuments SalesOrder[]
   salesDeliveriesDocuments SalesDelivery[]
   salesSamplesDocuments SalesSample[]
+  aiRulesEvidence AiRule[]
+  aiAlertsEvidence AiAlert[]
+  aiResponsesDocuments AiResponse[]
+  aiSourceConfigsDocuments AiSourceConfig[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -3128,4 +3170,189 @@ model SalesSample {
   @@index([organizationId])
   @@index([customerId])
   @@map("sales_samples")
+}
+
+model AiRule {
+  id String @id @default(uuid())
+  organizationId String? @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  description String @db.Text
+  ruleType String @map("rule_type")
+  conditionJson Json @map("condition_json")
+  severity AiRuleSeverity @default(media)
+  resultMessage String @db.Text @map("result_message")
+  source String @db.Text
+  evidenceDocumentId String? @map("evidence_document_id")
+  versionNumber Int @default(1) @map("version_number")
+  status AiRuleStatus @default(borrador)
+  responsibleUserId String @map("responsible_user_id")
+  validatedAt DateTime? @map("validated_at")
+  validFrom DateTime? @map("valid_from")
+  validUntil DateTime? @map("valid_until")
+  confidence Decimal @db.Decimal(8, 4) @default(0.8)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  responsible User @relation("AiRuleResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  evaluations AiRuleEvaluation[]
+  alerts AiAlert[]
+
+  @@index([organizationId])
+  @@index([ruleType])
+  @@index([status])
+  @@map("ai_rules")
+}
+
+model AiRuleEvaluation {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  ruleId String @map("rule_id")
+  entityType String @map("entity_type")
+  entityId String @map("entity_id")
+  result String
+  severity AiRuleSeverity
+  evidenceJson Json? @map("evidence_json")
+  evaluatedByUserId String? @map("evaluated_by_user_id")
+  ruleVersionNumber Int @map("rule_version_number")
+  evaluatedDataJson Json @map("evaluated_data_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  rule AiRule @relation(fields: [ruleId], references: [id])
+  evaluatedBy User? @relation("AiEvaluationUser", fields: [evaluatedByUserId], references: [id])
+  alerts AiAlert[]
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@map("ai_rule_evaluations")
+}
+
+model AiAlert {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  ruleId String? @map("rule_id")
+  evaluationId String? @map("evaluation_id")
+  entityType String @map("entity_type")
+  entityId String @map("entity_id")
+  detected String @db.Text
+  explanation String @db.Text
+  source String @db.Text
+  confidence Decimal @db.Decimal(8, 4)
+  severity AiRuleSeverity
+  suggestedAction String? @db.Text @map("suggested_action")
+  validationResponsible String? @map("validation_responsible")
+  outputType AiOutputType @default(alerta) @map("output_type")
+  status String @default("abierta")
+  evidenceDocumentId String? @map("evidence_document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  rule AiRule? @relation(fields: [ruleId], references: [id])
+  evaluation AiRuleEvaluation? @relation(fields: [evaluationId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([entityType, entityId])
+  @@map("ai_alerts")
+}
+
+model AiQuery {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  queryText String @db.Text @map("query_text")
+  moduleScope String? @map("module_scope")
+  entityType String? @map("entity_type")
+  entityId String? @map("entity_id")
+  userId String @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user User @relation("AiQueryUser", fields: [userId], references: [id])
+  response AiResponse?
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("ai_queries")
+}
+
+model AiResponse {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  queryId String @unique @map("query_id")
+  answer String @db.Text
+  sourcesJson Json @map("sources_json")
+  documentsJson Json? @map("documents_json")
+  fragmentsJson Json? @map("fragments_json")
+  confidence Decimal @db.Decimal(8, 4)
+  informationDate DateTime? @map("information_date")
+  warningsJson Json? @map("warnings_json")
+  validationStatus String @default("no_validada") @map("validation_status")
+  outputType AiOutputType @default(dato_documental) @map("output_type")
+  documentId String? @map("document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  query AiQuery @relation(fields: [queryId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+
+  @@index([organizationId])
+  @@map("ai_responses")
+}
+
+model LearningEvent {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  context String
+  inputJson Json @map("input_json")
+  proposedOutputJson Json? @map("proposed_output_json")
+  correctionJson Json? @map("correction_json")
+  userId String @map("user_id")
+  entityType String? @map("entity_type")
+  entityId String? @map("entity_id")
+  modelOrRule String? @map("model_or_rule")
+  reviewStatus String @default("pendiente") @map("review_status")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  user User @relation("AiLearningUser", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityType, entityId])
+  @@map("learning_events")
+}
+
+model AiSourceConfig {
+  id String @id @default(uuid())
+  organizationId String? @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  sourceType String @map("source_type")
+  author String?
+  sourceOrganization String? @map("source_organization")
+  sourceDate DateTime? @map("source_date")
+  validUntil DateTime? @map("valid_until")
+  confidence Decimal @db.Decimal(8, 4)
+  priority Int @default(5)
+  status String @default("activo")
+  responsibleUserId String @map("responsible_user_id")
+  lastReviewedAt DateTime? @map("last_reviewed_at")
+  provider String?
+  model String?
+  endpoint String?
+  limitsJson Json? @map("limits_json")
+  costPolicyJson Json? @map("cost_policy_json")
+  usagePolicy String? @db.Text @map("usage_policy")
+  environment String @default("demo")
+  documentId String? @map("document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  responsible User @relation("AiSourceResponsible", fields: [responsibleUserId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+
+  @@index([organizationId])
+  @@index([sourceType])
+  @@index([status])
+  @@map("ai_source_configs")
 }

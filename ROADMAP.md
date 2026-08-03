@@ -132,7 +132,7 @@ Compras y Abastecimiento:
 
 Validacion documentada en `docs/28_Validacion_Incremento_10.md`.
 
-## Incremento 11 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 11 - COMPLETADO Y APROBADO
 
 CRM, Ventas y Pedidos:
 
@@ -149,6 +149,22 @@ CRM, Ventas y Pedidos:
 - Dashboard ERP, pipeline Kanban, panel lateral y modo aprendizaje.
 
 Validacion documentada en `docs/29_Validacion_Incremento_11.md`.
+
+## Incremento 12 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+IA Responsable y Motor de Reglas:
+
+- Reglas estructuradas versionadas por tipo, condicion, severidad, fuente, evidencia y estado.
+- Evaluador reusable sobre entidades del ERP con registro de resultados.
+- Alertas explicables con regla, fuente, confianza, severidad y accion sugerida.
+- Asistente de consulta basado en datos registrados y fuentes KDE.
+- RAG logico preparado sobre documentos, chunks, OCR, relaciones y filtros de organizacion.
+- Respuestas con evidencia, advertencias, nivel de confianza y estado de validacion.
+- Eventos de aprendizaje por correcciones y rechazos, sin reentrenamiento automatico.
+- Configuracion de fuentes/proveedores IA sin claves reales ni secretos en frontend.
+- Dashboard de inteligencia y UI ERP con panel de evidencia.
+
+Validacion documentada en `docs/30_Validacion_Incremento_12.md`.
 
 ## Fases posteriores
 

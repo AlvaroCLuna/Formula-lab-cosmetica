@@ -1411,6 +1411,85 @@ async function main() {
       create: { id: `sales-sample-${index}`, organizationId: organization.id, permanentCode: `SAL-SMP-${String(index).padStart(6, "0")}`, productId: `sales-product-${index}`, finishedLotId: `prod-order-${index}-finished-lot`, quantity: 3 + index, unit: "pieza", customerId: `crm-customer-${index}`, contactId: `crm-contact-${index}`, sentAt: new Date(`2026-08-${String(index + 5).padStart(2, "0")}T11:00:00.000Z`), objective: "Enviar muestra comercial para validacion sensorial y tecnica.", cost: 120 + index * 20, followUp: "Dar seguimiento en 7 dias.", result: "Seguimiento demo registrado.", evidenceDocumentId: `kde-doc-${String(index + 44).padStart(3, "0")}`, responsibleUserId: "demo-user" }
     });
   }
+
+  const ruleTypes = ["compatibilidad", "incompatibilidad", "rango_uso", "ph", "temperatura", "orden_incorporacion", "restriccion_familia", "restriccion_producto", "alerta_documental", "alerta_calidad", "alerta_inventario", "alerta_costo", "alerta_produccion", "alerta_comercial"];
+  for (let index = 1; index <= 20; index += 1) {
+    const status = index <= 14 ? "validada" : index <= 17 ? "borrador" : index === 18 ? "en_revision" : index === 19 ? "rechazada" : "obsoleta";
+    const severity = index % 7 === 0 ? "critica" : index % 5 === 0 ? "alta" : index % 3 === 0 ? "media" : "baja";
+    await prisma.aiRule.upsert({
+      where: { id: `ai-rule-${index}` },
+      update: { status },
+      create: {
+        id: `ai-rule-${index}`,
+        organizationId: organization.id,
+        permanentCode: `AI-RUL-${String(index).padStart(6, "0")}`,
+        name: `Regla responsable demo ${index}`,
+        description: "Regla demo estructurada con fuente KDE y validacion humana requerida.",
+        ruleType: ruleTypes[(index - 1) % ruleTypes.length],
+        conditionJson: index % 4 === 0 ? { field: "status", operator: "in", value: ["cuarentena", "bloqueado", "rechazado"] } : index % 3 === 0 ? { field: "totalPercentage", operator: "neq", value: 100 } : index % 2 === 0 ? { field: "availableQuantity", operator: "lt", value: 10 } : { field: "evidenceDocumentId", operator: "missing" },
+        severity,
+        resultMessage: index % 2 === 0 ? "Se detecto condicion que requiere revision antes de continuar." : "Informacion insuficiente para evaluar sin evidencia documental.",
+        source: `Documento KDE demo ${index}; responsable tecnico demo.`,
+        evidenceDocumentId: `kde-doc-${String(((index - 1) % 50) + 1).padStart(3, "0")}`,
+        versionNumber: 1,
+        status,
+        responsibleUserId: "demo-user",
+        validatedAt: status === "validada" ? new Date("2026-08-03T00:00:00.000Z") : null,
+        validFrom: new Date("2026-08-01T00:00:00.000Z"),
+        validUntil: index === 20 ? new Date("2026-08-02T00:00:00.000Z") : new Date("2027-08-01T00:00:00.000Z"),
+        confidence: 0.7 + (index % 4) * 0.06
+      }
+    });
+  }
+
+  for (let index = 1; index <= 30; index += 1) {
+    const ruleIndex = ((index - 1) % 14) + 1;
+    const triggered = index % 3 === 0 || index % 5 === 0;
+    await prisma.aiRuleEvaluation.upsert({
+      where: { id: `ai-eval-${index}` },
+      update: { result: triggered ? "activada" : "sin_hallazgo" },
+      create: { id: `ai-eval-${index}`, organizationId: organization.id, permanentCode: `AI-EVL-${String(index).padStart(6, "0")}`, ruleId: `ai-rule-${ruleIndex}`, entityType: index % 2 === 0 ? "formulation_version" : "raw_material_lot", entityId: index % 2 === 0 ? approvedVersionForSales ?? "formulation-demo" : `lot-demo-${String(((index - 1) % 25) + 1).padStart(2, "0")}`, result: triggered ? "activada" : "sin_hallazgo", severity: index % 5 === 0 ? "alta" : "media", evidenceJson: { source: `kde-doc-${String(ruleIndex).padStart(3, "0")}`, reason: triggered ? "Condicion demo activada." : "Sin hallazgo demo." }, evaluatedByUserId: "demo-user", ruleVersionNumber: 1, evaluatedDataJson: { availableQuantity: index, status: index % 5 === 0 ? "cuarentena" : "aprobado", totalPercentage: index % 3 === 0 ? 98 : 100 } }
+    });
+  }
+
+  for (let index = 1; index <= 12; index += 1) {
+    await prisma.aiAlert.upsert({
+      where: { id: `ai-alert-${index}` },
+      update: { status: index % 4 === 0 ? "cerrada" : "abierta" },
+      create: { id: `ai-alert-${index}`, organizationId: organization.id, permanentCode: `AI-ALT-${String(index).padStart(6, "0")}`, ruleId: `ai-rule-${((index - 1) % 14) + 1}`, evaluationId: `ai-eval-${index}`, entityType: index % 2 === 0 ? "sales_order" : "raw_material_lot", entityId: index % 2 === 0 ? `sales-order-${((index - 1) % 5) + 1}` : `lot-demo-${String(index).padStart(2, "0")}`, detected: "Alerta demo explicable activada.", explanation: "La condicion estructurada coincidio con datos registrados; requiere validacion humana.", source: `kde-doc-${String(index).padStart(3, "0")}`, confidence: 0.72 + (index % 3) * 0.05, severity: index % 4 === 0 ? "critica" : "media", suggestedAction: "Revisar evidencia, validar responsable y documentar decision.", validationResponsible: "demo-user", outputType: index === 12 ? "informacion_insuficiente" : "alerta", status: index % 4 === 0 ? "cerrada" : "abierta", evidenceDocumentId: `kde-doc-${String(index).padStart(3, "0")}` }
+    });
+  }
+
+  for (let index = 1; index <= 15; index += 1) {
+    const insufficient = index % 5 === 0;
+    await prisma.aiQuery.upsert({
+      where: { id: `ai-query-${index}` },
+      update: { queryText: insufficient ? "Pregunta demo sin evidencia suficiente" : "En que formulaciones se usa SCI" },
+      create: { id: `ai-query-${index}`, organizationId: organization.id, permanentCode: `AI-QRY-${String(index).padStart(6, "0")}`, queryText: insufficient ? "Pregunta demo sin evidencia suficiente" : "En que formulaciones se usa SCI", moduleScope: index % 2 === 0 ? "formulaciones" : "documentos", entityType: index % 3 === 0 ? "raw_material_master" : null, entityId: index % 3 === 0 ? "rm-sci" : null, userId: "demo-user" }
+    });
+    await prisma.aiResponse.upsert({
+      where: { id: `ai-response-${index}` },
+      update: { validationStatus: "no_validada" },
+      create: { id: `ai-response-${index}`, organizationId: organization.id, permanentCode: `AI-RSP-${String(index).padStart(6, "0")}`, queryId: `ai-query-${index}`, answer: insufficient ? "Información insuficiente para evaluar" : "Respuesta demo basada en documentos, materias primas y relaciones registradas.", sourcesJson: insufficient ? [] : [{ type: "documento", id: `kde-doc-${String(index).padStart(3, "0")}`, title: "Documento demo", validationStatus: "procesado" }], documentsJson: insufficient ? [] : [{ id: `kde-doc-${String(index).padStart(3, "0")}`, name: "Documento demo" }], fragmentsJson: insufficient ? [] : [{ documentId: `kde-doc-${String(index).padStart(3, "0")}`, reference: "fragmento demo", text: "Fragmento demo de evidencia." }], confidence: insufficient ? 0.2 : 0.78, informationDate: new Date("2026-08-03T00:00:00.000Z"), warningsJson: insufficient ? ["No hay evidencia suficiente."] : ["Respuesta no validada automaticamente."], validationStatus: "no_validada", outputType: insufficient ? "informacion_insuficiente" : "dato_documental", documentId: insufficient ? null : `kde-doc-${String(index).padStart(3, "0")}` }
+    });
+  }
+
+  for (let index = 1; index <= 10; index += 1) {
+    await prisma.learningEvent.upsert({
+      where: { id: `ai-learning-${index}` },
+      update: { reviewStatus: index % 3 === 0 ? "revisado" : "pendiente" },
+      create: { id: `ai-learning-${index}`, organizationId: organization.id, permanentCode: `AI-LRN-${String(index).padStart(6, "0")}`, context: ["correccion_campo", "rechazo_sugerencia", "validacion_respuesta", "correccion_relacion"][index % 4], inputJson: { original: "dato demo" }, proposedOutputJson: { propuesta: "salida demo" }, correctionJson: { correccion: "ajuste humano documentado" }, userId: "demo-user", entityType: index % 2 === 0 ? "ai_response" : "extracted_value", entityId: index % 2 === 0 ? `ai-response-${index}` : `value-demo-${index}`, modelOrRule: `ai-rule-${((index - 1) % 10) + 1}`, reviewStatus: index % 3 === 0 ? "revisado" : "pendiente" }
+    });
+  }
+
+  const sourceTypes = ["norma_vigente", "fabricante", "metodo_validado", "interno_aprobado", "articulo_cientifico", "proveedor", "material_comercial", "no_validado", "proveedor_ia", "rag_logico"];
+  for (let index = 1; index <= 10; index += 1) {
+    await prisma.aiSourceConfig.upsert({
+      where: { id: `ai-source-${index}` },
+      update: { status: index === 8 ? "observacion" : "activo" },
+      create: { id: `ai-source-${index}`, organizationId: organization.id, permanentCode: `AI-SRC-${String(index).padStart(6, "0")}`, sourceType: sourceTypes[index - 1], author: index === 9 ? "Proveedor configurable" : "Autor demo", sourceOrganization: index === 1 ? "Norma vigente demo" : "Formula Lab Demo", sourceDate: new Date("2026-08-01T00:00:00.000Z"), validUntil: index === 8 ? new Date("2026-08-02T00:00:00.000Z") : new Date("2027-08-01T00:00:00.000Z"), confidence: 0.55 + index * 0.04, priority: index, status: index === 8 ? "observacion" : "activo", responsibleUserId: "demo-user", lastReviewedAt: new Date("2026-08-03T00:00:00.000Z"), provider: index === 9 ? "configurable" : null, model: index === 9 ? "sin_clave_demo" : null, endpoint: index === 9 ? "configurado_por_entorno" : null, limitsJson: index === 9 ? { dailyQueries: 100 } : null, costPolicyJson: index === 9 ? { mode: "preparado" } : null, usagePolicy: "No guardar claves en frontend ni repositorio. No responder sin evidencia tecnica.", environment: "demo", documentId: `kde-doc-${String(index).padStart(3, "0")}` }
+    });
+  }
 }
 
 main()

@@ -518,5 +518,38 @@ export const api = {
   },
   async listSalesSamples() {
     return request<{ samples: any[] }>("/sales/samples");
+  },
+  async aiDashboard() {
+    return request<any>("/ai/dashboard");
+  },
+  async listAiRules() {
+    return request<{ rules: any[] }>("/ai/rules");
+  },
+  async createAiRule(input: Record<string, unknown>) {
+    return request<{ rule: any }>("/ai/rules", { method: "POST", body: JSON.stringify(input) });
+  },
+  async evaluateAiRules(input: Record<string, unknown>) {
+    return request<{ results: any[] }>("/ai/evaluate", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listAiAlerts() {
+    return request<{ alerts: any[] }>("/ai/alerts");
+  },
+  async askAi(input: Record<string, unknown>) {
+    return request<any>("/ai/ask", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listAiQueries() {
+    return request<{ queries: any[] }>("/ai/queries");
+  },
+  async listAiResponses() {
+    return request<{ responses: any[] }>("/ai/responses");
+  },
+  async listLearningEvents() {
+    return request<{ events: any[] }>("/ai/learning-events");
+  },
+  async createLearningEvent(input: Record<string, unknown>) {
+    return request<{ event: any }>("/ai/learning-events", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listAiSources() {
+    return request<{ sources: any[] }>("/ai/sources");
   }
 };

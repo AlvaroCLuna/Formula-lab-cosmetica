@@ -22,6 +22,7 @@ const viewCopy: Record<string, { title: string; search: string }> = {
   costos: { title: "Motor de Costos", search: "Buscar escenarios, proveedores o precios" },
   compras: { title: "Compras y Abastecimiento", search: "Buscar solicitudes, cotizaciones, OC o proveedores" },
   ventas: { title: "CRM, Ventas y Pedidos", search: "Buscar clientes, oportunidades, cotizaciones o pedidos" },
+  ia: { title: "IA Responsable y Motor de Reglas", search: "Buscar reglas, alertas, fuentes o consultas" },
   inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" },
   produccion: { title: "Laboratorio y Produccion", search: "Buscar ordenes, lotes o formulaciones" },
   lims: { title: "LIMS", search: "Buscar proyectos, muestras, ensayos o instrumentos" },

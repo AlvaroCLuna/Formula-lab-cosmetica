@@ -306,13 +306,90 @@
   color: var(--muted);
 }
 
+.ai-page {
+  display: grid;
+  gap: 18px;
+}
+
+.ai-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 540px);
+  gap: 18px;
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.ai-hero p,
+.ai-answer {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.ai-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ai-kpis span {
+  display: grid;
+  gap: 5px;
+  min-height: 94px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.ai-kpis strong {
+  font-size: 22px;
+}
+
+.ai-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 18px;
+}
+
+.ai-main {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  align-content: start;
+}
+
+.ai-console {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.ai-console label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.ai-console textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
 @media (max-width: 1050px) {
   .quality-hero,
   .quality-layout,
   .purchases-hero,
   .purchases-layout,
   .sales-hero,
-  .sales-layout {
+  .sales-layout,
+  .ai-hero,
+  .ai-layout {
     grid-template-columns: 1fr;
   }
 
@@ -329,7 +406,9 @@
   .purchases-main,
   .sales-kpis,
   .sales-main,
-  .sales-pipeline {
+  .sales-pipeline,
+  .ai-kpis,
+  .ai-main {
     grid-template-columns: 1fr;
   }
 
@@ -337,7 +416,8 @@
   .quality-side,
   .quality-hero,
   .purchases-hero,
-  .sales-hero {
+  .sales-hero,
+  .ai-hero {
     overflow-wrap: anywhere;
   }
 }

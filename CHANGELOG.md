@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.12.0 - Incremento 12 implementado
+
+- Se implemento IA Responsable y Motor de Reglas con reglas versionadas, evaluaciones, alertas explicables, consultas, respuestas con evidencia, eventos de aprendizaje y fuentes/proveedores configurables.
+- Se agregaron modelos Prisma, migracion MySQL, SQL espejo, APIs, validaciones, seed y pruebas.
+- Se integro la capa IA con KDE, documentos, materias primas, formulaciones, inventario, calidad, costos, compras, CRM y auditoria mediante consultas y referencias trazables.
+- Se agrego evaluador estructurado que solo usa reglas validadas y registra entidad, regla, severidad, evidencia, version y datos evaluados.
+- Se agrego recuperacion logica sobre documentos, chunks, OCR y entidades registradas sin embeddings externos ni claves en frontend.
+- Se agrego UI ERP de IA con centro de consultas, panel de evidencia, semaforos de confianza, alertas explicables, fuentes, historial y modo aprendizaje.
+- Se agregaron datos demo con 20 reglas, 30+ evaluaciones, 12+ alertas, 15+ consultas/respuestas, 10 eventos de aprendizaje y fuentes con confiabilidad.
+- Se documento la validacion en `docs/30_Validacion_Incremento_12.md` con Flowchart y ER Diagram Mermaid.
+
 ## 0.11.0 - Incremento 11 implementado
 
 - Se implemento CRM, Ventas y Pedidos con prospectos, clientes, contactos, actividades, oportunidades, productos vendibles, listas de precios, cotizaciones, aprobaciones, pedidos, entregas y muestras comerciales.

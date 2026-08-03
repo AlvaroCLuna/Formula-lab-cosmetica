@@ -173,7 +173,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 11 - CRM, Ventas y Pedidos
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Prospectos implementados.
 - Clientes implementados mediante conversion de prospectos sin duplicar informacion.
@@ -191,7 +191,25 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - UI ERP moderna con dashboard, Kanban, perfil 360, cotizador guiado y modo aprendizaje implementada.
 - Seeds y pruebas agregadas.
 - Validacion documentada con Flowchart y ER Diagram Mermaid.
-- Pendiente: aprobacion formal antes de iniciar Incremento 12.
+
+## Incremento 12 - IA Responsable y Motor de Reglas
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Reglas estructuradas versionadas implementadas.
+- Evaluador de reglas implementado.
+- Alertas explicables implementadas.
+- Asistente de consulta interno implementado con evidencia.
+- RAG logico preparado sobre documentos, chunks y OCR.
+- Respuestas con fuentes, confianza, advertencias y estado de validacion implementadas.
+- Tipos de salida diferenciados implementados.
+- Asistentes de formulacion, laboratorio/calidad y operativo preparados por alcance de consulta y reglas.
+- Eventos de aprendizaje implementados sin reentrenamiento automatico.
+- Confiabilidad de fuentes y proveedores IA configurables implementados sin secretos.
+- Dashboard y UI ERP de inteligencia implementados.
+- Seeds y pruebas agregadas.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
+- Pendiente: aprobacion formal antes de iniciar Incremento 13.
 
 ## Pendiente para fases posteriores
 
