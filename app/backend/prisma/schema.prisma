@@ -209,6 +209,39 @@ enum QualityDecision {
   rechazar
 }
 
+enum PurchaseRequestStatus {
+  borrador
+  enviada
+  en_revision
+  aprobada
+  rechazada
+  convertida
+  cancelada
+  cerrada
+}
+
+enum PurchaseOrderStatus {
+  borrador
+  pendiente_aprobacion
+  aprobada
+  enviada
+  confirmada
+  parcialmente_recibida
+  recibida
+  cerrada
+  cancelada
+}
+
+enum PurchaseRfqStatus {
+  borrador
+  enviada
+  respondida_parcialmente
+  respondida
+  vencida
+  cancelada
+  cerrada
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -286,6 +319,20 @@ model Organization {
   qualityCapaActions QualityCapaAction[]
   qualityDispositions QualityDisposition[]
   qualityReports QualityReport[]
+  purchaseRequests PurchaseRequest[]
+  purchaseRequestItems PurchaseRequestItem[]
+  purchaseRequisitions PurchaseRequisition[]
+  purchaseRequisitionItems PurchaseRequisitionItem[]
+  purchaseRfqs PurchaseRfq[]
+  purchaseQuotes PurchaseQuote[]
+  purchaseComparisons PurchaseComparison[]
+  purchaseOrders PurchaseOrder[]
+  purchaseOrderItems PurchaseOrderItem[]
+  purchaseApprovals PurchaseApproval[]
+  purchaseReceipts PurchaseReceipt[]
+  purchaseReturns PurchaseReturn[]
+  supplierEvaluations SupplierEvaluation[]
+  supplySuggestions SupplySuggestion[]
 
   @@map("organizations")
 }
@@ -345,6 +392,13 @@ model User {
   qualityCapaActionsResponsible QualityCapaAction[] @relation("QualityCapaResponsible")
   qualityDispositionsResponsible QualityDisposition[] @relation("QualityDispositionResponsible")
   qualityReportsCreated QualityReport[] @relation("QualityReportCreatedBy")
+  purchaseRequestsRequested PurchaseRequest[] @relation("PurchaseRequester")
+  purchaseRequisitionsResponsible PurchaseRequisition[] @relation("PurchaseRequisitionResponsible")
+  purchaseOrdersResponsible PurchaseOrder[] @relation("PurchaseOrderResponsible")
+  purchaseApprovals PurchaseApproval[] @relation("PurchaseApprovalApprover")
+  purchaseReceiptsResponsible PurchaseReceipt[] @relation("PurchaseReceiptResponsible")
+  purchaseReturnsResponsible PurchaseReturn[] @relation("PurchaseReturnResponsible")
+  supplierEvaluationsResponsible SupplierEvaluation[] @relation("SupplierEvaluationResponsible")
 
   @@index([organizationId])
   @@map("users")
@@ -420,6 +474,12 @@ model Document {
   qualityCapaEvidence QualityCapaAction[]
   qualityDispositionsEvidence QualityDisposition[]
   qualityReportsDocuments QualityReport[]
+  purchaseRequestsDocuments PurchaseRequest[]
+  purchaseRfqsDocuments PurchaseRfq[]
+  purchaseQuotesDocuments PurchaseQuote[]
+  purchaseOrdersDocuments PurchaseOrder[]
+  purchaseReceiptsDocuments PurchaseReceipt[]
+  purchaseReturnsDocuments PurchaseReturn[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -2246,4 +2306,347 @@ model QualityReport {
   @@index([organizationId])
   @@index([entityType, entityId])
   @@map("quality_reports")
+}
+
+model PurchaseRequest {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  origin String
+  requesterUserId String @map("requester_user_id")
+  area String
+  priority ProductionPriority @default(media)
+  requiredDate DateTime? @map("required_date")
+  reason String @db.Text
+  status PurchaseRequestStatus @default(borrador)
+  observations String? @db.Text
+  documentId String? @map("document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  requester User @relation("PurchaseRequester", fields: [requesterUserId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  items PurchaseRequestItem[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("purchase_requests")
+}
+
+model PurchaseRequestItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  requestId String @map("request_id")
+  rawMaterialMasterId String? @map("raw_material_master_id")
+  commercialProductId String? @map("commercial_product_id")
+  itemName String @map("item_name")
+  quantity Decimal @db.Decimal(12, 3)
+  unit String
+  specifications String? @db.Text
+  status String @default("activo")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  request PurchaseRequest @relation(fields: [requestId], references: [id])
+
+  @@index([organizationId])
+  @@index([requestId])
+  @@map("purchase_request_items")
+}
+
+model PurchaseRequisition {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  responsibleUserId String @map("responsible_user_id")
+  priority ProductionPriority @default(media)
+  targetDate DateTime? @map("target_date")
+  suggestedSuppliersJson Json? @map("suggested_suppliers_json")
+  estimatedBudget Decimal? @db.Decimal(14, 2) @map("estimated_budget")
+  status PurchaseRequestStatus @default(en_revision)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("PurchaseRequisitionResponsible", fields: [responsibleUserId], references: [id])
+  items PurchaseRequisitionItem[]
+  rfqs PurchaseRfq[]
+  orders PurchaseOrder[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("purchase_requisitions")
+}
+
+model PurchaseRequisitionItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  requisitionId String @map("requisition_id")
+  requestItemId String? @map("request_item_id")
+  itemName String @map("item_name")
+  quantity Decimal @db.Decimal(12, 3)
+  unit String
+  targetDate DateTime? @map("target_date")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  requisition PurchaseRequisition @relation(fields: [requisitionId], references: [id])
+
+  @@index([organizationId])
+  @@index([requisitionId])
+  @@map("purchase_requisition_items")
+}
+
+model PurchaseRfq {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  requisitionId String? @map("requisition_id")
+  supplierNamesJson Json @map("supplier_names_json")
+  itemsJson Json @map("items_json")
+  currency String @default("MXN")
+  deliveryTerms String? @map("delivery_terms")
+  deadline DateTime? 
+  terms String? @db.Text
+  observations String? @db.Text
+  documentId String? @map("document_id")
+  status PurchaseRfqStatus @default(borrador)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  requisition PurchaseRequisition? @relation(fields: [requisitionId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  quotes PurchaseQuote[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("purchase_rfqs")
+}
+
+model PurchaseQuote {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  rfqId String? @map("rfq_id")
+  supplierId String? @map("supplier_id")
+  supplierName String @map("supplier_name")
+  commercialProductId String? @map("commercial_product_id")
+  manufacturerName String? @map("manufacturer_name")
+  presentation String?
+  quantity Decimal @db.Decimal(12, 3)
+  unitPrice Decimal @db.Decimal(14, 4) @map("unit_price")
+  taxRate Decimal? @db.Decimal(8, 4) @map("tax_rate")
+  shippingCost Decimal? @db.Decimal(14, 2) @map("shipping_cost")
+  currency String @default("MXN")
+  exchangeRate Decimal? @db.Decimal(12, 4) @map("exchange_rate")
+  minimumPurchase Decimal? @db.Decimal(12, 3) @map("minimum_purchase")
+  validUntil DateTime? @map("valid_until")
+  leadTimeDays Int? @map("lead_time_days")
+  paymentTerms String? @map("payment_terms")
+  availability String?
+  documentId String? @map("document_id")
+  observations String? @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  rfq PurchaseRfq? @relation(fields: [rfqId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  comparisons PurchaseComparison[]
+  orders PurchaseOrder[]
+
+  @@index([organizationId])
+  @@index([supplierName])
+  @@map("purchase_quotes")
+}
+
+model PurchaseComparison {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  quoteId String @map("quote_id")
+  criteriaJson Json @map("criteria_json")
+  normalizedCost Decimal @db.Decimal(14, 4) @map("normalized_cost")
+  totalAcquisitionCost Decimal @db.Decimal(14, 2) @map("total_acquisition_cost")
+  qualityScore Decimal? @db.Decimal(8, 2) @map("quality_score")
+  selected Boolean @default(false)
+  selectionReason String? @db.Text @map("selection_reason")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  quote PurchaseQuote @relation(fields: [quoteId], references: [id])
+
+  @@index([organizationId])
+  @@index([selected])
+  @@map("purchase_comparisons")
+}
+
+model PurchaseOrder {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  supplierName String @map("supplier_name")
+  requisitionId String? @map("requisition_id")
+  quoteId String? @map("quote_id")
+  currency String @default("MXN")
+  exchangeRate Decimal? @db.Decimal(12, 4) @map("exchange_rate")
+  subtotal Decimal @db.Decimal(14, 2)
+  taxTotal Decimal @db.Decimal(14, 2) @map("tax_total")
+  shippingTotal Decimal @db.Decimal(14, 2) @map("shipping_total")
+  discountTotal Decimal @db.Decimal(14, 2) @default(0) @map("discount_total")
+  total Decimal @db.Decimal(14, 2)
+  terms String? @db.Text
+  promisedDate DateTime? @map("promised_date")
+  status PurchaseOrderStatus @default(borrador)
+  responsibleUserId String @map("responsible_user_id")
+  documentId String? @map("document_id")
+  closeJustification String? @db.Text @map("close_justification")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  requisition PurchaseRequisition? @relation(fields: [requisitionId], references: [id])
+  quote PurchaseQuote? @relation(fields: [quoteId], references: [id])
+  responsible User @relation("PurchaseOrderResponsible", fields: [responsibleUserId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  items PurchaseOrderItem[]
+  approvals PurchaseApproval[]
+  receipts PurchaseReceipt[]
+  returns PurchaseReturn[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  orderId String @map("order_id")
+  commercialProductId String? @map("commercial_product_id")
+  rawMaterialMasterId String? @map("raw_material_master_id")
+  itemName String @map("item_name")
+  quantityOrdered Decimal @db.Decimal(12, 3) @map("quantity_ordered")
+  quantityReceived Decimal @db.Decimal(12, 3) @default(0) @map("quantity_received")
+  unit String
+  unitPrice Decimal @db.Decimal(14, 4) @map("unit_price")
+  taxRate Decimal? @db.Decimal(8, 4) @map("tax_rate")
+  lineTotal Decimal @db.Decimal(14, 2) @map("line_total")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order PurchaseOrder @relation(fields: [orderId], references: [id])
+  receipts PurchaseReceipt[]
+
+  @@index([organizationId])
+  @@index([orderId])
+  @@map("purchase_order_items")
+}
+
+model PurchaseApproval {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  orderId String @map("order_id")
+  approverUserId String @map("approver_user_id")
+  decision String
+  comment String? @db.Text
+  level Int @default(1)
+  evidenceDocumentId String? @map("evidence_document_id")
+  decidedAt DateTime @default(now()) @map("decided_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order PurchaseOrder @relation(fields: [orderId], references: [id])
+  approver User @relation("PurchaseApprovalApprover", fields: [approverUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([orderId])
+  @@map("purchase_approvals")
+}
+
+model PurchaseReceipt {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  orderId String @map("order_id")
+  orderItemId String? @map("order_item_id")
+  expectedQuantity Decimal @db.Decimal(12, 3) @map("expected_quantity")
+  receivedQuantity Decimal @db.Decimal(12, 3) @map("received_quantity")
+  differenceQuantity Decimal @db.Decimal(12, 3) @map("difference_quantity")
+  supplierLotCode String? @map("supplier_lot_code")
+  receivedAt DateTime @default(now()) @map("received_at")
+  remision String?
+  invoice String?
+  packageStatus String? @map("package_status")
+  initialStatus String @default("cuarentena") @map("initial_status")
+  observations String? @db.Text
+  documentId String? @map("document_id")
+  inventoryLotId String? @map("inventory_lot_id")
+  inventoryMovementId String? @map("inventory_movement_id")
+  qualityInspectionId String? @map("quality_inspection_id")
+  responsibleUserId String @map("responsible_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order PurchaseOrder @relation(fields: [orderId], references: [id])
+  orderItem PurchaseOrderItem? @relation(fields: [orderItemId], references: [id])
+  responsible User @relation("PurchaseReceiptResponsible", fields: [responsibleUserId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+
+  @@index([organizationId])
+  @@index([orderId])
+  @@map("purchase_receipts")
+}
+
+model PurchaseReturn {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  orderId String? @map("order_id")
+  lotId String? @map("lot_id")
+  reason String @db.Text
+  quantity Decimal @db.Decimal(12, 3)
+  unit String
+  evidenceDocumentId String? @map("evidence_document_id")
+  responsibleUserId String @map("responsible_user_id")
+  disposition String
+  status String @default("registrada")
+  inventoryMovementId String? @map("inventory_movement_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order PurchaseOrder? @relation(fields: [orderId], references: [id])
+  responsible User @relation("PurchaseReturnResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+
+  @@index([organizationId])
+  @@index([orderId])
+  @@map("purchase_returns")
+}
+
+model SupplierEvaluation {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  supplierName String @map("supplier_name")
+  lotsReceived Int @default(0) @map("lots_received")
+  lotsApproved Int @default(0) @map("lots_approved")
+  lotsRejected Int @default(0) @map("lots_rejected")
+  incompleteDocuments Int @default(0) @map("incomplete_documents")
+  incidents Int @default(0)
+  responseTimeDays Decimal? @db.Decimal(8, 2) @map("response_time_days")
+  priceVariation Decimal? @db.Decimal(8, 2) @map("price_variation")
+  score Decimal @db.Decimal(8, 2)
+  trend String @default("estable")
+  responsibleUserId String @map("responsible_user_id")
+  evaluatedAt DateTime @default(now()) @map("evaluated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("SupplierEvaluationResponsible", fields: [responsibleUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([supplierName])
+  @@map("supplier_evaluations")
+}
+
+model SupplySuggestion {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  rawMaterialMasterId String? @map("raw_material_master_id")
+  itemName String @map("item_name")
+  availableQuantity Decimal @db.Decimal(12, 3) @map("available_quantity")
+  reservedQuantity Decimal @db.Decimal(12, 3) @map("reserved_quantity")
+  reorderPoint Decimal @db.Decimal(12, 3) @map("reorder_point")
+  suggestedQuantity Decimal @db.Decimal(12, 3) @map("suggested_quantity")
+  reason String @db.Text
+  status String @default("sugerida")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@map("supply_suggestions")
 }

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.10.0 - Incremento 10 implementado
+
+- Se implemento Compras y Abastecimiento con solicitudes, requisiciones, RFQ, cotizaciones, comparativas, ordenes de compra, aprobaciones, recepciones, devoluciones, evaluaciones de proveedores y sugerencias.
+- Se agregaron modelos Prisma, migracion MySQL, SQL espejo, APIs, validaciones, seed y pruebas.
+- Se integro Compras con materias primas maestras, productos comerciales, proveedores, Motor de Costos, Inventario, Calidad, KDE y auditoria.
+- Se agregaron reglas para impedir OC sin proveedor/renglones, recepciones superiores al pendiente sin autorizacion y sobrescritura de cotizaciones/precios.
+- Se agrego UI ERP de Compras con dashboard, panel lateral, acciones guiadas, alertas y modo aprendizaje.
+- Se agregaron datos demo con 8 solicitudes, 4 requisiciones, 4 RFQ, 10 cotizaciones, 4 comparativas, 5 OC, 4 recepciones, 1 devolucion y 3 evaluaciones de proveedor.
+- Se documento la validacion en `docs/28_Validacion_Incremento_10.md` con Flowchart y ER Diagram Mermaid.
+
 ## 0.9.0 - Incremento 9 implementado
 
 - Se implemento Control de Calidad con especificaciones versionadas, planes de muestreo, inspecciones, liberaciones, desviaciones, no conformidades, CAPA y disposiciones.

@@ -413,5 +413,47 @@ export const api = {
   },
   async archiveRawMaterial(id: string) {
     return request<{ rawMaterial: RawMaterialMaster }>(`/raw-materials/${id}/archive`, { method: "POST" });
+  },
+  async purchasesDashboard() {
+    return request<any>("/purchases/dashboard");
+  },
+  async listPurchaseRequests() {
+    return request<{ requests: any[] }>("/purchases/requests");
+  },
+  async createPurchaseRequest(input: Record<string, unknown>) {
+    return request<{ request: any }>("/purchases/requests", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listPurchaseQuotes() {
+    return request<{ quotes: any[] }>("/purchases/quotes");
+  },
+  async createPurchaseQuote(input: Record<string, unknown>) {
+    return request<{ quote: any }>("/purchases/quotes", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listPurchaseOrders() {
+    return request<{ orders: any[] }>("/purchases/orders");
+  },
+  async createPurchaseOrder(input: Record<string, unknown>) {
+    return request<{ order: any }>("/purchases/orders", { method: "POST", body: JSON.stringify(input) });
+  },
+  async approvePurchaseOrder(id: string, input: Record<string, unknown>) {
+    return request<any>(`/purchases/orders/${id}/approve`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async listPurchaseReceipts() {
+    return request<{ receipts: any[] }>("/purchases/receipts");
+  },
+  async createPurchaseReceipt(input: Record<string, unknown>) {
+    return request<any>("/purchases/receipts", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listPurchaseReturns() {
+    return request<{ returns: any[] }>("/purchases/returns");
+  },
+  async createPurchaseReturn(input: Record<string, unknown>) {
+    return request<any>("/purchases/returns", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listSupplierEvaluations() {
+    return request<{ evaluations: any[] }>("/purchases/supplier-evaluations");
+  },
+  async listSupplySuggestions() {
+    return request<{ suggestions: any[] }>("/purchases/suggestions");
   }
 };

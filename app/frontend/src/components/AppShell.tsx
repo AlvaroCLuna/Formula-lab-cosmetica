@@ -20,6 +20,7 @@ const viewCopy: Record<string, { title: string; search: string }> = {
   formulaciones: { title: "Gestor de Formulaciones", search: "Buscar formulaciones, versiones o ingredientes" },
   materias: { title: "Materias Primas Maestras", search: "Buscar materias primas, INCI o funciones" },
   costos: { title: "Motor de Costos", search: "Buscar escenarios, proveedores o precios" },
+  compras: { title: "Compras y Abastecimiento", search: "Buscar solicitudes, cotizaciones, OC o proveedores" },
   inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" },
   produccion: { title: "Laboratorio y Produccion", search: "Buscar ordenes, lotes o formulaciones" },
   lims: { title: "LIMS", search: "Buscar proyectos, muestras, ensayos o instrumentos" },

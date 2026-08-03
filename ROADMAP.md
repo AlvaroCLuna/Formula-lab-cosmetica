@@ -101,7 +101,7 @@ LIMS - Laboratory Information Management System:
 
 Validacion documentada en `docs/26_Validacion_Incremento_8.md`.
 
-## Incremento 9 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 9 - COMPLETADO Y APROBADO
 
 Control de Calidad:
 
@@ -116,6 +116,22 @@ Control de Calidad:
 
 Validacion documentada en `docs/27_Validacion_Incremento_9.md`.
 
+## Incremento 10 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+Compras y Abastecimiento:
+
+- Solicitudes de compra con origen, prioridad, responsable, renglones y evidencia.
+- Requisiciones y RFQ para comparar proveedores y condiciones.
+- Cotizaciones historicas sin sobrescritura y relacionadas con productos comerciales.
+- Comparativas con criterio y motivo de seleccion.
+- Ordenes de compra con aprobacion, moneda MXN/USD, importes y documentos.
+- Recepcion contra OC con soporte parcial, cuarentena inicial y trazabilidad a inventario/calidad.
+- Devoluciones a proveedor con movimiento de inventario preparado.
+- Evaluacion de proveedores y sugerencias de abastecimiento.
+- Dashboard ERP, panel lateral, alertas, acciones guiadas y modo aprendizaje.
+
+Validacion documentada en `docs/28_Validacion_Incremento_10.md`.
+
 ## Fases posteriores
 
 - Registro completo de usuarios.
@@ -126,7 +142,7 @@ Validacion documentada en `docs/27_Validacion_Incremento_9.md`.
 - Sincronizacion en tiempo real.
 - APK Android.
 - Laboratorio guiado con reglas estructuradas.
-- Compras completas.
+- Compras avanzadas.
 - Planificacion avanzada MRP.
 - Produccion avanzada.
 - Facturacion.

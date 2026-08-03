@@ -1166,6 +1166,131 @@ async function main() {
     });
   }
   await prisma.qualityNonConformity.update({ where: { id: "qlt-ncf-4" }, data: { dispositionId: "qlt-dsp-4", status: "cerrada" } });
+
+  const purchaseSuppliers = ["Proveedor Demo Norte", "Proveedor Demo Sur", "Proveedor Especialidades USD"];
+  for (let index = 1; index <= 8; index += 1) {
+    const material = rawMaterials[(index - 1) % rawMaterials.length];
+    await prisma.purchaseRequest.upsert({
+      where: { id: `pur-req-${index}` },
+      update: { status: index > 6 ? "aprobada" : "enviada" },
+      create: {
+        id: `pur-req-${index}`,
+        organizationId: organization.id,
+        permanentCode: `PUR-REQ-${String(index).padStart(5, "0")}`,
+        origin: index % 2 === 0 ? "inventario" : "produccion",
+        requesterUserId: "demo-user",
+        area: index % 2 === 0 ? "Almacen" : "Laboratorio",
+        priority: index % 3 === 0 ? "alta" : "media",
+        requiredDate: new Date(`2026-09-${String(index + 3).padStart(2, "0")}T00:00:00.000Z`),
+        reason: `Solicitud demo para reabastecer ${material.commonName}.`,
+        status: index > 6 ? "aprobada" : "enviada",
+        observations: "Solicitud demo creada para Incremento 10.",
+        documentId: `kde-doc-${String(index).padStart(3, "0")}`
+      }
+    });
+    await prisma.purchaseRequestItem.upsert({
+      where: { id: `pur-req-${index}-item` },
+      update: { quantity: 1 + index },
+      create: { id: `pur-req-${index}-item`, organizationId: organization.id, requestId: `pur-req-${index}`, rawMaterialMasterId: material.id, commercialProductId: `${material.id}-product`, itemName: material.commonName, quantity: 1 + index, unit: "kg", specifications: "Grado cosmetico con COA, SDS y TDS disponibles." }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    const material = rawMaterials[(index + 3) % rawMaterials.length];
+    await prisma.purchaseRequisition.upsert({
+      where: { id: `pur-rqn-${index}` },
+      update: { status: index === 4 ? "convertida" : "aprobada" },
+      create: { id: `pur-rqn-${index}`, organizationId: organization.id, permanentCode: `PUR-RQN-${String(index).padStart(5, "0")}`, responsibleUserId: "demo-user", priority: index === 1 ? "alta" : "media", targetDate: new Date(`2026-09-${String(index + 8).padStart(2, "0")}T00:00:00.000Z`), suggestedSuppliersJson: purchaseSuppliers, estimatedBudget: 2500 + index * 600, status: index === 4 ? "convertida" : "aprobada" }
+    });
+    await prisma.purchaseRequisitionItem.upsert({
+      where: { id: `pur-rqn-${index}-item` },
+      update: { quantity: 5 + index },
+      create: { id: `pur-rqn-${index}-item`, organizationId: organization.id, requisitionId: `pur-rqn-${index}`, requestItemId: `pur-req-${index}-item`, itemName: material.commonName, quantity: 5 + index, unit: "kg", targetDate: new Date(`2026-09-${String(index + 10).padStart(2, "0")}T00:00:00.000Z`) }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    await prisma.purchaseRfq.upsert({
+      where: { id: `pur-rfq-${index}` },
+      update: { status: index === 4 ? "respondida_parcialmente" : "respondida" },
+      create: { id: `pur-rfq-${index}`, organizationId: organization.id, permanentCode: `PUR-RFQ-${String(index).padStart(5, "0")}`, requisitionId: `pur-rqn-${index}`, supplierNamesJson: purchaseSuppliers, itemsJson: [{ itemName: rawMaterials[index].commonName, quantity: 5 + index, unit: "kg" }], currency: index === 3 ? "USD" : "MXN", deliveryTerms: "Entrega en almacen principal con documentos completos.", deadline: new Date(`2026-08-${String(index + 15).padStart(2, "0")}T00:00:00.000Z`), terms: "Cotizar precio, vigencia, minimo de compra y tiempo de entrega.", observations: "RFQ demo Incremento 10.", documentId: `kde-doc-${String(index + 5).padStart(3, "0")}`, status: index === 4 ? "respondida_parcialmente" : "respondida" }
+    });
+  }
+
+  for (let index = 1; index <= 10; index += 1) {
+    const material = rawMaterials[(index + 5) % rawMaterials.length];
+    const usd = index % 4 === 0;
+    await prisma.purchaseQuote.upsert({
+      where: { id: `pur-quo-${index}` },
+      update: { unitPrice: usd ? 18 + index : 210 + index * 19 },
+      create: { id: `pur-quo-${index}`, organizationId: organization.id, permanentCode: `PUR-QUO-${String(index).padStart(5, "0")}`, rfqId: `pur-rfq-${((index - 1) % 4) + 1}`, supplierId: `${material.id}-supplier`, supplierName: purchaseSuppliers[(index - 1) % purchaseSuppliers.length], commercialProductId: `${material.id}-product`, manufacturerName: "Fabricante demo", presentation: index % 2 === 0 ? "Cubeta 5 kg" : "Bolsa 1 kg", quantity: 1 + index, unitPrice: usd ? 18 + index : 210 + index * 19, taxRate: 16, shippingCost: index * 22, currency: usd ? "USD" : "MXN", exchangeRate: usd ? 18.7 : null, minimumPurchase: index % 3 === 0 ? 5 : 1, validUntil: new Date(`2026-${index > 8 ? "08" : "12"}-28T00:00:00.000Z`), leadTimeDays: 3 + index, paymentTerms: index % 2 === 0 ? "Credito 15 dias" : "Contado", availability: index % 5 === 0 ? "bajo pedido" : "disponible", documentId: `kde-doc-${String(index + 10).padStart(3, "0")}`, observations: "Cotizacion demo no sobrescribe precios previos." }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    await prisma.purchaseComparison.upsert({
+      where: { id: `pur-cmp-${index}` },
+      update: { selected: index <= 2 },
+      create: { id: `pur-cmp-${index}`, organizationId: organization.id, permanentCode: `PUR-CMP-${String(index).padStart(5, "0")}`, quoteId: `pur-quo-${index}`, criteriaJson: { precio: 40, vigencia: 20, documentacion: 25, entrega: 15 }, normalizedCost: 210 + index * 21, totalAcquisitionCost: 1250 + index * 160, qualityScore: 82 + index, selected: index <= 2, selectionReason: index <= 2 ? "Seleccion por costo normalizado, disponibilidad y documentacion completa." : "No seleccionada por vigencia o tiempo de entrega." }
+    });
+  }
+
+  for (let index = 1; index <= 5; index += 1) {
+    const material = rawMaterials[(index + 8) % rawMaterials.length];
+    const quantity = 4 + index;
+    const unitPrice = index === 3 ? 32 : 240 + index * 30;
+    const currency = index === 3 ? "USD" : "MXN";
+    await prisma.purchaseOrder.upsert({
+      where: { id: `pur-po-${index}` },
+      update: { status: index === 1 ? "recibida" : index === 2 ? "parcialmente_recibida" : index === 5 ? "pendiente_aprobacion" : "aprobada" },
+      create: { id: `pur-po-${index}`, organizationId: organization.id, permanentCode: `PUR-PO-${String(index).padStart(5, "0")}`, supplierName: purchaseSuppliers[(index - 1) % purchaseSuppliers.length], requisitionId: index <= 4 ? `pur-rqn-${index}` : null, quoteId: `pur-quo-${index}`, currency, exchangeRate: currency === "USD" ? 18.7 : null, subtotal: quantity * unitPrice, taxTotal: quantity * unitPrice * 0.16, shippingTotal: 80 + index * 10, discountTotal: 0, total: quantity * unitPrice * 1.16 + 80 + index * 10, terms: "OC demo con recepcion parcial permitida y trazabilidad KDE.", promisedDate: new Date(`2026-09-${String(index + 5).padStart(2, "0")}T00:00:00.000Z`), status: index === 1 ? "recibida" : index === 2 ? "parcialmente_recibida" : index === 5 ? "pendiente_aprobacion" : "aprobada", responsibleUserId: "demo-user", documentId: `kde-doc-${String(index + 20).padStart(3, "0")}` }
+    });
+    await prisma.purchaseOrderItem.upsert({
+      where: { id: `pur-po-${index}-item` },
+      update: { quantityReceived: index === 1 ? quantity : index === 2 ? quantity / 2 : 0 },
+      create: { id: `pur-po-${index}-item`, organizationId: organization.id, orderId: `pur-po-${index}`, commercialProductId: `${material.id}-product`, rawMaterialMasterId: material.id, itemName: material.commonName, quantityOrdered: quantity, quantityReceived: index === 1 ? quantity : index === 2 ? quantity / 2 : 0, unit: "kg", unitPrice, taxRate: 16, lineTotal: quantity * unitPrice }
+    });
+    if (index <= 4) {
+      await prisma.purchaseApproval.upsert({
+        where: { id: `pur-po-${index}-approval` },
+        update: { decision: "aprobada" },
+        create: { id: `pur-po-${index}-approval`, organizationId: organization.id, orderId: `pur-po-${index}`, approverUserId: "demo-user", decision: "aprobada", comment: "Aprobacion demo por criterios documentados.", level: 1, evidenceDocumentId: `kde-doc-${String(index + 25).padStart(3, "0")}` }
+      });
+    }
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    const expected = index === 4 ? 3 : 5;
+    const received = index === 4 ? 1.5 : expected;
+    await prisma.purchaseReceipt.upsert({
+      where: { id: `pur-rcv-${index}` },
+      update: { receivedQuantity: received },
+      create: { id: `pur-rcv-${index}`, organizationId: organization.id, permanentCode: `PUR-RCV-${String(index).padStart(5, "0")}`, orderId: `pur-po-${Math.min(index, 3)}`, orderItemId: `pur-po-${Math.min(index, 3)}-item`, expectedQuantity: expected, receivedQuantity: received, differenceQuantity: received - expected, supplierLotCode: `SUP-PUR-${String(index).padStart(3, "0")}`, remision: `REM-${String(index).padStart(4, "0")}`, invoice: index % 2 === 0 ? `FAC-${String(index).padStart(4, "0")}` : null, packageStatus: index === 3 ? "observacion en empaque" : "integro", initialStatus: "cuarentena", observations: index === 4 ? "Recepcion parcial demo." : "Recepcion completa demo.", documentId: `kde-doc-${String(index + 30).padStart(3, "0")}`, inventoryLotId: `lot-demo-${String(index).padStart(2, "0")}`, inventoryMovementId: `pur-rcv-${index}-movement-ref`, qualityInspectionId: `qlt-inspection-${index}`, responsibleUserId: "demo-user" }
+    });
+  }
+
+  await prisma.purchaseReturn.upsert({
+    where: { id: "pur-rtn-1" },
+    update: { status: "registrada" },
+    create: { id: "pur-rtn-1", organizationId: organization.id, permanentCode: "PUR-RTN-00001", orderId: "pur-po-2", lotId: "lot-demo-02", reason: "Devolucion demo por diferencia documental detectada en recepcion.", quantity: 0.5, unit: "kg", evidenceDocumentId: "kde-doc-040", responsibleUserId: "demo-user", disposition: "devolver_a_proveedor", status: "registrada", inventoryMovementId: "pur-return-demo-movement" }
+  });
+
+  for (let index = 1; index <= 3; index += 1) {
+    await prisma.supplierEvaluation.upsert({
+      where: { id: `pur-evl-${index}` },
+      update: { score: 78 + index * 5 },
+      create: { id: `pur-evl-${index}`, organizationId: organization.id, permanentCode: `PUR-EVL-${String(index).padStart(5, "0")}`, supplierName: purchaseSuppliers[index - 1], lotsReceived: 6 + index, lotsApproved: 5 + index, lotsRejected: index === 3 ? 1 : 0, incompleteDocuments: index === 2 ? 2 : 0, incidents: index === 3 ? 2 : index - 1, responseTimeDays: 2 + index, priceVariation: index === 1 ? 4.5 : 8.2 + index, score: 78 + index * 5, trend: index === 3 ? "riesgo" : "estable", responsibleUserId: "demo-user" }
+    });
+  }
+
+  for (let index = 1; index <= 8; index += 1) {
+    const material = rawMaterials[(index + 12) % rawMaterials.length];
+    await prisma.supplySuggestion.upsert({
+      where: { id: `pur-sug-${index}` },
+      update: { status: index % 3 === 0 ? "convertida" : "sugerida" },
+      create: { id: `pur-sug-${index}`, organizationId: organization.id, rawMaterialMasterId: material.id, itemName: material.commonName, availableQuantity: index * 0.7, reservedQuantity: index % 2, reorderPoint: 5, suggestedQuantity: 6 + index, reason: index % 2 === 0 ? "Stock bajo contra punto de reorden." : "Cobertura insuficiente para formulacion escalada.", status: index % 3 === 0 ? "convertida" : "sugerida" }
+    });
+  }
 }
 
 main()

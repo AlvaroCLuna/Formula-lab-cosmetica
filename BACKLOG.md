@@ -136,7 +136,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 9 - Control de Calidad
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Especificaciones de calidad implementadas.
 - Criterios de especificacion implementados.
@@ -152,7 +152,25 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - UI ERP moderna de Calidad implementada.
 - Seeds y pruebas agregadas.
 - Validacion documentada con Flowchart y ER Diagram Mermaid.
-- Pendiente: aprobacion formal antes de iniciar Incremento 10.
+
+## Incremento 10 - Compras y Abastecimiento
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Solicitudes de compra implementadas.
+- Requisiciones y RFQ implementados con identificadores permanentes.
+- Cotizaciones implementadas sin sobrescribir historicos.
+- Comparativas de proveedores implementadas con criterio y motivo de seleccion.
+- Ordenes de compra implementadas con aprobacion y validaciones obligatorias.
+- Recepcion contra OC implementada con soporte parcial y cuarentena inicial.
+- Devolucion a proveedor implementada con movimiento de inventario.
+- Evaluacion de proveedores implementada.
+- Sugerencias de abastecimiento implementadas.
+- Integracion con materias primas, productos comerciales, costos, inventario, calidad, KDE y auditoria implementada.
+- UI ERP moderna de Compras con dashboard, panel lateral, alertas y modo aprendizaje implementada.
+- Seeds y pruebas agregadas.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
+- Pendiente: aprobacion formal antes de iniciar Incremento 11.
 
 ## Pendiente para fases posteriores
 
