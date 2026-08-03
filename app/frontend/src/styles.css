@@ -602,6 +602,8 @@ textarea {
 .formulation-table,
 .formulation-quick-view,
 .formula-engine,
+.cost-summary,
+.cost-simulator,
 .raw-material-table,
 .raw-material-quick-view,
 .knowledge-editor,
@@ -726,6 +728,76 @@ textarea {
   gap: 10px;
   padding: 12px;
   border-top: 1px solid var(--line);
+}
+
+.cost-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.cost-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 12px;
+}
+
+.cost-kpis article {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.cost-kpis span,
+.cost-items span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.cost-kpis strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+.cost-bars {
+  display: flex;
+  gap: 3px;
+  height: 22px;
+  padding: 0 12px;
+}
+
+.cost-bars span {
+  min-width: 8px;
+  border-radius: 4px;
+  background: var(--primary);
+}
+
+.cost-items {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.cost-items article {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.cost-simulator form {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
 }
 
 .module-hero {
@@ -1109,6 +1181,8 @@ textarea {
   .engine-layout,
   .phase-board,
   .engine-add-ingredient,
+  .cost-grid,
+  .cost-kpis,
   .module-hero,
   .filters-bar {
     grid-template-columns: 1fr;

@@ -1,10 +1,11 @@
-import { BookOpen, Boxes, ClipboardCheck, FileStack, FlaskConical, LayoutDashboard, UploadCloud } from "lucide-react";
+import { BookOpen, Boxes, Calculator, ClipboardCheck, FileStack, FlaskConical, LayoutDashboard, UploadCloud } from "lucide-react";
 
 const items = [
   { id: "panel", label: "Panel", icon: LayoutDashboard, disabled: true },
   { id: "inteligencia", label: "Inteligencia", icon: UploadCloud },
   { id: "formulaciones", label: "Formulaciones", icon: FileStack },
   { id: "materias", label: "Materias primas", icon: Boxes },
+  { id: "costos", label: "Costos", icon: Calculator },
   { id: "calidad", label: "Calidad", icon: ClipboardCheck, disabled: true },
   { id: "aprendizaje", label: "Aprendizaje", icon: BookOpen, disabled: true }
 ];

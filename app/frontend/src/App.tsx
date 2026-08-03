@@ -6,6 +6,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { IngredientIntelligencePage } from "./pages/IngredientIntelligencePage";
 import { FormulationListPage } from "./pages/FormulationListPage";
 import { RawMaterialsPage } from "./pages/RawMaterialsPage";
+import { CostEnginePage } from "./pages/CostEnginePage";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -43,7 +44,7 @@ export function App() {
         setUser(null);
       }}
     >
-      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : <IngredientIntelligencePage />}
+      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : <IngredientIntelligencePage />}
     </AppShell>
   );
 }

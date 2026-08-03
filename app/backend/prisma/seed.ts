@@ -113,8 +113,60 @@ async function main() {
     });
     await prisma.rawMaterialCommercialProduct.upsert({
       where: { id: `${material.id}-product` },
-      update: { tradeName: material.commonName, status: "activo" },
-      create: { id: `${material.id}-product`, organizationId: organization.id, rawMaterialMasterId: material.id, supplierId: `${material.id}-supplier`, tradeName: material.commonName, averageCost: null, currency: "MXN" }
+      update: {
+        permanentCode: `PC-${material.permanentCode}`,
+        tradeName: material.commonName,
+        presentation: "Bolsa",
+        presentationQuantity: material.id.includes("agua") ? 20 : 1,
+        unit: material.id.includes("agua") ? "l" : "kg",
+        price: material.id.includes("argan") || material.id.includes("hialuronico") ? 28 : 240 + material.permanentCode.length * 7,
+        taxRate: 16,
+        shippingCost: 35,
+        minimumPurchase: 1,
+        priceValidUntil: new Date("2026-12-31T00:00:00.000Z"),
+        quotedAt: new Date("2026-08-01T00:00:00.000Z"),
+        status: "activo",
+        currency: material.id.includes("argan") || material.id.includes("hialuronico") ? "USD" : "MXN"
+      },
+      create: {
+        id: `${material.id}-product`,
+        organizationId: organization.id,
+        rawMaterialMasterId: material.id,
+        supplierId: `${material.id}-supplier`,
+        permanentCode: `PC-${material.permanentCode}`,
+        tradeName: material.commonName,
+        presentation: "Bolsa",
+        presentationQuantity: material.id.includes("agua") ? 20 : 1,
+        unit: material.id.includes("agua") ? "l" : "kg",
+        price: material.id.includes("argan") || material.id.includes("hialuronico") ? 28 : 240 + material.permanentCode.length * 7,
+        taxRate: 16,
+        shippingCost: 35,
+        minimumPurchase: 1,
+        priceValidUntil: new Date("2026-12-31T00:00:00.000Z"),
+        quotedAt: new Date("2026-08-01T00:00:00.000Z"),
+        averageCost: material.id.includes("argan") || material.id.includes("hialuronico") ? 28 : 240 + material.permanentCode.length * 7,
+        currency: material.id.includes("argan") || material.id.includes("hialuronico") ? "USD" : "MXN"
+      }
+    });
+    await prisma.rawMaterialPriceHistory.upsert({
+      where: { id: `${material.id}-price-1` },
+      update: { newPrice: material.id.includes("argan") || material.id.includes("hialuronico") ? 28 : 240 + material.permanentCode.length * 7 },
+      create: {
+        id: `${material.id}-price-1`,
+        organizationId: organization.id,
+        commercialProductId: `${material.id}-product`,
+        supplierId: `${material.id}-supplier`,
+        previousPrice: null,
+        newPrice: material.id.includes("argan") || material.id.includes("hialuronico") ? 28 : 240 + material.permanentCode.length * 7,
+        currency: material.id.includes("argan") || material.id.includes("hialuronico") ? "USD" : "MXN",
+        taxRate: 16,
+        shippingCost: 35,
+        validUntil: new Date("2026-12-31T00:00:00.000Z"),
+        quotedAt: new Date("2026-08-01T00:00:00.000Z"),
+        reason: "Seed demo Incremento 5",
+        evidenceReference: "Cotizacion demo",
+        createdByUserId: "demo-user"
+      }
     });
     await prisma.rawMaterialDocument.upsert({
       where: { id: `${material.id}-doc` },

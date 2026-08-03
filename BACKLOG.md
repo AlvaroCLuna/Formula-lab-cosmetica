@@ -37,7 +37,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 4 - Formula Engine
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Motor de calculo y validacion implementado.
 - Fases estructuradas por version implementadas.
@@ -45,7 +45,19 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Escalado por batch implementado.
 - Comparacion avanzada de versiones implementada.
 - Preparacion para reglas y costeo futuro implementada a nivel arquitectonico.
-- Pendiente: aprobacion formal del usuario antes de iniciar Incremento 5.
+
+## Incremento 5 - Motor de Costos
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Productos comerciales enriquecidos implementados.
+- Historial de precios implementado.
+- Normalizacion de costos implementada.
+- Costeo de formulaciones por escenarios implementado.
+- Simulador y resumen ejecutivo implementados.
+- Alertas de costo implementadas.
+- Soporte inicial MXN/USD implementado con tipo de cambio manual.
+- Pendiente: aprobacion formal antes de iniciar Incremento 6.
 
 ## Pendiente para fases posteriores
 

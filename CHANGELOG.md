@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.0 - Incremento 5 implementado
+
+- Se implemento el Motor de Costos con escenarios fechados que no modifican formulaciones aprobadas.
+- Se ampliaron productos comerciales con presentacion, precio, moneda, impuestos, envio, compra minima, vigencia, cotizacion y observaciones.
+- Se agrego historial de precios sin sobrescritura.
+- Se agrego normalizacion de costo por gramo, kilogramo, mililitro, litro y unidad.
+- Se agrego costeo por ingrediente, fase, lote, kg, participacion de costo y alertas.
+- Se agrego simulador interactivo con lote, moneda, proveedor, costos adicionales, margen y markup.
+- Se agregaron APIs de simulacion, guardado de escenarios, consulta y actualizacion historica de precios.
+- Se agregaron datos demo con 30 productos comerciales, precios MXN/USD e historicos.
+- Se documento la validacion en `docs/21_Validacion_Incremento_5.md`.
+
 ## 0.4.0 - Incremento 4 implementado
 
 - Se implemento Formula Engine como motor operativo reutilizable para formulaciones.

@@ -112,6 +112,9 @@ model Organization {
   rawMaterialManufacturers RawMaterialManufacturer[]
   rawMaterialSuppliers RawMaterialSupplier[]
   rawMaterialProducts RawMaterialCommercialProduct[]
+  rawMaterialPriceHistory RawMaterialPriceHistory[]
+  costScenarios CostScenario[]
+  costScenarioItems CostScenarioItem[]
   rawMaterialDocuments RawMaterialDocument[]
   rawMaterialLots RawMaterialLot[]
 
@@ -141,6 +144,8 @@ model User {
   createdRawMaterialMasters RawMaterialMaster[]
   rawMaterialVersions RawMaterialMasterVersion[]
   rawMaterialApprovals RawMaterialMasterVersion[] @relation("RawMaterialApprovals")
+  rawMaterialPriceHistory RawMaterialPriceHistory[]
+  costScenarios CostScenario[]
 
   @@index([organizationId])
   @@map("users")
@@ -394,6 +399,7 @@ model RawMaterialSupplier {
   organization        Organization      @relation(fields: [organizationId], references: [id])
   rawMaterial         RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
   products            RawMaterialCommercialProduct[]
+  priceHistory        RawMaterialPriceHistory[]
 
   @@index([organizationId])
   @@index([rawMaterialMasterId])
@@ -408,6 +414,17 @@ model RawMaterialCommercialProduct {
   supplierId          String?                  @map("supplier_id")
   tradeName           String                   @map("trade_name")
   sku                 String?
+  permanentCode       String?                  @map("permanent_code")
+  presentation        String?
+  presentationQuantity Float?                  @map("presentation_quantity")
+  unit                String?
+  price               Float?
+  taxRate             Float?                   @map("tax_rate")
+  shippingCost        Float?                   @map("shipping_cost")
+  minimumPurchase     Float?                   @map("minimum_purchase")
+  priceValidUntil     DateTime?                @map("price_valid_until")
+  quotedAt            DateTime?                @map("quoted_at")
+  observations        String?                  @db.Text
   averageCost         Float?                   @map("average_cost")
   currency            String?                  @default("MXN")
   status              EntityStatus             @default(activo)
@@ -417,12 +434,103 @@ model RawMaterialCommercialProduct {
   rawMaterial         RawMaterialMaster        @relation(fields: [rawMaterialMasterId], references: [id])
   manufacturer        RawMaterialManufacturer? @relation(fields: [manufacturerId], references: [id])
   supplier            RawMaterialSupplier?     @relation(fields: [supplierId], references: [id])
+  priceHistory        RawMaterialPriceHistory[]
+  costScenarioItems   CostScenarioItem[]
 
+  @@unique([organizationId, permanentCode])
   @@index([organizationId])
   @@index([rawMaterialMasterId])
   @@index([manufacturerId])
   @@index([supplierId])
   @@map("raw_material_commercial_products")
+}
+
+model RawMaterialPriceHistory {
+  id                  String                       @id @default(uuid())
+  organizationId      String                       @map("organization_id")
+  commercialProductId String                       @map("commercial_product_id")
+  supplierId          String?                      @map("supplier_id")
+  previousPrice       Float?                       @map("previous_price")
+  newPrice            Float                        @map("new_price")
+  currency            String                       @default("MXN")
+  taxRate             Float?                       @map("tax_rate")
+  shippingCost        Float?                       @map("shipping_cost")
+  validUntil          DateTime?                    @map("valid_until")
+  quotedAt            DateTime                     @default(now()) @map("quoted_at")
+  reason              String?
+  evidenceReference   String?                      @map("evidence_reference")
+  createdByUserId     String                       @map("created_by_user_id")
+  createdAt           DateTime                     @default(now()) @map("created_at")
+  organization        Organization                 @relation(fields: [organizationId], references: [id])
+  commercialProduct   RawMaterialCommercialProduct @relation(fields: [commercialProductId], references: [id])
+  supplier            RawMaterialSupplier?         @relation(fields: [supplierId], references: [id])
+  createdBy           User                         @relation(fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([commercialProductId])
+  @@index([supplierId])
+  @@map("raw_material_price_history")
+}
+
+model CostScenario {
+  id                   String             @id @default(uuid())
+  organizationId       String             @map("organization_id")
+  formulationVersionId String             @map("formulation_version_id")
+  name                 String
+  batchSize            Float              @map("batch_size")
+  batchUnit            String             @default("g") @map("batch_unit")
+  currency             String             @default("MXN")
+  exchangeRate         Float              @default(1) @map("exchange_rate")
+  exchangeRateDate     DateTime           @default(now()) @map("exchange_rate_date")
+  providerStrategy     String             @default("precio_reciente") @map("provider_strategy")
+  additionalCostsJson  Json               @map("additional_costs_json")
+  marginPercent        Float              @default(0) @map("margin_percent")
+  markupPercent        Float              @default(0) @map("markup_percent")
+  subtotalIngredients  Float              @default(0) @map("subtotal_ingredients")
+  subtotalAdditional   Float              @default(0) @map("subtotal_additional")
+  totalCost            Float              @default(0) @map("total_cost")
+  costPerKg            Float?             @map("cost_per_kg")
+  wholesalePrice       Float?             @map("wholesale_price")
+  retailPrice          Float?             @map("retail_price")
+  suggestedPrice       Float?             @map("suggested_price")
+  alertsJson           Json               @map("alerts_json")
+  createdByUserId      String             @map("created_by_user_id")
+  createdAt            DateTime           @default(now()) @map("created_at")
+  organization         Organization       @relation(fields: [organizationId], references: [id])
+  formulationVersion   FormulationVersion @relation(fields: [formulationVersionId], references: [id])
+  createdBy            User               @relation(fields: [createdByUserId], references: [id])
+  items                CostScenarioItem[]
+
+  @@index([organizationId])
+  @@index([formulationVersionId])
+  @@map("cost_scenarios")
+}
+
+model CostScenarioItem {
+  id                  String                        @id @default(uuid())
+  organizationId      String                        @map("organization_id")
+  costScenarioId      String                        @map("cost_scenario_id")
+  formulationIngredientId String                    @map("formulation_ingredient_id")
+  commercialProductId String?                       @map("commercial_product_id")
+  displayName         String                        @map("display_name")
+  phase               String
+  percentage          Float
+  grams               Float
+  currency            String                        @default("MXN")
+  unitCost            Float?                        @map("unit_cost")
+  lineCost            Float?                        @map("line_cost")
+  costSharePercent    Float?                        @map("cost_share_percent")
+  priceDate           DateTime?                     @map("price_date")
+  traceJson           Json                          @map("trace_json")
+  organization        Organization                  @relation(fields: [organizationId], references: [id])
+  scenario            CostScenario                  @relation(fields: [costScenarioId], references: [id])
+  formulationIngredient FormulationIngredient       @relation(fields: [formulationIngredientId], references: [id])
+  commercialProduct   RawMaterialCommercialProduct? @relation(fields: [commercialProductId], references: [id])
+
+  @@index([organizationId])
+  @@index([costScenarioId])
+  @@index([formulationIngredientId])
+  @@map("cost_scenario_items")
 }
 
 model RawMaterialDocument {
@@ -509,6 +617,7 @@ model FormulationVersion {
   phases              FormulationPhase[]
   baseComparisons     FormulationVersionComparison[] @relation("BaseVersion")
   targetComparisons   FormulationVersionComparison[] @relation("TargetVersion")
+  costScenarios       CostScenario[]
 
   @@unique([formulationFamilyId, versionNumber])
   @@index([organizationId])
@@ -558,6 +667,7 @@ model FormulationIngredient {
   organization         Organization         @relation(fields: [organizationId], references: [id])
   version              FormulationVersion   @relation(fields: [formulationVersionId], references: [id])
   rawMaterialMaster    RawMaterialMaster?   @relation(fields: [rawMaterialMasterId], references: [id])
+  costScenarioItems    CostScenarioItem[]
 
   @@index([organizationId])
   @@index([formulationVersionId])

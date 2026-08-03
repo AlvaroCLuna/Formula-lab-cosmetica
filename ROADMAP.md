@@ -39,7 +39,7 @@ Materias Primas Maestras:
 - Inteligencia operativa: formulaciones asociadas, uso promedio, proveedores, documentos, costo promedio preparado y ultima actualizacion.
 - Validacion documentada en `docs/19_Validacion_Incremento_3.md`.
 
-## Incremento 4 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 4 - COMPLETADO Y APROBADO
 
 Formula Engine:
 
@@ -52,9 +52,22 @@ Formula Engine:
 - Preparacion para reglas y costeo futuro sin implementar esos modulos.
 - Validacion documentada en `docs/20_Validacion_Incremento_4.md`.
 
-## Incremento 5 - Pendiente de especificacion
+## Incremento 5 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
 
-No iniciar hasta aprobacion formal del Incremento 4.
+Motor de Costos:
+
+- Productos comerciales enriquecidos.
+- Historial de precios sin sobrescritura.
+- Normalizacion de costos por unidad base.
+- Costeo de formulaciones por escenarios fechados.
+- Simulador de lote, proveedor, costos indirectos, margen y markup.
+- Alertas por datos incompletos, precio vencido y moneda diferente.
+- Soporte inicial MXN/USD con tipo de cambio manual.
+- Validacion documentada en `docs/21_Validacion_Incremento_5.md`.
+
+## Incremento 6 - Pendiente de especificacion
+
+No iniciar hasta aprobacion formal del Incremento 5.
 
 ## Fases posteriores
 

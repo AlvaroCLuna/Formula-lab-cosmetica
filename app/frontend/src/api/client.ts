@@ -165,6 +165,21 @@ export const api = {
     const params = new URLSearchParams({ baseVersionId, targetVersionId });
     return request<{ comparison: unknown }>(`/formula-engine/compare?${params}`);
   },
+  async simulateCost(versionId: string, input: Record<string, unknown>) {
+    return request<{ result: any }>(`/cost-engine/versions/${versionId}/simulate`, {
+      method: "POST",
+      body: JSON.stringify(input)
+    });
+  },
+  async saveCostScenario(versionId: string, input: Record<string, unknown>) {
+    return request<{ scenario: any; result: any }>(`/cost-engine/versions/${versionId}/scenarios`, {
+      method: "POST",
+      body: JSON.stringify(input)
+    });
+  },
+  async listCostScenarios(versionId: string) {
+    return request<{ scenarios: any[] }>(`/cost-engine/versions/${versionId}/scenarios`);
+  },
   async listMasterRawMaterials(filters: { search?: string; status?: string; category?: string; family?: string } = {}) {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
