@@ -958,6 +958,103 @@ textarea {
   padding: 10px;
 }
 
+.knowledge-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.knowledge-tabs button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.knowledge-tabs button.active {
+  border-color: var(--primary);
+  background: #eff8f4;
+  color: var(--primary-strong);
+}
+
+.knowledge-search-results {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.knowledge-search-results article,
+.knowledge-section,
+.knowledge-side,
+.learning-lab,
+.knowledge-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.knowledge-search-results article {
+  padding: 12px;
+}
+
+.knowledge-search-results span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.knowledge-center-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 18px;
+  align-items: start;
+}
+
+.knowledge-browser,
+.knowledge-section,
+.learning-lab {
+  display: grid;
+  gap: 12px;
+}
+
+.knowledge-section,
+.learning-lab {
+  padding: 12px;
+}
+
+.knowledge-card-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.knowledge-card {
+  display: grid;
+  gap: 6px;
+  min-height: 110px;
+  padding: 12px;
+  color: var(--text);
+  text-align: left;
+}
+
+.knowledge-card span,
+.knowledge-card small {
+  color: var(--muted);
+}
+
+.knowledge-side {
+  position: sticky;
+  top: 16px;
+}
+
+.knowledge-side .section-heading {
+  padding: 12px;
+}
+
 .module-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
@@ -1347,6 +1444,9 @@ textarea {
   .production-grid,
   .production-kpis,
   .production-card,
+  .knowledge-center-grid,
+  .knowledge-search-results,
+  .knowledge-card-grid,
   .module-hero,
   .filters-bar {
     grid-template-columns: 1fr;
@@ -1364,6 +1464,10 @@ textarea {
   }
 
   .production-side {
+    position: static;
+  }
+
+  .knowledge-side {
     position: static;
   }
 

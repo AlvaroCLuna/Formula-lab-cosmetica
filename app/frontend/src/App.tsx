@@ -9,6 +9,7 @@ import { RawMaterialsPage } from "./pages/RawMaterialsPage";
 import { CostEnginePage } from "./pages/CostEnginePage";
 import { InventoryPage } from "./pages/InventoryPage";
 import { ProductionPage } from "./pages/ProductionPage";
+import { KnowledgeCenterPage } from "./pages/KnowledgeCenterPage";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -46,7 +47,7 @@ export function App() {
         setUser(null);
       }}
     >
-      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "inventario" ? <InventoryPage /> : view === "produccion" ? <ProductionPage /> : <IngredientIntelligencePage />}
+      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "inventario" ? <InventoryPage /> : view === "produccion" ? <ProductionPage /> : view === "conocimiento" ? <KnowledgeCenterPage /> : <IngredientIntelligencePage />}
     </AppShell>
   );
 }

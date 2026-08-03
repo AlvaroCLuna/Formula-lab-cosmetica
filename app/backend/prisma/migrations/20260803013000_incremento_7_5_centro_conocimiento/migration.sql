@@ -1,0 +1,180 @@
+CREATE TABLE product_categories (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  code VARCHAR(191) NOT NULL,
+  name VARCHAR(191) NOT NULL,
+  description TEXT NULL,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  sort_order INT NOT NULL DEFAULT 0,
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL,
+  UNIQUE KEY product_categories_org_code_unique (organization_id, code),
+  KEY product_categories_organization_id_idx (organization_id),
+  CONSTRAINT product_categories_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id)
+);
+
+CREATE TABLE knowledge_formulation_families (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  code VARCHAR(191) NOT NULL,
+  name VARCHAR(191) NOT NULL,
+  simple_definition TEXT NOT NULL,
+  technical_definition TEXT NULL,
+  typical_structure TEXT NULL,
+  usual_ingredients_json JSON NULL,
+  advantages_json JSON NULL,
+  limitations_json JSON NULL,
+  difficulty VARCHAR(191) NOT NULL DEFAULT 'Intermedio',
+  common_equipment_json JSON NULL,
+  basic_controls_json JSON NULL,
+  frequent_risks_json JSON NULL,
+  related_terms_json JSON NULL,
+  internal_references_json JSON NULL,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL,
+  UNIQUE KEY knowledge_families_org_code_unique (organization_id, code),
+  KEY knowledge_families_organization_id_idx (organization_id),
+  CONSTRAINT knowledge_families_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id)
+);
+
+CREATE TABLE product_types (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  category_id VARCHAR(191) NOT NULL,
+  code VARCHAR(191) NOT NULL,
+  name VARCHAR(191) NOT NULL,
+  description TEXT NULL,
+  physical_form VARCHAR(191) NULL,
+  application_route VARCHAR(191) NULL,
+  usage_zone VARCHAR(191) NULL,
+  cosmetic_need VARCHAR(191) NULL,
+  target_audience VARCHAR(191) NULL,
+  difficulty VARCHAR(191) NOT NULL DEFAULT 'Basico',
+  learning_summary TEXT NULL,
+  manufacturing_overview TEXT NULL,
+  usual_equipment_json JSON NULL,
+  process_stages_json JSON NULL,
+  common_errors_json JSON NULL,
+  safety_notes TEXT NULL,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  created_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at DATETIME(3) NOT NULL,
+  UNIQUE KEY product_types_org_code_unique (organization_id, code),
+  KEY product_types_organization_id_idx (organization_id),
+  KEY product_types_category_id_idx (category_id),
+  CONSTRAINT product_types_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id),
+  CONSTRAINT product_types_category_id_fkey FOREIGN KEY (category_id) REFERENCES product_categories(id)
+);
+
+CREATE TABLE formulation_subfamilies (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  family_id VARCHAR(191) NOT NULL,
+  code VARCHAR(191) NOT NULL,
+  name VARCHAR(191) NOT NULL,
+  description TEXT NULL,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  UNIQUE KEY formulation_subfamilies_org_code_unique (organization_id, code),
+  KEY formulation_subfamilies_organization_id_idx (organization_id),
+  KEY formulation_subfamilies_family_id_idx (family_id),
+  CONSTRAINT formulation_subfamilies_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id),
+  CONSTRAINT formulation_subfamilies_family_id_fkey FOREIGN KEY (family_id) REFERENCES knowledge_formulation_families(id)
+);
+
+CREATE TABLE product_family_relations (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  product_type_id VARCHAR(191) NOT NULL,
+  family_id VARCHAR(191) NOT NULL,
+  subfamily_id VARCHAR(191) NULL,
+  relation_type VARCHAR(191) NOT NULL DEFAULT 'principal',
+  complexity_level VARCHAR(191) NOT NULL DEFAULT 'Basico',
+  physical_form VARCHAR(191) NULL,
+  application_route VARCHAR(191) NULL,
+  usage_zone VARCHAR(191) NULL,
+  cosmetic_need VARCHAR(191) NULL,
+  target_audience VARCHAR(191) NULL,
+  frequent_ingredients_json JSON NULL,
+  recommended_controls_json JSON NULL,
+  equipment_json JSON NULL,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  KEY product_family_relations_organization_id_idx (organization_id),
+  KEY product_family_relations_product_type_id_idx (product_type_id),
+  KEY product_family_relations_family_id_idx (family_id),
+  CONSTRAINT product_family_relations_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id),
+  CONSTRAINT product_family_relations_product_type_id_fkey FOREIGN KEY (product_type_id) REFERENCES product_types(id),
+  CONSTRAINT product_family_relations_family_id_fkey FOREIGN KEY (family_id) REFERENCES knowledge_formulation_families(id),
+  CONSTRAINT product_family_relations_subfamily_id_fkey FOREIGN KEY (subfamily_id) REFERENCES formulation_subfamilies(id)
+);
+
+CREATE TABLE cosmetic_needs (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  code VARCHAR(191) NOT NULL,
+  area VARCHAR(191) NOT NULL,
+  name VARCHAR(191) NOT NULL,
+  description TEXT NULL,
+  product_type_ids_json JSON NOT NULL,
+  family_ids_json JSON NOT NULL,
+  raw_material_ids_json JSON NULL,
+  equipment_json JSON NULL,
+  controls_json JSON NULL,
+  difficulty VARCHAR(191) NOT NULL DEFAULT 'Basico',
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  UNIQUE KEY cosmetic_needs_org_code_unique (organization_id, code),
+  KEY cosmetic_needs_organization_id_idx (organization_id),
+  CONSTRAINT cosmetic_needs_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id)
+);
+
+CREATE TABLE family_glossary_terms (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  family_id VARCHAR(191) NULL,
+  term VARCHAR(191) NOT NULL,
+  simple_definition TEXT NOT NULL,
+  technical_definition TEXT NULL,
+  related_terms_json JSON NULL,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  KEY family_glossary_terms_organization_id_idx (organization_id),
+  KEY family_glossary_terms_family_id_idx (family_id),
+  CONSTRAINT family_glossary_terms_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id),
+  CONSTRAINT family_glossary_terms_family_id_fkey FOREIGN KEY (family_id) REFERENCES knowledge_formulation_families(id)
+);
+
+CREATE TABLE product_search_terms (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  product_type_id VARCHAR(191) NULL,
+  family_id VARCHAR(191) NULL,
+  need_id VARCHAR(191) NULL,
+  term VARCHAR(191) NOT NULL,
+  term_type VARCHAR(191) NOT NULL DEFAULT 'relacionado',
+  weight INT NOT NULL DEFAULT 1,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  KEY product_search_terms_organization_id_idx (organization_id),
+  KEY product_search_terms_product_type_id_idx (product_type_id),
+  KEY product_search_terms_family_id_idx (family_id),
+  KEY product_search_terms_need_id_idx (need_id),
+  CONSTRAINT product_search_terms_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id),
+  CONSTRAINT product_search_terms_product_type_id_fkey FOREIGN KEY (product_type_id) REFERENCES product_types(id),
+  CONSTRAINT product_search_terms_need_id_fkey FOREIGN KEY (need_id) REFERENCES cosmetic_needs(id)
+);
+
+CREATE TABLE guided_selection_rules (
+  id VARCHAR(191) NOT NULL PRIMARY KEY,
+  organization_id VARCHAR(191) NULL,
+  code VARCHAR(191) NOT NULL,
+  desired_outcome VARCHAR(191) NULL,
+  usage_zone VARCHAR(191) NULL,
+  physical_form VARCHAR(191) NULL,
+  difficulty VARCHAR(191) NULL,
+  cosmetic_need VARCHAR(191) NULL,
+  product_type_ids_json JSON NOT NULL,
+  family_ids_json JSON NOT NULL,
+  raw_material_ids_json JSON NULL,
+  status ENUM('activo','inactivo','archivado') NOT NULL DEFAULT 'activo',
+  UNIQUE KEY guided_selection_rules_org_code_unique (organization_id, code),
+  KEY guided_selection_rules_organization_id_idx (organization_id),
+  CONSTRAINT guided_selection_rules_organization_id_fkey FOREIGN KEY (organization_id) REFERENCES organizations(id)
+);

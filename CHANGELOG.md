@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.5 - Incremento 7.5 implementado
+
+- Se implemento el Centro de Conocimiento Cosmetico como modulo navegable desde el AppShell.
+- Se agrego exploracion por categoria de producto, familia formulativa, subfamilia, necesidad cosmetica y glosario.
+- Se agrego buscador universal basado en terminos y relaciones registradas, sin IA generativa ni invencion de contenido tecnico.
+- Se agrego seleccion guiada por necesidad, zona de uso, forma fisica, dificultad y resultado deseado.
+- Se agrego pestana educativa "Como se fabrica" con etapas generales, equipo, controles, errores frecuentes y notas de seguridad.
+- Se agregaron APIs, modelos Prisma, migracion SQL/Prisma, seeds y pruebas basicas del Centro de Conocimiento.
+- Se documento la validacion en `docs/24_Validacion_Incremento_7_5.md`.
+
 ## 0.7.0 - Incremento 7 implementado
 
 - Se implemento Laboratorio y Produccion MVP con ordenes de produccion trazables.

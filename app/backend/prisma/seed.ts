@@ -373,6 +373,139 @@ async function main() {
 
   await prisma.rawMaterialLot.update({ where: { id: "lot-demo-02" }, data: { locationId: "loc-lab-01" } });
 
+  const knowledgeFamilies = [
+    ["kf-tensioactivos", "KF-TENS", "Sistemas tensioactivos", "Sistemas que limpian usando tensioactivos y agua."],
+    ["kf-emulsiones", "KF-EMUL", "Emulsiones", "Mezclas estables de fase acuosa y oleosa."],
+    ["kf-anhidros", "KF-ANHI", "Sistemas anhidros", "Productos sin agua libre basados en aceites, mantecas o ceras."],
+    ["kf-geles", "KF-GEL", "Geles", "Sistemas con viscosidad construida por polimeros, gomas o gelificantes."],
+    ["kf-soluciones", "KF-SOL", "Soluciones", "Mezclas homogeneas donde los componentes estan disueltos."],
+    ["kf-suspensiones", "KF-SUSP", "Suspensiones", "Sistemas con particulas dispersas que no se disuelven totalmente."],
+    ["kf-dispersiones", "KF-DISP", "Dispersiones", "Sistemas donde una fase se distribuye en otra sin formar solucion completa."],
+    ["kf-solidos", "KF-SOLID", "Sistemas solidos compactos", "Productos solidos compactados o moldeados."],
+    ["kf-efervescentes", "KF-EFER", "Sistemas efervescentes", "Solidos que liberan gas al contacto con agua."],
+    ["kf-perfumeria", "KF-PERF", "Perfumeria y sistemas hidroalcoholicos", "Sistemas aromaticos en alcohol, agua o solubilizantes."],
+    ["kf-extractivas", "KF-EXT", "Preparaciones extractivas", "Preparaciones obtenidas por contacto entre material vegetal y solvente."],
+    ["kf-cerosos", "KF-CERA", "Sistemas cerosos", "Sistemas estructurados con ceras, aceites y mantecas."],
+    ["kf-limpieza", "KF-LIMP", "Productos de limpieza", "Sistemas para limpieza domestica o higiene no cosmetica futura."],
+    ["kf-decorativos", "KF-DECO", "Productos decorativos futuros", "Base conceptual para maquillaje y color cosmetico."]
+  ] as const;
+
+  for (const [id, code, name, simpleDefinition] of knowledgeFamilies) {
+    await prisma.knowledgeFormulationFamily.upsert({
+      where: { id },
+      update: { code, name, simpleDefinition, status: "activo" },
+      create: {
+        id,
+        code,
+        name,
+        simpleDefinition,
+        technicalDefinition: "Contenido educativo registrado. No sustituye procedimiento tecnico validado.",
+        typicalStructure: "Ingredientes funcionales, vehiculo o fase base, modificadores, controles y documentacion.",
+        usualIngredientsJson: ["Agua", "Aceites", "Tensioactivos", "Modificadores reologicos", "Conservantes"],
+        advantagesJson: ["Permite ubicar productos por tecnologia", "Facilita aprendizaje progresivo"],
+        limitationsJson: ["Requiere validacion tecnica antes de fabricar"],
+        difficulty: ["kf-efervescentes", "kf-decorativos"].includes(id) ? "Avanzado" : "Intermedio",
+        commonEquipmentJson: ["Bascula", "Agitador", "Vaso de proceso", "Termometro"],
+        basicControlsJson: ["pH", "Viscosidad", "Apariencia", "Estabilidad"],
+        frequentRisksJson: ["Separacion", "pH fuera de rango", "Contaminacion"],
+        relatedTermsJson: [name],
+        internalReferencesJson: ["Formula Engine", "Materias Primas Maestras", "Produccion"]
+      }
+    });
+  }
+
+  const subfamilies = [
+    ["ksf-solido-compacto", "kf-tensioactivos", "KSF-SOLID-COMP", "Solido compactado"],
+    ["ksf-emulsion-ow", "kf-emulsiones", "KSF-OW", "Emulsion O/W"],
+    ["ksf-balsamo-anhidro", "kf-anhidros", "KSF-BALM", "Balsamo anhidro"]
+  ] as const;
+  for (const [id, familyId, code, name] of subfamilies) {
+    await prisma.formulationSubfamily.upsert({ where: { id }, update: { name }, create: { id, familyId, code, name, description: "Subfamilia educativa registrada para navegacion del Centro de Conocimiento." } });
+  }
+
+  const categoryProducts = [
+    ["cat-capilar", "Capilar", ["Shampoo solido", "Shampoo liquido", "Shampoo anticaspa", "Shampoo hidratante", "Shampoo para cabello graso", "Shampoo infantil", "Shampoo sin sulfatos", "Acondicionador solido", "Acondicionador liquido", "Leave-in", "Mascarilla capilar", "Serum capilar", "Protector termico", "Activador de rizos", "Spray desenredante", "Aceite capilar", "Gel fijador", "Cera", "Pomada", "Crema para peinar", "Espuma", "Spray fijador"]],
+    ["cat-jabones", "Jabones y limpieza", ["Jabon solido", "Jabon liquido", "Syndet", "Limpiador facial", "Limpiador corporal", "Limpiador intimo", "Exfoliante", "Gel de bano"]],
+    ["cat-facial", "Facial", ["Agua micelar", "Tonico", "Serum", "Crema facial", "Contorno de ojos", "Exfoliante facial", "Mascarilla", "Balsamo facial", "Protector solar"]],
+    ["cat-corporal", "Corporal", ["Crema corporal", "Locion", "Manteca corporal", "Aceite corporal", "Gel corporal", "Exfoliante corporal", "Mousse corporal", "After sun"]],
+    ["cat-manos-pies", "Manos y pies", ["Crema para manos", "Crema para pies", "Balsamo", "Exfoliante", "Aceite para cuticula"]],
+    ["cat-higiene", "Higiene personal", ["Desodorante solido", "Desodorante roll-on", "Desodorante spray", "Pasta dental", "Enjuague bucal", "Gel antibacterial"]],
+    ["cat-afeitado", "Afeitado", ["Crema de afeitar", "Jabon de afeitar", "Aceite de afeitar", "After shave", "Balsamo postafeitado"]],
+    ["cat-labios", "Labios", ["Balsamo labial", "Exfoliante labial", "Protector labial", "Gloss"]],
+    ["cat-bebes", "Bebes", ["Shampoo infantil", "Jabon infantil", "Crema infantil", "Pomada", "Aceite infantil"]],
+    ["cat-spa", "Spa", ["Sales de bano", "Bombas efervescentes", "Mascarillas", "Arcillas", "Envolturas"]],
+    ["cat-perfumeria", "Perfumeria", ["Perfume", "Eau de toilette", "Eau de parfum", "Splash corporal", "Bruma corporal"]],
+    ["cat-aromaterapia", "Aromaterapia y hogar", ["Roll-on aromatico", "Bruma ambiental", "Spray ambiental", "Difusor", "Vela aromatica", "Wax melts"]],
+    ["cat-bases", "Bases y preparaciones", ["Base de shampoo", "Base de acondicionador", "Base de crema", "Base de gel", "Base de locion", "Extracto", "Macerado", "Oleato", "Hidrolato", "Tintura", "Fermento", "Infusion"]]
+  ] as const;
+
+  const productIdByName = new Map<string, string>();
+  const slugOf = (value: string) => value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  for (const [categoryId, categoryName, products] of categoryProducts) {
+    await prisma.productCategory.upsert({ where: { id: categoryId }, update: { name: categoryName }, create: { id: categoryId, code: categoryId.replace("cat-", "CAT-").toUpperCase(), name: categoryName, description: `Categoria ${categoryName}.`, sortOrder: categoryProducts.findIndex((item) => item[0] === categoryId) + 1 } });
+    for (const productName of products) {
+      const productId = `pt-${slugOf(productName)}`;
+      productIdByName.set(productName.toLowerCase(), productId);
+      await prisma.productType.upsert({
+        where: { id: productId },
+        update: { name: productName, categoryId },
+        create: { id: productId, categoryId, code: productId.replace("pt-", "PT-").toUpperCase(), name: productName, description: `${productName} dentro de ${categoryName}.`, physicalForm: productName.toLowerCase().includes("solido") ? "Solido" : "Liquido o semisolido", applicationRoute: "Topica", usageZone: categoryName, cosmeticNeed: categoryName, targetAudience: categoryName === "Bebes" ? "Infantil" : "General", difficulty: productName.toLowerCase().includes("protector solar") ? "Avanzado" : "Basico", learningSummary: "Ficha educativa sin receta. Explica familia, ingredientes frecuentes y proceso general.", manufacturingOverview: "Pesar, preparar fases, mezclar segun tecnologia, controlar parametros y documentar.", usualEquipmentJson: ["Bascula", "Agitador", "Recipiente de proceso"], processStagesJson: ["Seleccion", "Preparacion", "Mezcla", "Control", "Documentacion"], commonErrorsJson: ["No validar pH", "No documentar lote"], safetyNotes: "Usar EPP y revisar SDS/TDS." }
+      });
+    }
+  }
+
+  const relations = [
+    ["Shampoo solido", "kf-tensioactivos", "ksf-solido-compacto", "Intermedio", ["SCI", "SCS", "Cocamidopropyl Betaine"]],
+    ["Shampoo liquido", "kf-tensioactivos", null, "Intermedio", ["SCS", "Cocamidopropyl Betaine", "Glicerina"]],
+    ["Shampoo hidratante", "kf-tensioactivos", null, "Intermedio", ["Glicerina", "Pantenol", "Proteina Hidrolizada"]],
+    ["Acondicionador liquido", "kf-emulsiones", "ksf-emulsion-ow", "Intermedio", ["BTMS", "Alcohol Cetilico"]],
+    ["Acondicionador solido", "kf-cerosos", "ksf-balsamo-anhidro", "Intermedio", ["BTMS", "Manteca de Karite"]],
+    ["Leave-in", "kf-emulsiones", "ksf-emulsion-ow", "Intermedio", ["Pantenol", "Proteina Hidrolizada"]],
+    ["Mascarilla capilar", "kf-emulsiones", "ksf-emulsion-ow", "Intermedio", ["BTMS", "Aceite de Argan"]],
+    ["Aceite capilar", "kf-anhidros", null, "Basico", ["Aceite de Argan", "Vitamina E"]],
+    ["Crema facial", "kf-emulsiones", "ksf-emulsion-ow", "Intermedio", ["Glicerina", "Olivem 1000"]],
+    ["Crema corporal", "kf-emulsiones", "ksf-emulsion-ow", "Intermedio", ["Manteca de Karite", "Glicerina"]],
+    ["Gel corporal", "kf-geles", null, "Basico", ["Goma Xantana", "Aloe Vera"]],
+    ["Serum", "kf-soluciones", null, "Intermedio", ["Niacinamida", "Acido hialuronico"]],
+    ["Balsamo labial", "kf-cerosos", "ksf-balsamo-anhidro", "Basico", ["Manteca de Karite", "Aceite de Coco"]],
+    ["Bombas efervescentes", "kf-efervescentes", null, "Avanzado", ["Arcilla Blanca"]],
+    ["Perfume", "kf-perfumeria", null, "Intermedio", ["Vitamina E"]],
+    ["Extracto", "kf-extractivas", null, "Basico", ["Romero", "Ortiga"]],
+    ["Macerado", "kf-extractivas", null, "Basico", ["Romero", "Ortiga"]],
+    ["Syndet", "kf-solidos", "ksf-solido-compacto", "Intermedio", ["SCI", "SCS"]],
+    ["Exfoliante corporal", "kf-dispersiones", null, "Basico", ["Arcilla Verde", "Arcilla Blanca"]],
+    ["Protector solar", "kf-emulsiones", "ksf-emulsion-ow", "Avanzado", ["Glicerina", "Olivem 1000"]]
+  ] as const;
+  for (const [productName, familyId, subfamilyId, complexityLevel, ingredients] of relations) {
+    const productTypeId = productIdByName.get(productName.toLowerCase());
+    if (productTypeId) await prisma.productFamilyRelation.upsert({ where: { id: `rel-${productTypeId}-${familyId}` }, update: { complexityLevel, frequentIngredientsJson: ingredients }, create: { id: `rel-${productTypeId}-${familyId}`, productTypeId, familyId, subfamilyId, relationType: "principal", complexityLevel, physicalForm: "Registrada", applicationRoute: "Topica", usageZone: "Cosmetica", cosmeticNeed: "Consulta", targetAudience: "General", frequentIngredientsJson: ingredients, recommendedControlsJson: ["pH", "Viscosidad", "Apariencia"], equipmentJson: ["Bascula", "Agitador"] } });
+  }
+
+  const needs = [
+    ["need-cabello-seco", "Cabello", "Cabello seco", ["Shampoo hidratante", "Acondicionador liquido", "Mascarilla capilar", "Leave-in", "Serum capilar"], ["kf-tensioactivos", "kf-emulsiones", "kf-anhidros"], ["rm-pantenol", "rm-glicerina", "rm-proteina", "rm-argan", "rm-karite"], "Intermedio"],
+    ["need-cabello-graso", "Cabello", "Cabello graso", ["Shampoo para cabello graso", "Shampoo liquido", "Shampoo solido"], ["kf-tensioactivos"], ["rm-sci", "rm-scs", "rm-arcilla-verde"], "Basico"],
+    ["need-caspa", "Cabello", "Caspa", ["Shampoo anticaspa", "Shampoo liquido"], ["kf-tensioactivos"], ["rm-romero", "rm-ortiga"], "Intermedio"],
+    ["need-piel-grasa", "Piel", "Piel grasa", ["Limpiador facial", "Gel corporal", "Serum"], ["kf-tensioactivos", "kf-geles", "kf-soluciones"], ["rm-niacinamida", "rm-glicerina"], "Intermedio"],
+    ["need-hidratacion", "Piel", "Hidratacion", ["Crema facial", "Crema corporal", "Locion"], ["kf-emulsiones"], ["rm-glicerina", "rm-acido-hialuronico", "rm-pantenol"], "Basico"],
+    ["need-relajacion", "Spa", "Relajacion", ["Sales de bano", "Bruma corporal", "Roll-on aromatico"], ["kf-soluciones", "kf-perfumeria", "kf-anhidros"], ["rm-romero"], "Basico"]
+  ] as const;
+  for (const [id, area, name, productNames, familyIds, rawMaterialIds, difficulty] of needs) {
+    await prisma.cosmeticNeed.upsert({ where: { id }, update: { name, area }, create: { id, code: id.replace("need-", "NEED-").toUpperCase(), area, name, description: `Ruta guiada para ${name}.`, productTypeIdsJson: productNames.map((name) => productIdByName.get(name.toLowerCase())).filter(Boolean), familyIdsJson: familyIds, rawMaterialIdsJson: rawMaterialIds, equipmentJson: ["Bascula", "Agitador", "Mezclador", "Homogeneizador"], controlsJson: ["pH", "Viscosidad", "Estabilidad", "Apariencia"], difficulty } });
+  }
+
+  const glossary = [["glos-tensioactivo", "kf-tensioactivos", "Tensioactivo"], ["glos-emulsion", "kf-emulsiones", "Emulsion"], ["glos-anhidro", "kf-anhidros", "Anhidro"], ["glos-fefo", null, "FEFO"], ["glos-ph", null, "pH"]] as const;
+  for (const [id, familyId, term] of glossary) await prisma.familyGlossaryTerm.upsert({ where: { id }, update: { term }, create: { id, familyId, term, simpleDefinition: `${term}: termino del Centro de Conocimiento explicado para principiantes.`, technicalDefinition: "Definicion tecnica demo pendiente de fuente documental especifica.", relatedTermsJson: [term] } });
+
+  for (const [index, term] of ["quiero fabricar shampoo", "cabello seco", "piel grasa", "crema", "emulsion", "tensioactivo", "caspa", "hidratacion", "anti edad", "protector solar", "gel refrescante", "sistema anhidro"].entries()) {
+    await prisma.productSearchTerm.upsert({ where: { id: `kst-${index + 1}` }, update: { term }, create: { id: `kst-${index + 1}`, productTypeId: index % 2 === 0 ? productIdByName.get("shampoo solido") : productIdByName.get("crema facial"), familyId: index % 3 === 0 ? "kf-tensioactivos" : "kf-emulsiones", needId: index % 2 === 0 ? "need-cabello-seco" : "need-hidratacion", term, termType: "universal", weight: 5 } });
+  }
+
+  for (const [id, desiredOutcome, usageZone, physicalForm, difficulty, cosmeticNeed, productNames, familyIds, rawMaterialIds] of [
+    ["gsr-cabello-seco", "fabricar producto para cabello seco", "Cabello", "Liquido o semisolido", "Intermedio", "Cabello seco", ["Shampoo hidratante", "Acondicionador liquido", "Mascarilla capilar"], ["kf-tensioactivos", "kf-emulsiones"], ["rm-pantenol", "rm-glicerina"]],
+    ["gsr-piel-grasa", "producto para piel grasa", "Piel", "Gel", "Intermedio", "Piel grasa", ["Limpiador facial", "Serum"], ["kf-geles", "kf-soluciones"], ["rm-niacinamida"]],
+    ["gsr-anhidro", "sistema anhidro", "Corporal", "Solido", "Basico", "Hidratacion", ["Balsamo labial", "Manteca corporal"], ["kf-anhidros", "kf-cerosos"], ["rm-karite", "rm-coco"]]
+  ] as const) await prisma.guidedSelectionRule.upsert({ where: { id }, update: { desiredOutcome }, create: { id, code: id.replace("gsr-", "GSR-").toUpperCase(), desiredOutcome, usageZone, physicalForm, difficulty, cosmeticNeed, productTypeIdsJson: productNames.map((name) => productIdByName.get(name.toLowerCase())).filter(Boolean), familyIdsJson: familyIds, rawMaterialIdsJson: rawMaterialIds } });
+
   const family = await prisma.formulationFamily.upsert({
     where: { organizationId_permanentCode: { organizationId: organization.id, permanentCode: "FLC-FRM-000001" } },
     update: {

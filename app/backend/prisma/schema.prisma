@@ -178,6 +178,15 @@ model Organization {
   productionChecklistItems ProductionChecklistItem[]
   productionProcessParameters ProductionProcessParameter[]
   finishedProductLots FinishedProductLot[]
+  productCategories ProductCategory[]
+  productTypes ProductType[]
+  knowledgeFamilies KnowledgeFormulationFamily[]
+  formulationSubfamilies FormulationSubfamily[]
+  productFamilyRelations ProductFamilyRelation[]
+  familyGlossaryTerms FamilyGlossaryTerm[]
+  productSearchTerms ProductSearchTerm[]
+  guidedSelectionRules GuidedSelectionRule[]
+  cosmeticNeeds CosmeticNeed[]
 
   @@map("organizations")
 }
@@ -1027,4 +1036,211 @@ model FinishedProductLot {
 
   @@index([organizationId])
   @@map("finished_product_lots")
+}
+
+model ProductCategory {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  code           String
+  name           String
+  description    String?      @db.Text
+  status         EntityStatus @default(activo)
+  sortOrder      Int          @default(0) @map("sort_order")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  products       ProductType[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("product_categories")
+}
+
+model ProductType {
+  id                    String       @id @default(uuid())
+  organizationId        String?      @map("organization_id")
+  categoryId            String       @map("category_id")
+  code                  String
+  name                  String
+  description           String?      @db.Text
+  physicalForm          String?      @map("physical_form")
+  applicationRoute      String?      @map("application_route")
+  usageZone             String?      @map("usage_zone")
+  cosmeticNeed          String?      @map("cosmetic_need")
+  targetAudience        String?      @map("target_audience")
+  difficulty            String      @default("Basico")
+  learningSummary       String?      @db.Text @map("learning_summary")
+  manufacturingOverview String?      @db.Text @map("manufacturing_overview")
+  usualEquipmentJson    Json?        @map("usual_equipment_json")
+  processStagesJson     Json?        @map("process_stages_json")
+  commonErrorsJson      Json?        @map("common_errors_json")
+  safetyNotes           String?      @db.Text @map("safety_notes")
+  status                EntityStatus @default(activo)
+  createdAt             DateTime     @default(now()) @map("created_at")
+  updatedAt             DateTime     @default(now()) @updatedAt @map("updated_at")
+  organization          Organization? @relation(fields: [organizationId], references: [id])
+  category              ProductCategory @relation(fields: [categoryId], references: [id])
+  familyRelations       ProductFamilyRelation[]
+  searchTerms           ProductSearchTerm[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([categoryId])
+  @@map("product_types")
+}
+
+model KnowledgeFormulationFamily {
+  id                    String       @id @default(uuid())
+  organizationId        String?      @map("organization_id")
+  code                  String
+  name                  String
+  simpleDefinition      String       @db.Text @map("simple_definition")
+  technicalDefinition   String?      @db.Text @map("technical_definition")
+  typicalStructure      String?      @db.Text @map("typical_structure")
+  usualIngredientsJson  Json?        @map("usual_ingredients_json")
+  advantagesJson        Json?        @map("advantages_json")
+  limitationsJson       Json?        @map("limitations_json")
+  difficulty            String       @default("Intermedio")
+  commonEquipmentJson   Json?        @map("common_equipment_json")
+  basicControlsJson     Json?        @map("basic_controls_json")
+  frequentRisksJson     Json?        @map("frequent_risks_json")
+  relatedTermsJson      Json?        @map("related_terms_json")
+  internalReferencesJson Json?       @map("internal_references_json")
+  status                EntityStatus @default(activo)
+  createdAt             DateTime     @default(now()) @map("created_at")
+  updatedAt             DateTime     @default(now()) @updatedAt @map("updated_at")
+  organization          Organization? @relation(fields: [organizationId], references: [id])
+  subfamilies           FormulationSubfamily[]
+  productRelations      ProductFamilyRelation[]
+  glossaryTerms         FamilyGlossaryTerm[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("knowledge_formulation_families")
+}
+
+model FormulationSubfamily {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  familyId       String       @map("family_id")
+  code           String
+  name           String
+  description    String?      @db.Text
+  status         EntityStatus @default(activo)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  family         KnowledgeFormulationFamily @relation(fields: [familyId], references: [id])
+  productRelations ProductFamilyRelation[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([familyId])
+  @@map("formulation_subfamilies")
+}
+
+model ProductFamilyRelation {
+  id                 String       @id @default(uuid())
+  organizationId     String?      @map("organization_id")
+  productTypeId      String       @map("product_type_id")
+  familyId           String       @map("family_id")
+  subfamilyId        String?      @map("subfamily_id")
+  relationType       String       @default("principal") @map("relation_type")
+  complexityLevel    String       @default("Basico") @map("complexity_level")
+  physicalForm       String?      @map("physical_form")
+  applicationRoute   String?      @map("application_route")
+  usageZone          String?      @map("usage_zone")
+  cosmeticNeed       String?      @map("cosmetic_need")
+  targetAudience     String?      @map("target_audience")
+  frequentIngredientsJson Json?   @map("frequent_ingredients_json")
+  recommendedControlsJson Json?   @map("recommended_controls_json")
+  equipmentJson      Json?        @map("equipment_json")
+  status             EntityStatus @default(activo)
+  organization       Organization? @relation(fields: [organizationId], references: [id])
+  productType        ProductType  @relation(fields: [productTypeId], references: [id])
+  family             KnowledgeFormulationFamily @relation(fields: [familyId], references: [id])
+  subfamily          FormulationSubfamily? @relation(fields: [subfamilyId], references: [id])
+
+  @@index([organizationId])
+  @@index([productTypeId])
+  @@index([familyId])
+  @@map("product_family_relations")
+}
+
+model FamilyGlossaryTerm {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  familyId       String?      @map("family_id")
+  term           String
+  simpleDefinition String     @db.Text @map("simple_definition")
+  technicalDefinition String? @db.Text @map("technical_definition")
+  relatedTermsJson Json?      @map("related_terms_json")
+  status         EntityStatus @default(activo)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  family         KnowledgeFormulationFamily? @relation(fields: [familyId], references: [id])
+
+  @@index([organizationId])
+  @@index([familyId])
+  @@map("family_glossary_terms")
+}
+
+model ProductSearchTerm {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  productTypeId  String?      @map("product_type_id")
+  familyId       String?      @map("family_id")
+  needId         String?      @map("need_id")
+  term           String
+  termType       String       @default("relacionado") @map("term_type")
+  weight         Int          @default(1)
+  status         EntityStatus @default(activo)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  productType    ProductType? @relation(fields: [productTypeId], references: [id])
+  need           CosmeticNeed? @relation(fields: [needId], references: [id])
+
+  @@index([organizationId])
+  @@index([productTypeId])
+  @@index([familyId])
+  @@index([needId])
+  @@map("product_search_terms")
+}
+
+model GuidedSelectionRule {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  code           String
+  desiredOutcome String?      @map("desired_outcome")
+  usageZone      String?      @map("usage_zone")
+  physicalForm   String?      @map("physical_form")
+  difficulty     String?
+  cosmeticNeed   String?      @map("cosmetic_need")
+  productTypeIdsJson Json     @map("product_type_ids_json")
+  familyIdsJson  Json         @map("family_ids_json")
+  rawMaterialIdsJson Json?    @map("raw_material_ids_json")
+  status         EntityStatus @default(activo)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("guided_selection_rules")
+}
+
+model CosmeticNeed {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  code           String
+  area           String
+  name           String
+  description    String?      @db.Text
+  productTypeIdsJson Json     @map("product_type_ids_json")
+  familyIdsJson  Json         @map("family_ids_json")
+  rawMaterialIdsJson Json?    @map("raw_material_ids_json")
+  equipmentJson  Json?        @map("equipment_json")
+  controlsJson   Json?        @map("controls_json")
+  difficulty     String       @default("Basico")
+  status         EntityStatus @default(activo)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  searchTerms    ProductSearchTerm[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("cosmetic_needs")
 }

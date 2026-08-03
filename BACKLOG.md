@@ -75,7 +75,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 7 - Laboratorio y Produccion MVP
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Ordenes de produccion implementadas.
 - Generacion desde formulacion aprobada implementada.
@@ -87,6 +87,19 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Cierre con lote de producto terminado implementado.
 - Calculo de rendimiento, diferencia y merma implementado.
 - Dashboard y UI ERP tipo laboratorio implementados.
+
+## Incremento 7.5 - Centro de Conocimiento Cosmetico
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Menu Centro de Conocimiento implementado.
+- Categorias de productos cosmeticos implementadas.
+- Familias y subfamilias formulativas implementadas.
+- Necesidades cosmeticas implementadas con productos, familias, materias primas, equipo y controles sugeridos.
+- Busqueda universal implementada con relaciones registradas, sin IA generativa.
+- Seleccion guiada implementada con reglas declarativas.
+- Glosario y modo aprendizaje implementados.
+- Validacion documentada con diagrama de flujo y diagrama ER Mermaid.
 - Pendiente: aprobacion formal antes de iniciar Incremento 8.
 
 ## Pendiente para fases posteriores

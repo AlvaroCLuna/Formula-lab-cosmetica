@@ -226,6 +226,30 @@ export const api = {
   async addProductionParameter(id: string, input: Record<string, unknown>) {
     return request<{ parameter: any }>(`/production/orders/${id}/parameters`, { method: "POST", body: JSON.stringify(input) });
   },
+  async knowledgeCategories() {
+    return request<{ categories: any[] }>("/knowledge-center/categories");
+  },
+  async knowledgeProducts() {
+    return request<{ products: any[] }>("/knowledge-center/products");
+  },
+  async knowledgeFamilies() {
+    return request<{ families: any[] }>("/knowledge-center/families");
+  },
+  async knowledgeNeeds() {
+    return request<{ needs: any[] }>("/knowledge-center/needs");
+  },
+  async knowledgeNeed(id: string) {
+    return request<{ need: any; products: any[]; families: any[]; rawMaterials: any[]; formulations: any[]; equipment: any; controls: any }>(`/knowledge-center/needs/${id}`);
+  },
+  async knowledgeGlossary() {
+    return request<{ terms: any[] }>("/knowledge-center/glossary");
+  },
+  async knowledgeSearch(q: string) {
+    return request<{ products: any[]; families: any[]; needs: any[] }>(`/knowledge-center/search?q=${encodeURIComponent(q)}`);
+  },
+  async guidedKnowledgeSelection(input: Record<string, unknown>) {
+    return request<{ rules: any[]; products: any[]; families: any[]; rawMaterials: any[] }>("/knowledge-center/guided-selection", { method: "POST", body: JSON.stringify(input) });
+  },
   async listMasterRawMaterials(filters: { search?: string; status?: string; category?: string; family?: string } = {}) {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {
