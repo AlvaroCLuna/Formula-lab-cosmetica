@@ -60,7 +60,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 6 - Inventario y Lotes
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Almacenes y ubicaciones implementados.
 - Lotes de materia prima con estados operativos implementados.
@@ -72,7 +72,22 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Integracion preparatoria con costos de entrada, moneda y tipo de cambio implementada.
 - UI ERP de inventario con vista rapida y modo aprendizaje implementada.
 - Seeds con 2 almacenes, 8 ubicaciones, 25 lotes y movimientos demo agregados.
-- Pendiente: aprobacion formal antes de iniciar Incremento 7.
+
+## Incremento 7 - Laboratorio y Produccion MVP
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Ordenes de produccion implementadas.
+- Generacion desde formulacion aprobada implementada.
+- Consumo teorico con FEFO, disponibilidad y costo esperado implementado.
+- Consumo real con descuento de inventario y kardex implementado.
+- Checklist obligatorio implementado.
+- Bitacora cronologica implementada.
+- Parametros de proceso implementados.
+- Cierre con lote de producto terminado implementado.
+- Calculo de rendimiento, diferencia y merma implementado.
+- Dashboard y UI ERP tipo laboratorio implementados.
+- Pendiente: aprobacion formal antes de iniciar Incremento 8.
 
 ## Pendiente para fases posteriores
 
@@ -86,7 +101,8 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Eventos de sincronizacion en tiempo real.
 - APK instalable.
 - Compras completas.
-- Produccion completa.
+- Planificacion avanzada MRP.
+- Produccion avanzada.
 - Facturacion.
 - Calidad avanzada.
 - Laboratorio avanzado.

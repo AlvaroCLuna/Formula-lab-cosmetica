@@ -871,6 +871,93 @@ textarea {
   padding: 12px;
 }
 
+.production-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 430px;
+  gap: 18px;
+  align-items: start;
+}
+
+.production-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.production-kpis article,
+.production-orders,
+.production-side,
+.production-consumption {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.production-kpis article {
+  padding: 14px;
+}
+
+.production-kpis span,
+.production-card span,
+.production-consumption span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.production-kpis strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+.production-side {
+  position: sticky;
+  top: 16px;
+}
+
+.production-card {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) 100px 120px auto;
+  gap: 12px;
+  align-items: center;
+  width: calc(100% - 24px);
+  margin: 0 12px 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--text);
+  text-align: left;
+}
+
+.production-card.selected {
+  border-color: var(--primary);
+  background: #eff8f4;
+}
+
+.production-orders .section-heading,
+.production-side .section-heading {
+  padding: 12px;
+}
+
+.checkline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.production-consumption {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+}
+
 .module-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
@@ -1257,6 +1344,9 @@ textarea {
   .inventory-grid,
   .inventory-kpis,
   .inventory-row,
+  .production-grid,
+  .production-kpis,
+  .production-card,
   .module-hero,
   .filters-bar {
     grid-template-columns: 1fr;
@@ -1270,6 +1360,10 @@ textarea {
   }
 
   .inventory-side {
+    position: static;
+  }
+
+  .production-side {
     position: static;
   }
 

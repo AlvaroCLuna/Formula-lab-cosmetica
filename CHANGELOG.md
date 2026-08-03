@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.7.0 - Incremento 7 implementado
+
+- Se implemento Laboratorio y Produccion MVP con ordenes de produccion trazables.
+- Se agrego generacion de orden desde version aprobada de formulacion.
+- Se agrego consumo teorico con cantidades requeridas, disponibilidad, lotes FEFO sugeridos y costo esperado.
+- Se agrego consumo real con lote utilizado, cantidad, merma, sustitucion autorizada, descuento de inventario y movimiento de kardex.
+- Se agregaron bitacora, checklist obligatorio, parametros de proceso y cierre con lote de producto terminado.
+- Se agrego dashboard de produccion con ordenes activas, produccion del dia, lotes producidos, consumo, merma y ordenes detenidas.
+- Se agregaron APIs, migracion Prisma/SQL, seeds con ordenes demo y pruebas del servicio de produccion.
+- Se documento la validacion en `docs/23_Validacion_Incremento_7.md`.
+
 ## 0.6.0 - Incremento 6 implementado
 
 - Se implemento Inventario y Lotes con almacenes, ubicaciones, lotes de materia prima y estados operativos.

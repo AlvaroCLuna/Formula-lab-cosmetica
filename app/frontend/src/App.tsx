@@ -8,6 +8,7 @@ import { FormulationListPage } from "./pages/FormulationListPage";
 import { RawMaterialsPage } from "./pages/RawMaterialsPage";
 import { CostEnginePage } from "./pages/CostEnginePage";
 import { InventoryPage } from "./pages/InventoryPage";
+import { ProductionPage } from "./pages/ProductionPage";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -45,7 +46,7 @@ export function App() {
         setUser(null);
       }}
     >
-      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "inventario" ? <InventoryPage /> : <IngredientIntelligencePage />}
+      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "inventario" ? <InventoryPage /> : view === "produccion" ? <ProductionPage /> : <IngredientIntelligencePage />}
     </AppShell>
   );
 }

@@ -18,7 +18,8 @@ const viewCopy: Record<string, { title: string; search: string }> = {
   formulaciones: { title: "Gestor de Formulaciones", search: "Buscar formulaciones, versiones o ingredientes" },
   materias: { title: "Materias Primas Maestras", search: "Buscar materias primas, INCI o funciones" },
   costos: { title: "Motor de Costos", search: "Buscar escenarios, proveedores o precios" },
-  inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" }
+  inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" },
+  produccion: { title: "Laboratorio y Produccion", search: "Buscar ordenes, lotes o formulaciones" }
 };
 
 export function AppShell({ user, activeView, onNavigate, onLogout, children }: Props) {

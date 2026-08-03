@@ -468,6 +468,146 @@ async function main() {
       }
     });
   }
+
+  const productionOrders = [
+    ["po-demo-01", "OP-00001", "terminada", "alta", 1000, 940],
+    ["po-demo-02", "OP-00002", "terminada", "media", 500, 485],
+    ["po-demo-03", "OP-00003", "terminada", "media", 250, 240],
+    ["po-demo-04", "OP-00004", "en_proceso", "urgente", 1000, null],
+    ["po-demo-05", "OP-00005", "pausada", "alta", 500, null]
+  ] as const;
+  const productionMaterials = [
+    ["ing-sci", "rm-sci", "lot-demo-01", 45],
+    ["ing-betaina", "rm-betaina", "lot-demo-04", 10],
+    ["ing-karite", "rm-karite", "lot-demo-08", 8]
+  ] as const;
+  const checklistLabels = ["Equipo limpio", "Materia prima liberada", "Basculas calibradas", "EPP colocado", "Documentacion disponible"] as const;
+
+  for (const [id, permanentCode, status, priority, plannedQuantity, actualYield] of productionOrders) {
+    await prisma.productionOrder.upsert({
+      where: { id },
+      update: {
+        status,
+        priority,
+        plannedQuantity,
+        expectedYield: plannedQuantity,
+        actualYield,
+        yieldDifference: actualYield == null ? null : Math.round((actualYield - plannedQuantity) * 1000) / 1000,
+        finishedAt: status === "terminada" ? new Date("2026-08-02T16:00:00.000Z") : null
+      },
+      create: {
+        id,
+        organizationId: organization.id,
+        permanentCode,
+        formulationVersionId: "frm-shampoo-v1",
+        status,
+        priority,
+        targetLotCode: `PT-${permanentCode}`,
+        plannedQuantity,
+        plannedUnit: "g",
+        expectedYield: plannedQuantity,
+        responsibleUserId: "demo-user",
+        operatorUserId: "demo-user",
+        plannedStartAt: new Date("2026-08-02T10:00:00.000Z"),
+        startedAt: ["terminada", "en_proceso", "pausada"].includes(status) ? new Date("2026-08-02T10:30:00.000Z") : null,
+        finishedAt: status === "terminada" ? new Date("2026-08-02T16:00:00.000Z") : null,
+        actualYield,
+        yieldDifference: actualYield == null ? null : Math.round((actualYield - plannedQuantity) * 1000) / 1000,
+        wasteTotal: status === "terminada" ? 5 : 0,
+        expectedCost: Math.round(plannedQuantity * 0.42 * 100) / 100,
+        notes: "Orden demo del MVP de laboratorio y produccion."
+      }
+    });
+
+    for (const [index, label] of checklistLabels.entries()) {
+      await prisma.productionChecklistItem.upsert({
+        where: { id: `${id}-chk-${index + 1}` },
+        update: { label, completed: status !== "borrador" },
+        create: {
+          id: `${id}-chk-${index + 1}`,
+          organizationId: organization.id,
+          productionOrderId: id,
+          label,
+          required: true,
+          completed: status !== "borrador",
+          completedAt: status !== "borrador" ? new Date("2026-08-02T10:15:00.000Z") : null,
+          completedByUserId: status !== "borrador" ? "demo-user" : null
+        }
+      });
+    }
+
+    for (const [ingredientId, rawMaterialId, lotId, percentage] of productionMaterials) {
+      const requiredQuantity = Math.round((percentage / 100) * plannedQuantity * 1000) / 1000;
+      const confirmed = ["terminada", "en_proceso", "pausada"].includes(status);
+      await prisma.productionConsumption.upsert({
+        where: { id: `${id}-cons-${rawMaterialId}` },
+        update: {
+          rawMaterialLotId: confirmed ? lotId : null,
+          requiredQuantity,
+          usedQuantity: confirmed ? requiredQuantity : null,
+          wasteQuantity: status === "terminada" ? 1 : 0,
+          confirmedAt: confirmed ? new Date("2026-08-02T11:00:00.000Z") : null
+        },
+        create: {
+          id: `${id}-cons-${rawMaterialId}`,
+          organizationId: organization.id,
+          productionOrderId: id,
+          rawMaterialMasterId: rawMaterialId,
+          rawMaterialLotId: confirmed ? lotId : null,
+          formulationIngredientId: ingredientId,
+          requiredQuantity,
+          usedQuantity: confirmed ? requiredQuantity : null,
+          wasteQuantity: status === "terminada" ? 1 : 0,
+          unit: "g",
+          observations: confirmed ? "Consumo demo trazable." : "Pendiente de consumo real.",
+          confirmedAt: confirmed ? new Date("2026-08-02T11:00:00.000Z") : null,
+          confirmedByUserId: confirmed ? "demo-user" : null,
+          inventoryMovementId: confirmed ? `${id}-mov-${rawMaterialId}` : null
+        }
+      });
+
+      if (confirmed) {
+        await prisma.inventoryMovement.upsert({
+          where: { id: `${id}-mov-${rawMaterialId}` },
+          update: { quantity: requiredQuantity + (status === "terminada" ? 1 : 0) },
+          create: {
+            id: `${id}-mov-${rawMaterialId}`,
+            organizationId: organization.id,
+            lotId,
+            type: "salida",
+            quantity: requiredQuantity + (status === "terminada" ? 1 : 0),
+            unit: "g",
+            previousBalance: 1000,
+            newBalance: Math.max(1000 - requiredQuantity, 0),
+            previousReserved: 0,
+            newReserved: 0,
+            reason: `Consumo produccion ${permanentCode}`,
+            reference: permanentCode,
+            createdByUserId: "demo-user"
+          }
+        });
+      }
+    }
+
+    await prisma.productionLog.upsert({
+      where: { id: `${id}-log-start` },
+      update: { observations: "Inicio demo de produccion." },
+      create: { id: `${id}-log-start`, organizationId: organization.id, productionOrderId: id, type: "inicio", operatorUserId: "demo-user", temperature: 24, timeMinutes: 0, agitationSpeed: 0, observations: "Inicio demo de produccion." }
+    });
+    await prisma.productionProcessParameter.upsert({
+      where: { id: `${id}-param-1` },
+      update: { temperature: 28, ph: 5.5 },
+      create: { id: `${id}-param-1`, organizationId: organization.id, productionOrderId: id, recordedByUserId: "demo-user", temperature: 28, timeMinutes: 20, speed: 600, ph: 5.5, viscosity: "Media", obtainedWeight: actualYield, observations: "Parametro demo de proceso." }
+    });
+
+    if (status === "terminada" && actualYield != null) {
+      await prisma.finishedProductLot.upsert({
+        where: { productionOrderId: id },
+        update: { quantityObtained: actualYield, actualYield },
+        create: { id: `${id}-finished-lot`, organizationId: organization.id, productionOrderId: id, lotCode: `PT-${permanentCode}`, producedAt: new Date("2026-08-02T16:00:00.000Z"), responsibleUserId: "demo-user", quantityObtained: actualYield, unit: "g", expectedYield: plannedQuantity, actualYield }
+      });
+    }
+  }
 }
 
 main()

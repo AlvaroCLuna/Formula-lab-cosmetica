@@ -1,0 +1,1 @@
+SOURCE app/backend/prisma/migrations/20260803011000_incremento_7_laboratorio_produccion/migration.sql;

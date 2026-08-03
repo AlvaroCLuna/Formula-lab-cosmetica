@@ -197,6 +197,35 @@ export const api = {
   async inventoryMovement(id: string, input: Record<string, unknown>) {
     return request<{ lot: any; movement: any }>(`/inventory/lots/${id}/movements`, { method: "POST", body: JSON.stringify(input) });
   },
+  async productionDashboard() {
+    return request<{ indicators: any }>("/production/dashboard");
+  },
+  async listProductionOrders(filters: { search?: string; status?: string; priority?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ orders: any[] }>(`/production/orders${params.toString() ? `?${params}` : ""}`);
+  },
+  async getProductionOrder(id: string) {
+    return request<{ order: any; theoretical: any }>(`/production/orders/${id}`);
+  },
+  async createProductionOrder(input: Record<string, unknown>) {
+    return request<{ order: any }>("/production/orders", { method: "POST", body: JSON.stringify(input) });
+  },
+  async transitionProductionOrder(id: string, input: Record<string, unknown>) {
+    return request<{ order: any }>(`/production/orders/${id}/transition`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async updateProductionChecklist(id: string, completed: boolean) {
+    return request<{ item: any }>(`/production/checklist/${id}`, { method: "PATCH", body: JSON.stringify({ completed }) });
+  },
+  async confirmProductionConsumption(id: string, input: Record<string, unknown>) {
+    return request<{ consumption: any }>(`/production/consumptions/${id}/confirm`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async addProductionLog(id: string, input: Record<string, unknown>) {
+    return request<{ log: any }>(`/production/orders/${id}/logs`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async addProductionParameter(id: string, input: Record<string, unknown>) {
+    return request<{ parameter: any }>(`/production/orders/${id}/parameters`, { method: "POST", body: JSON.stringify(input) });
+  },
   async listMasterRawMaterials(filters: { search?: string; status?: string; category?: string; family?: string } = {}) {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {

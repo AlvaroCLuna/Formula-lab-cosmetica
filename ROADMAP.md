@@ -28,7 +28,7 @@ Motor de Costos con productos comerciales enriquecidos, historial de precios, no
 
 Validacion documentada en `docs/21_Validacion_Incremento_5.md`.
 
-## Incremento 6 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 6 - COMPLETADO Y APROBADO
 
 Inventario y Lotes:
 
@@ -45,6 +45,21 @@ Inventario y Lotes:
 
 Validacion documentada en `docs/22_Validacion_Incremento_6.md`.
 
+## Incremento 7 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+Laboratorio y Produccion MVP:
+
+- Ordenes de produccion desde versiones aprobadas.
+- Estados, prioridad, responsable, operador y fechas.
+- Consumo teorico con FEFO, disponibilidad y costo esperado.
+- Consumo real con descuento de inventario, movimiento y kardex.
+- Checklist obligatorio antes de iniciar.
+- Bitacora cronologica y parametros de proceso.
+- Cierre con lote de producto terminado y calculo de rendimiento.
+- Dashboard ERP de produccion y experiencia tipo laboratorio.
+
+Validacion documentada en `docs/23_Validacion_Incremento_7.md`.
+
 ## Fases posteriores
 
 - Registro completo de usuarios.
@@ -56,6 +71,7 @@ Validacion documentada en `docs/22_Validacion_Incremento_6.md`.
 - APK Android.
 - Laboratorio guiado con reglas estructuradas.
 - Compras completas.
-- Produccion completa.
+- Planificacion avanzada MRP.
+- Produccion avanzada.
 - Facturacion.
 - Calidad avanzada.

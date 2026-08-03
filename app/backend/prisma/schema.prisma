@@ -117,6 +117,33 @@ enum InventoryMovementType {
   merma
 }
 
+enum ProductionOrderStatus {
+  borrador
+  planeada
+  liberada
+  en_proceso
+  pausada
+  terminada
+  cancelada
+}
+
+enum ProductionPriority {
+  baja
+  media
+  alta
+  urgente
+}
+
+enum ProductionLogType {
+  inicio
+  fin
+  pausa
+  reanudacion
+  incidencia
+  observacion
+  parametro
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -145,6 +172,12 @@ model Organization {
   warehouses InventoryWarehouse[]
   locations InventoryLocation[]
   movements InventoryMovement[]
+  productionOrders ProductionOrder[]
+  productionConsumptions ProductionConsumption[]
+  productionLogs ProductionLog[]
+  productionChecklistItems ProductionChecklistItem[]
+  productionProcessParameters ProductionProcessParameter[]
+  finishedProductLots FinishedProductLot[]
 
   @@map("organizations")
 }
@@ -176,6 +209,12 @@ model User {
   costScenarios CostScenario[]
   inventoryWarehouses InventoryWarehouse[]
   inventoryMovements InventoryMovement[]
+  responsibleProductionOrders ProductionOrder[] @relation("ProductionResponsible")
+  operatedProductionOrders ProductionOrder[] @relation("ProductionOperator")
+  productionLogs ProductionLog[]
+  productionConsumptions ProductionConsumption[]
+  productionChecklistItems ProductionChecklistItem[]
+  finishedProductLots FinishedProductLot[]
 
   @@index([organizationId])
   @@map("users")
@@ -341,6 +380,7 @@ model RawMaterialMaster {
   products         RawMaterialCommercialProduct[]
   documents        RawMaterialDocument[]
   lots             RawMaterialLot[]
+  productionConsumptions ProductionConsumption[]
 
   @@unique([organizationId, permanentCode])
   @@index([organizationId])
@@ -628,6 +668,7 @@ model RawMaterialLot {
   manufacturer        RawMaterialManufacturer? @relation(fields: [manufacturerId], references: [id])
   location            InventoryLocation? @relation(fields: [locationId], references: [id])
   movements           InventoryMovement[]
+  productionConsumptions ProductionConsumption[]
 
   @@unique([organizationId, permanentCode])
   @@index([organizationId])
@@ -756,6 +797,7 @@ model FormulationVersion {
   baseComparisons     FormulationVersionComparison[] @relation("BaseVersion")
   targetComparisons   FormulationVersionComparison[] @relation("TargetVersion")
   costScenarios       CostScenario[]
+  productionOrders    ProductionOrder[]
 
   @@unique([formulationFamilyId, versionNumber])
   @@index([organizationId])
@@ -830,4 +872,159 @@ model FormulationVersionComparison {
   @@index([baseVersionId])
   @@index([targetVersionId])
   @@map("formulation_version_comparisons")
+}
+
+model ProductionOrder {
+  id                   String                @id @default(uuid())
+  organizationId       String                @map("organization_id")
+  permanentCode        String                @map("permanent_code")
+  formulationVersionId String                @map("formulation_version_id")
+  status               ProductionOrderStatus @default(borrador)
+  priority             ProductionPriority    @default(media)
+  targetLotCode        String                @map("target_lot_code")
+  plannedQuantity      Float                 @map("planned_quantity")
+  plannedUnit          String                @default("g") @map("planned_unit")
+  expectedYield        Float                 @map("expected_yield")
+  responsibleUserId    String?               @map("responsible_user_id")
+  operatorUserId       String                @map("operator_user_id")
+  plannedStartAt       DateTime?             @map("planned_start_at")
+  plannedEndAt         DateTime?             @map("planned_end_at")
+  startedAt            DateTime?             @map("started_at")
+  finishedAt           DateTime?             @map("finished_at")
+  actualYield          Float?                @map("actual_yield")
+  yieldDifference      Float?                @map("yield_difference")
+  wasteTotal           Float                 @default(0) @map("waste_total")
+  expectedCost         Float?                @map("expected_cost")
+  notes                String?               @db.Text
+  createdAt            DateTime              @default(now()) @map("created_at")
+  updatedAt            DateTime              @default(now()) @updatedAt @map("updated_at")
+  organization         Organization          @relation(fields: [organizationId], references: [id])
+  formulationVersion   FormulationVersion    @relation(fields: [formulationVersionId], references: [id])
+  responsible          User?                 @relation("ProductionResponsible", fields: [responsibleUserId], references: [id])
+  operator             User                  @relation("ProductionOperator", fields: [operatorUserId], references: [id])
+  consumptions         ProductionConsumption[]
+  logs                 ProductionLog[]
+  checklistItems       ProductionChecklistItem[]
+  processParameters    ProductionProcessParameter[]
+  finishedLot          FinishedProductLot?
+
+  @@unique([organizationId, permanentCode])
+  @@index([organizationId])
+  @@index([formulationVersionId])
+  @@index([operatorUserId])
+  @@map("production_orders")
+}
+
+model ProductionConsumption {
+  id                      String           @id @default(uuid())
+  organizationId          String           @map("organization_id")
+  productionOrderId       String           @map("production_order_id")
+  rawMaterialMasterId     String           @map("raw_material_master_id")
+  rawMaterialLotId        String?          @map("raw_material_lot_id")
+  formulationIngredientId String?          @map("formulation_ingredient_id")
+  requiredQuantity        Float            @map("required_quantity")
+  usedQuantity            Float?           @map("used_quantity")
+  wasteQuantity           Float            @default(0) @map("waste_quantity")
+  unit                    String           @default("g")
+  substitutionAuthorized  Boolean          @default(false) @map("substitution_authorized")
+  observations            String?          @db.Text
+  confirmedAt             DateTime?        @map("confirmed_at")
+  confirmedByUserId       String?          @map("confirmed_by_user_id")
+  inventoryMovementId     String?          @map("inventory_movement_id")
+  createdAt               DateTime         @default(now()) @map("created_at")
+  updatedAt               DateTime         @default(now()) @updatedAt @map("updated_at")
+  organization            Organization     @relation(fields: [organizationId], references: [id])
+  order                   ProductionOrder  @relation(fields: [productionOrderId], references: [id])
+  rawMaterial             RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
+  lot                     RawMaterialLot?   @relation(fields: [rawMaterialLotId], references: [id])
+  confirmedBy             User?            @relation(fields: [confirmedByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([productionOrderId])
+  @@index([rawMaterialMasterId])
+  @@index([rawMaterialLotId])
+  @@map("production_consumptions")
+}
+
+model ProductionLog {
+  id                String            @id @default(uuid())
+  organizationId    String            @map("organization_id")
+  productionOrderId String            @map("production_order_id")
+  type              ProductionLogType
+  operatorUserId    String            @map("operator_user_id")
+  temperature       Float?
+  timeMinutes       Float?            @map("time_minutes")
+  agitationSpeed    Float?            @map("agitation_speed")
+  observations      String?           @db.Text
+  incidence         String?           @db.Text
+  createdAt         DateTime          @default(now()) @map("created_at")
+  organization      Organization      @relation(fields: [organizationId], references: [id])
+  order             ProductionOrder   @relation(fields: [productionOrderId], references: [id])
+  operator          User              @relation(fields: [operatorUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([productionOrderId])
+  @@index([operatorUserId])
+  @@map("production_logs")
+}
+
+model ProductionChecklistItem {
+  id                String           @id @default(uuid())
+  organizationId    String           @map("organization_id")
+  productionOrderId String           @map("production_order_id")
+  label             String
+  required          Boolean          @default(true)
+  completed         Boolean          @default(false)
+  completedAt       DateTime?        @map("completed_at")
+  completedByUserId String?          @map("completed_by_user_id")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @default(now()) @updatedAt @map("updated_at")
+  organization      Organization     @relation(fields: [organizationId], references: [id])
+  order             ProductionOrder  @relation(fields: [productionOrderId], references: [id])
+  completedBy       User?            @relation(fields: [completedByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([productionOrderId])
+  @@map("production_checklist_items")
+}
+
+model ProductionProcessParameter {
+  id                String          @id @default(uuid())
+  organizationId    String          @map("organization_id")
+  productionOrderId String          @map("production_order_id")
+  temperature       Float?
+  timeMinutes       Float?          @map("time_minutes")
+  speed             Float?
+  ph                Float?
+  viscosity         String?
+  obtainedWeight    Float?          @map("obtained_weight")
+  observations      String?         @db.Text
+  recordedByUserId  String          @map("recorded_by_user_id")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  organization      Organization    @relation(fields: [organizationId], references: [id])
+  order             ProductionOrder @relation(fields: [productionOrderId], references: [id])
+
+  @@index([organizationId])
+  @@index([productionOrderId])
+  @@map("production_process_parameters")
+}
+
+model FinishedProductLot {
+  id                String          @id @default(uuid())
+  organizationId    String          @map("organization_id")
+  productionOrderId String          @unique @map("production_order_id")
+  lotCode           String          @map("lot_code")
+  producedAt        DateTime        @map("produced_at")
+  responsibleUserId String          @map("responsible_user_id")
+  quantityObtained  Float           @map("quantity_obtained")
+  unit              String          @default("g")
+  expectedYield     Float           @map("expected_yield")
+  actualYield       Float           @map("actual_yield")
+  createdAt         DateTime        @default(now()) @map("created_at")
+  organization      Organization    @relation(fields: [organizationId], references: [id])
+  order             ProductionOrder @relation(fields: [productionOrderId], references: [id])
+  responsible       User            @relation(fields: [responsibleUserId], references: [id])
+
+  @@index([organizationId])
+  @@map("finished_product_lots")
 }
