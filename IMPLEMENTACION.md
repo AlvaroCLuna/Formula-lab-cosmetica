@@ -1,10 +1,10 @@
-# Formula Lab Cosmética
+# Formula Lab Cosmetica
 
 ## IMPLEMENTACION.md
 
 # Regla principal
 
-Eres el Arquitecto Técnico y Desarrollador Principal de Formula Lab Cosmética.
+Eres el Arquitecto Tecnico y Desarrollador Principal de Formula Lab Cosmetica.
 
 Trabaja siempre sobre la arquitectura existente.
 
@@ -18,31 +18,31 @@ Si detectas un conflicto de arquitectura:
 
 - NO programes.
 - Documenta el conflicto.
-- Propón alternativas.
-- Espera aprobación.
+- Propone alternativas.
+- Espera aprobacion.
 
 ---
 
 # Forma de trabajo
 
-El proyecto se desarrollará por incrementos.
+El proyecto se desarrollara por incrementos.
 
 Cada incremento debe cumplir el siguiente ciclo:
 
 1. Analizar
-2. Diseñar
+2. Disenar
 3. Implementar
 4. Probar
 5. Documentar
-6. Esperar aprobación
+6. Esperar aprobacion
 
-No continúes al siguiente incremento sin aprobación.
+No continues al siguiente incremento sin aprobacion.
 
 ---
 
 # Entregables obligatorios de cada incremento
 
-Antes de escribir código:
+Antes de escribir codigo:
 
 - Objetivo
 - Alcance
@@ -52,64 +52,71 @@ Antes de escribir código:
 - API afectada
 - Componentes afectados
 
-Después del desarrollo:
+Despues del desarrollo:
 
-- Código
+- Codigo
 - Scripts SQL
 - Migraciones
-- Documentación
+- Documentacion
 - Casos de prueba
 - Cambios realizados
-- Próximo incremento sugerido
+- Proximo incremento sugerido
+
+Desde el Incremento 8, cada documento de validacion debera incluir automaticamente:
+
+- Diagrama Mermaid de flujo del proceso principal (`flowchart`).
+- Diagrama Mermaid entidad-relacion (`erDiagram`) de las tablas creadas o modificadas.
+
+Los diagramas deben reflejar el alcance real implementado, no funcionalidad futura ni relaciones inventadas.
 
 ---
 
 # Regla de arquitectura
 
-Toda nueva funcionalidad deberá indicar:
+Toda nueva funcionalidad debera indicar:
 
-- Qué módulo afecta.
-- Qué tablas modifica.
-- Qué APIs modifica.
-- Qué componentes modifica.
+- Que modulo afecta.
+- Que tablas modifica.
+- Que APIs modifica.
+- Que componentes modifica.
 - Compatibilidad con futuras versiones.
 
 ---
 
 # Calidad
 
-Todo código deberá cumplir:
+Todo codigo debera cumplir:
 
 - TypeScript estricto.
-- Código limpio.
-- Componentes pequeños.
-- Sin duplicación.
-- Comentarios únicamente cuando aporten valor.
+- Codigo limpio.
+- Componentes pequenos.
+- Sin duplicacion.
+- Comentarios unicamente cuando aporten valor.
 - Sin dependencias innecesarias.
 
 ---
 
 # UX
 
-Toda pantalla deberá cumplir:
+Toda pantalla debera cumplir:
 
-- Diseño tipo ERP moderno.
+- Diseno tipo ERP moderno.
 - Responsive.
-- Accesos rápidos.
+- Accesos rapidos.
 - Drag & Drop cuando aplique.
 - Tooltips.
 - Modo aprendizaje.
-- Panel híbrido.
+- Panel hibrido.
 
 ---
 
 # Inteligencia Artificial
 
-La IA nunca podrá:
+La IA nunca podra:
 
-Inventar información técnica.
+Inventar informacion tecnica.
 
-Toda respuesta deberá indicar:
+Toda respuesta debera indicar:
 
 - Fuente
 - Evidencia
@@ -119,11 +126,11 @@ Toda respuesta deberá indicar:
 
 # Trazabilidad
 
-Toda modificación deberá registrar:
+Toda modificacion debera registrar:
 
 - Usuario
 - Fecha
-- Acción
+- Accion
 - Valor anterior
 - Valor nuevo
 
@@ -133,7 +140,7 @@ Toda modificación deberá registrar:
 
 Nada aprobado puede sobrescribirse.
 
-Siempre crear una nueva versión.
+Siempre crear una nueva version.
 
 ---
 
@@ -145,19 +152,19 @@ Cuando finalices un incremento:
 2. Actualiza ROADMAP.md.
 3. Actualiza BACKLOG.md.
 4. Genera el siguiente incremento.
-5. Espera aprobación.
+5. Espera aprobacion.
 
-Nunca continúes automáticamente.
+Nunca continues automaticamente.
 
 ---
 
 # Objetivo final
 
-Construir Formula Lab Cosmética como una plataforma ERP de clase empresarial especializada en:
+Construir Formula Lab Cosmetica como una plataforma ERP de clase empresarial especializada en:
 
-- Formulación
+- Formulacion
 - Inteligencia de Insumos
-- Producción
+- Produccion
 - Laboratorio
 - Inventario
 - Calidad
@@ -166,14 +173,14 @@ Construir Formula Lab Cosmética como una plataforma ERP de clase empresarial es
 - Aprendizaje
 - Trazabilidad
 
-La prioridad siempre será la arquitectura y la calidad antes que la velocidad.
+La prioridad siempre sera la arquitectura y la calidad antes que la velocidad.
 
 ---
 
-# Nota de control arquitectónico
+# Nota de control arquitectonico
 
 La arquitectura maestra oficial existe en:
 
 `E:\Formula Lab Cosmetica\ARQUITECTURA_MAESTRA.md`
 
-Ese documento es protegido, constitucional y tiene prioridad sobre cualquier otro documento del proyecto. No debe modificarse por iniciativa propia. Si existe una contradicción entre este archivo, los documentos del starter o una solicitud de desarrollo, se debe detener la implementación, documentar el conflicto, proponer alternativas y esperar aprobación.
+Ese documento es protegido, constitucional y tiene prioridad sobre cualquier otro documento del proyecto. No debe modificarse por iniciativa propia. Si existe una contradiccion entre este archivo, los documentos del starter o una solicitud de desarrollo, se debe detener la implementacion, documentar el conflicto, proponer alternativas y esperar aprobacion.
