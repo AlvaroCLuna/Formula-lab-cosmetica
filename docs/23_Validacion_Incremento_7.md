@@ -11,6 +11,57 @@
 - Cierre de orden con lote de producto terminado.
 - Dashboard y UI tipo laboratorio.
 
+## Diagramas Mermaid
+
+### Generacion de Orden de Produccion
+
+```mermaid
+flowchart TD
+  A["Usuario selecciona version de formulacion"] --> B{"Version aprobada?"}
+  B -- "No" --> C["Bloquear creacion de orden"]
+  B -- "Si" --> D["Crear orden de produccion"]
+  D --> E["Registrar version, lote objetivo, cantidad, operador y organizacion"]
+  E --> F["Crear checklist obligatorio"]
+  F --> G["Calcular consumo teorico con Formula Engine"]
+  G --> H["Sugerir lotes por FEFO sin descontar inventario"]
+  H --> I["Registrar auditoria de creacion"]
+```
+
+### Consumo Real e Inventario
+
+```mermaid
+flowchart TD
+  A["Operador selecciona consumo pendiente"] --> B["Selecciona lote de materia prima"]
+  B --> C{"Lote corresponde a materia prima?"}
+  C -- "No" --> D{"Sustitucion autorizada?"}
+  D -- "No" --> E["Bloquear consumo"]
+  D -- "Si" --> F["Validar cantidad disponible"]
+  C -- "Si" --> F
+  F --> G{"Cantidad usada + merma <= disponible?"}
+  G -- "No" --> H["Bloquear saldo negativo"]
+  G -- "Si" --> I["Confirmar consumo real"]
+  I --> J["Crear movimiento de salida en inventario"]
+  J --> K["Actualizar kardex del lote"]
+  K --> L["Registrar auditoria de consumo"]
+```
+
+### Inicio y Cierre de Produccion
+
+```mermaid
+flowchart TD
+  A["Orden planeada o liberada"] --> B{"Checklist obligatorio completo?"}
+  B -- "No" --> C["Bloquear inicio"]
+  B -- "Si" --> D["Iniciar produccion"]
+  D --> E["Registrar bitacora de inicio"]
+  E --> F["Registrar parametros de proceso"]
+  F --> G{"Existe consumo real confirmado?"}
+  G -- "No" --> H["Bloquear cierre"]
+  G -- "Si" --> I["Terminar orden"]
+  I --> J["Calcular rendimiento, diferencia y merma"]
+  J --> K["Crear lote de producto terminado"]
+  K --> L["Registrar bitacora final y auditoria"]
+```
+
 ## Pruebas Ejecutadas
 
 - `npm.cmd run db:generate`
