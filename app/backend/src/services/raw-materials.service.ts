@@ -1,6 +1,21 @@
 import type { Prisma, RawMaterialMasterVersion } from "@prisma/client";
 import { prisma } from "../db.js";
 
+const rawMaterialDetailInclude = {
+  versions: { orderBy: { versionNumber: "desc" } },
+  manufacturers: { where: { status: "activo" }, orderBy: { name: "asc" } },
+  suppliers: { where: { status: "activo" }, orderBy: { name: "asc" } },
+  products: { where: { status: "activo" }, orderBy: { tradeName: "asc" } },
+  documents: { where: { status: "activo" }, orderBy: { createdAt: "desc" } },
+  lots: { where: { status: { notIn: ["archivado"] } }, orderBy: { createdAt: "desc" } },
+  ingredients: {
+    where: { status: "activo" },
+    include: { version: { include: { family: true } } }
+  }
+} satisfies Prisma.RawMaterialMasterInclude;
+
+export type RawMaterialDetail = Prisma.RawMaterialMasterGetPayload<{ include: typeof rawMaterialDetailInclude }>;
+
 export function isEditableRawMaterialVersion(version: { status: string }) {
   return ["borrador", "en_revision"].includes(version.status);
 }
@@ -69,22 +84,11 @@ export function buildRawMaterialWhere(input: { organizationId: string; search?: 
 export async function getRawMaterialDetail(id: string, organizationId: string) {
   return prisma.rawMaterialMaster.findFirstOrThrow({
     where: { id, organizationId },
-    include: {
-      versions: { orderBy: { versionNumber: "desc" } },
-      manufacturers: { where: { status: "activo" }, orderBy: { name: "asc" } },
-      suppliers: { where: { status: "activo" }, orderBy: { name: "asc" } },
-      products: { where: { status: "activo" }, orderBy: { tradeName: "asc" } },
-      documents: { where: { status: "activo" }, orderBy: { createdAt: "desc" } },
-      lots: { where: { status: "activo" }, orderBy: { createdAt: "desc" } },
-      ingredients: {
-        where: { status: "activo" },
-        include: { version: { include: { family: true } } }
-      }
-    }
+    include: rawMaterialDetailInclude
   });
 }
 
-export function buildRawMaterialIntelligence(rawMaterial: Awaited<ReturnType<typeof getRawMaterialDetail>>) {
+export function buildRawMaterialIntelligence(rawMaterial: RawMaterialDetail) {
   const formulationMap = new Map<string, { id: string; name: string; versionNumber: number; percentage: number }>();
   rawMaterial.ingredients.forEach((ingredient) => {
     formulationMap.set(ingredient.version.formulationFamilyId, {

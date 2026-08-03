@@ -92,6 +92,31 @@ enum RawMaterialDocumentType {
   otro
 }
 
+enum InventoryLotStatus {
+  pendiente_recepcion
+  recibido
+  cuarentena
+  aprobado
+  rechazado
+  bloqueado
+  agotado
+  caducado
+  archivado
+}
+
+enum InventoryMovementType {
+  entrada
+  salida
+  ajuste_positivo
+  ajuste_negativo
+  transferencia
+  reserva
+  liberacion_reserva
+  devolucion
+  rechazo
+  merma
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -117,6 +142,9 @@ model Organization {
   costScenarioItems CostScenarioItem[]
   rawMaterialDocuments RawMaterialDocument[]
   rawMaterialLots RawMaterialLot[]
+  warehouses InventoryWarehouse[]
+  locations InventoryLocation[]
+  movements InventoryMovement[]
 
   @@map("organizations")
 }
@@ -146,6 +174,8 @@ model User {
   rawMaterialApprovals RawMaterialMasterVersion[] @relation("RawMaterialApprovals")
   rawMaterialPriceHistory RawMaterialPriceHistory[]
   costScenarios CostScenario[]
+  inventoryWarehouses InventoryWarehouse[]
+  inventoryMovements InventoryMovement[]
 
   @@index([organizationId])
   @@map("users")
@@ -184,6 +214,7 @@ model Document {
   processingJobs    DocumentProcessingJob[]
   extractedValues   ExtractedValue[]
   rawMaterialLinks  RawMaterialDocument[]
+  inventoryMovements InventoryMovement[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -381,6 +412,7 @@ model RawMaterialManufacturer {
   organization        Organization      @relation(fields: [organizationId], references: [id])
   rawMaterial         RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
   products            RawMaterialCommercialProduct[]
+  lots                RawMaterialLot[]
 
   @@index([organizationId])
   @@index([rawMaterialMasterId])
@@ -400,6 +432,7 @@ model RawMaterialSupplier {
   rawMaterial         RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
   products            RawMaterialCommercialProduct[]
   priceHistory        RawMaterialPriceHistory[]
+  lots                RawMaterialLot[]
 
   @@index([organizationId])
   @@index([rawMaterialMasterId])
@@ -436,6 +469,7 @@ model RawMaterialCommercialProduct {
   supplier            RawMaterialSupplier?     @relation(fields: [supplierId], references: [id])
   priceHistory        RawMaterialPriceHistory[]
   costScenarioItems   CostScenarioItem[]
+  lots                RawMaterialLot[]
 
   @@unique([organizationId, permanentCode])
   @@index([organizationId])
@@ -559,17 +593,121 @@ model RawMaterialLot {
   id                  String            @id @default(uuid())
   organizationId      String            @map("organization_id")
   rawMaterialMasterId String            @map("raw_material_master_id")
+  commercialProductId String?           @map("commercial_product_id")
+  supplierId          String?           @map("supplier_id")
+  manufacturerId      String?           @map("manufacturer_id")
+  permanentCode       String            @map("permanent_code")
+  supplierLotNumber   String?           @map("supplier_lot_number")
   lotCode             String            @map("lot_code")
+  receivedAt          DateTime?         @map("received_at")
+  manufacturedAt      DateTime?         @map("manufactured_at")
   expirationDate      DateTime?         @map("expiration_date")
-  status              EntityStatus      @default(activo)
+  expectedQuantity    Float?            @map("expected_quantity")
+  receivedQuantity    Float             @default(0) @map("received_quantity")
+  availableQuantity   Float             @default(0) @map("available_quantity")
+  reservedQuantity    Float             @default(0) @map("reserved_quantity")
+  unit                String            @default("g")
+  unitCost            Float?            @map("unit_cost")
+  currency            String            @default("MXN")
+  exchangeRate        Float?            @map("exchange_rate")
+  locationId          String?           @map("location_id")
+  status              InventoryLotStatus @default(pendiente_recepcion)
+  packageIntact       Boolean?          @map("package_intact")
+  correctIdentification Boolean?        @map("correct_identification")
+  appearance          String?
+  color               String?
+  odor                String?
+  receptionDecision   String?           @map("reception_decision")
+  observations        String?           @db.Text
   createdAt           DateTime          @default(now()) @map("created_at")
   updatedAt           DateTime          @default(now()) @updatedAt @map("updated_at")
   organization        Organization      @relation(fields: [organizationId], references: [id])
   rawMaterial         RawMaterialMaster @relation(fields: [rawMaterialMasterId], references: [id])
+  commercialProduct   RawMaterialCommercialProduct? @relation(fields: [commercialProductId], references: [id])
+  supplier            RawMaterialSupplier? @relation(fields: [supplierId], references: [id])
+  manufacturer        RawMaterialManufacturer? @relation(fields: [manufacturerId], references: [id])
+  location            InventoryLocation? @relation(fields: [locationId], references: [id])
+  movements           InventoryMovement[]
 
+  @@unique([organizationId, permanentCode])
   @@index([organizationId])
   @@index([rawMaterialMasterId])
+  @@index([commercialProductId])
+  @@index([locationId])
   @@map("raw_material_lots")
+}
+
+model InventoryWarehouse {
+  id             String              @id @default(uuid())
+  organizationId String              @map("organization_id")
+  name           String
+  code           String
+  zone           String?
+  status         EntityStatus        @default(activo)
+  responsibleUserId String?          @map("responsible_user_id")
+  createdAt      DateTime            @default(now()) @map("created_at")
+  updatedAt      DateTime            @default(now()) @updatedAt @map("updated_at")
+  organization   Organization        @relation(fields: [organizationId], references: [id])
+  responsible    User?               @relation(fields: [responsibleUserId], references: [id])
+  locations      InventoryLocation[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("inventory_warehouses")
+}
+
+model InventoryLocation {
+  id             String             @id @default(uuid())
+  organizationId String             @map("organization_id")
+  warehouseId    String             @map("warehouse_id")
+  zone           String
+  aisle          String?
+  shelf          String?
+  code           String
+  status         EntityStatus       @default(activo)
+  createdAt      DateTime           @default(now()) @map("created_at")
+  updatedAt      DateTime           @default(now()) @updatedAt @map("updated_at")
+  organization   Organization       @relation(fields: [organizationId], references: [id])
+  warehouse      InventoryWarehouse @relation(fields: [warehouseId], references: [id])
+  lots           RawMaterialLot[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([warehouseId])
+  @@map("inventory_locations")
+}
+
+model InventoryMovement {
+  id              String                @id @default(uuid())
+  organizationId  String                @map("organization_id")
+  lotId           String                @map("lot_id")
+  relatedMovementId String?             @map("related_movement_id")
+  type            InventoryMovementType
+  quantity        Float
+  unit            String                @default("g")
+  previousBalance Float                 @map("previous_balance")
+  newBalance      Float                 @map("new_balance")
+  previousReserved Float                @default(0) @map("previous_reserved")
+  newReserved     Float                 @default(0) @map("new_reserved")
+  reason          String
+  reference       String?
+  documentId      String?               @map("document_id")
+  fromLocationId  String?               @map("from_location_id")
+  toLocationId    String?               @map("to_location_id")
+  unitCost        Float?                @map("unit_cost")
+  currency        String?               @default("MXN")
+  exchangeRate    Float?                @map("exchange_rate")
+  createdByUserId String                @map("created_by_user_id")
+  createdAt       DateTime              @default(now()) @map("created_at")
+  organization    Organization          @relation(fields: [organizationId], references: [id])
+  lot             RawMaterialLot        @relation(fields: [lotId], references: [id])
+  createdBy       User                  @relation(fields: [createdByUserId], references: [id])
+  document        Document?             @relation(fields: [documentId], references: [id])
+
+  @@index([organizationId])
+  @@index([lotId])
+  @@index([createdByUserId])
+  @@map("inventory_movements")
 }
 
 model FormulationFamily {

@@ -111,10 +111,17 @@ async function main() {
       update: { name: "Proveedor demo", status: "activo" },
       create: { id: `${material.id}-supplier`, organizationId: organization.id, rawMaterialMasterId: material.id, name: "Proveedor demo", contact: "Pendiente" }
     });
+    await prisma.rawMaterialManufacturer.upsert({
+      where: { id: `${material.id}-manufacturer` },
+      update: { name: "Fabricante demo", status: "activo" },
+      create: { id: `${material.id}-manufacturer`, organizationId: organization.id, rawMaterialMasterId: material.id, name: "Fabricante demo", country: "MX" }
+    });
     await prisma.rawMaterialCommercialProduct.upsert({
       where: { id: `${material.id}-product` },
       update: {
         permanentCode: `PC-${material.permanentCode}`,
+        manufacturerId: `${material.id}-manufacturer`,
+        supplierId: `${material.id}-supplier`,
         tradeName: material.commonName,
         presentation: "Bolsa",
         presentationQuantity: material.id.includes("agua") ? 20 : 1,
@@ -132,6 +139,7 @@ async function main() {
         id: `${material.id}-product`,
         organizationId: organization.id,
         rawMaterialMasterId: material.id,
+        manufacturerId: `${material.id}-manufacturer`,
         supplierId: `${material.id}-supplier`,
         permanentCode: `PC-${material.permanentCode}`,
         tradeName: material.commonName,
@@ -174,6 +182,196 @@ async function main() {
       create: { id: `${material.id}-doc`, organizationId: organization.id, rawMaterialMasterId: material.id, title: `Ficha pendiente ${material.commonName}`, documentType: "tds", externalReference: "Documento demo pendiente de carga" }
     });
   }
+
+  const warehouses = [
+    ["wh-central", "ALM-CENTRAL", "Almacen central", "Recepcion y stock general"],
+    ["wh-lab", "ALM-LAB", "Almacen laboratorio", "Pruebas y muestras"]
+  ] as const;
+
+  for (const [id, code, name, zone] of warehouses) {
+    await prisma.inventoryWarehouse.upsert({
+      where: { id },
+      update: { code, name, zone, status: "activo", responsibleUserId: "demo-user" },
+      create: { id, organizationId: organization.id, code, name, zone, status: "activo", responsibleUserId: "demo-user" }
+    });
+  }
+
+  const locations = [
+    ["loc-a1", "wh-central", "A", "01", "E1", "CENT-A1-E1"],
+    ["loc-a2", "wh-central", "A", "02", "E1", "CENT-A2-E1"],
+    ["loc-b1", "wh-central", "B", "01", "E2", "CENT-B1-E2"],
+    ["loc-b2", "wh-central", "B", "02", "E2", "CENT-B2-E2"],
+    ["loc-q1", "wh-central", "Cuarentena", "Q", "E1", "CENT-Q1"],
+    ["loc-frio", "wh-central", "Frio", "F", "E1", "CENT-FRIO"],
+    ["loc-lab-01", "wh-lab", "Laboratorio", "01", "Mesa", "LAB-01"],
+    ["loc-lab-02", "wh-lab", "Laboratorio", "02", "Mesa", "LAB-02"]
+  ] as const;
+
+  for (const [id, warehouseId, zone, aisle, shelf, code] of locations) {
+    await prisma.inventoryLocation.upsert({
+      where: { id },
+      update: { warehouseId, zone, aisle, shelf, code, status: "activo" },
+      create: { id, organizationId: organization.id, warehouseId, zone, aisle, shelf, code, status: "activo" }
+    });
+  }
+
+  const lotStatuses = ["aprobado", "aprobado", "aprobado", "cuarentena", "bloqueado", "rechazado", "caducado", "recibido"] as const;
+  const locationIds = locations.map(([id]) => id);
+  const inventoryMaterials = rawMaterials.slice(0, 25);
+  for (const [index, material] of inventoryMaterials.entries()) {
+    const status = lotStatuses[index % lotStatuses.length];
+    const lotId = `lot-demo-${String(index + 1).padStart(2, "0")}`;
+    const receivedQuantity = 1000 + index * 75;
+    const reservedQuantity = index % 6 === 0 && status === "aprobado" ? 120 : 0;
+    const availableQuantity = status === "agotado" ? 0 : Math.max(receivedQuantity - reservedQuantity - (status === "rechazado" ? receivedQuantity : 0), 0);
+    const expirationDate = status === "caducado"
+      ? new Date("2026-01-15T00:00:00.000Z")
+      : index % 5 === 0
+        ? new Date("2026-09-20T00:00:00.000Z")
+        : new Date(`2027-${String((index % 9) + 1).padStart(2, "0")}-15T00:00:00.000Z`);
+    const locationId = status === "cuarentena" ? "loc-q1" : locationIds[index % locationIds.length];
+    const unitCost = material.id.includes("argan") ? 9.8 : Math.round((0.18 + index * 0.035) * 100) / 100;
+    const currency = material.id.includes("argan") ? "USD" : "MXN";
+
+    await prisma.rawMaterialLot.upsert({
+      where: { id: lotId },
+      update: {
+        commercialProductId: `${material.id}-product`,
+        supplierId: `${material.id}-supplier`,
+        manufacturerId: `${material.id}-manufacturer`,
+        locationId,
+        status,
+        receivedQuantity,
+        availableQuantity,
+        reservedQuantity,
+        expirationDate,
+        unitCost,
+        currency
+      },
+      create: {
+        id: lotId,
+        organizationId: organization.id,
+        rawMaterialMasterId: material.id,
+        commercialProductId: `${material.id}-product`,
+        supplierId: `${material.id}-supplier`,
+        manufacturerId: `${material.id}-manufacturer`,
+        permanentCode: `LOT-${String(index + 1).padStart(5, "0")}`,
+        lotCode: `LOT-${String(index + 1).padStart(5, "0")}`,
+        supplierLotNumber: `PROV-${String(index + 1).padStart(4, "0")}`,
+        receivedAt: new Date("2026-08-02T09:00:00.000Z"),
+        manufacturedAt: new Date("2026-06-15T00:00:00.000Z"),
+        expirationDate,
+        expectedQuantity: receivedQuantity,
+        receivedQuantity,
+        availableQuantity,
+        reservedQuantity,
+        unit: material.id.includes("agua") ? "l" : "g",
+        unitCost,
+        currency,
+        exchangeRate: currency === "USD" ? 18.5 : 1,
+        locationId,
+        status,
+        packageIntact: status !== "rechazado",
+        correctIdentification: status !== "rechazado",
+        appearance: "Conforme a recepcion visual demo",
+        color: "Segun especificacion demo",
+        odor: "Caracteristico",
+        receptionDecision: status === "rechazado" ? "Rechazar" : status === "cuarentena" ? "Mantener en cuarentena" : "Liberar",
+        observations: "Lote demo para validar kardex, FEFO, reservas y alertas. No sustituye COA/SDS/TDS."
+      }
+    });
+
+    await prisma.inventoryMovement.upsert({
+      where: { id: `${lotId}-entrada` },
+      update: { quantity: receivedQuantity, newBalance: receivedQuantity, unitCost, currency },
+      create: {
+        id: `${lotId}-entrada`,
+        organizationId: organization.id,
+        lotId,
+        type: "entrada",
+        quantity: receivedQuantity,
+        unit: material.id.includes("agua") ? "l" : "g",
+        previousBalance: 0,
+        newBalance: receivedQuantity,
+        previousReserved: 0,
+        newReserved: 0,
+        reason: "Recepcion documental demo",
+        reference: "COA/SDS/TDS demo",
+        toLocationId: locationId,
+        unitCost,
+        currency,
+        exchangeRate: currency === "USD" ? 18.5 : 1,
+        createdByUserId: "demo-user"
+      }
+    });
+
+    if (reservedQuantity > 0) {
+      await prisma.inventoryMovement.upsert({
+        where: { id: `${lotId}-reserva` },
+        update: { quantity: reservedQuantity, newBalance: availableQuantity, newReserved: reservedQuantity },
+        create: {
+          id: `${lotId}-reserva`,
+          organizationId: organization.id,
+          lotId,
+          type: "reserva",
+          quantity: reservedQuantity,
+          unit: "g",
+          previousBalance: receivedQuantity,
+          newBalance: availableQuantity,
+          previousReserved: 0,
+          newReserved: reservedQuantity,
+          reason: "Reserva demo para formulacion futura",
+          reference: "REQ-DEMO-001",
+          fromLocationId: locationId,
+          createdByUserId: "demo-user"
+        }
+      });
+    }
+  }
+
+  await prisma.inventoryMovement.upsert({
+    where: { id: "lot-demo-02-transfer-out" },
+    update: { relatedMovementId: "lot-demo-02-transfer-in" },
+    create: {
+      id: "lot-demo-02-transfer-out",
+      organizationId: organization.id,
+      lotId: "lot-demo-02",
+      type: "salida",
+      quantity: 50,
+      unit: "g",
+      previousBalance: 1075,
+      newBalance: 1025,
+      reason: "Transferencia demo entre ubicaciones",
+      reference: "TR-DEMO-001",
+      fromLocationId: "loc-a2",
+      toLocationId: "loc-lab-01",
+      relatedMovementId: "lot-demo-02-transfer-in",
+      createdByUserId: "demo-user"
+    }
+  });
+
+  await prisma.inventoryMovement.upsert({
+    where: { id: "lot-demo-02-transfer-in" },
+    update: { relatedMovementId: "lot-demo-02-transfer-out" },
+    create: {
+      id: "lot-demo-02-transfer-in",
+      organizationId: organization.id,
+      lotId: "lot-demo-02",
+      type: "entrada",
+      quantity: 50,
+      unit: "g",
+      previousBalance: 1025,
+      newBalance: 1075,
+      reason: "Transferencia demo entre ubicaciones",
+      reference: "TR-DEMO-001",
+      fromLocationId: "loc-a2",
+      toLocationId: "loc-lab-01",
+      relatedMovementId: "lot-demo-02-transfer-out",
+      createdByUserId: "demo-user"
+    }
+  });
+
+  await prisma.rawMaterialLot.update({ where: { id: "lot-demo-02" }, data: { locationId: "loc-lab-01" } });
 
   const family = await prisma.formulationFamily.upsert({
     where: { organizationId_permanentCode: { organizationId: organization.id, permanentCode: "FLC-FRM-000001" } },

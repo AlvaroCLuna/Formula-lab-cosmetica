@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0 - Incremento 6 implementado
+
+- Se implemento Inventario y Lotes con almacenes, ubicaciones, lotes de materia prima y estados operativos.
+- Se agrego kardex trazable por lote con entradas, salidas, reservas, liberaciones, ajustes y transferencias relacionadas.
+- Se agregaron reglas para impedir saldos negativos y reservas superiores a la existencia disponible.
+- Se agregaron alertas por caducidad, cuarentena, bloqueo, stock insuficiente y lotes sin fecha de caducidad.
+- Se preparo FEFO/FIFO e implemento sugerencia inicial FEFO para disponibilidad desde formulaciones escaladas.
+- Se integro inventario con materias primas maestras, productos comerciales, proveedores, fabricantes y costos de entrada.
+- Se agrego panel ERP de inventario con indicadores, filtros, listado, vista rapida, kardex y modo aprendizaje.
+- Se agregaron migraciones Prisma/SQL, seeds con 2 almacenes, 8 ubicaciones, 25 lotes y movimientos demo.
+- Se agregaron pruebas del motor de inventario y validacion documentada en `docs/22_Validacion_Incremento_6.md`.
+
 ## 0.5.0 - Incremento 5 implementado
 
 - Se implemento el Motor de Costos con escenarios fechados que no modifican formulaciones aprobadas.

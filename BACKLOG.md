@@ -4,7 +4,7 @@
 
 Estado: COMPLETADO Y APROBADO.
 
-No realizar más cambios sobre Incremento 1 salvo correcciones críticas futuras.
+No realizar mas cambios sobre Incremento 1 salvo correcciones criticas futuras.
 
 ## Incremento 2 - Gestor de Formulaciones
 
@@ -48,7 +48,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 5 - Motor de Costos
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Productos comerciales enriquecidos implementados.
 - Historial de precios implementado.
@@ -57,22 +57,37 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Simulador y resumen ejecutivo implementados.
 - Alertas de costo implementadas.
 - Soporte inicial MXN/USD implementado con tipo de cambio manual.
-- Pendiente: aprobacion formal antes de iniciar Incremento 6.
+
+## Incremento 6 - Inventario y Lotes
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Almacenes y ubicaciones implementados.
+- Lotes de materia prima con estados operativos implementados.
+- Movimientos y kardex implementados.
+- Reservas y liberaciones implementadas con bloqueo de saldos negativos.
+- Transferencias implementadas como salida y entrada relacionadas.
+- Alertas de caducidad, cuarentena, bloqueo, agotado y stock insuficiente implementadas.
+- Disponibilidad desde formulaciones escaladas implementada sin descuento automatico.
+- Integracion preparatoria con costos de entrada, moneda y tipo de cambio implementada.
+- UI ERP de inventario con vista rapida y modo aprendizaje implementada.
+- Seeds con 2 almacenes, 8 ubicaciones, 25 lotes y movimientos demo agregados.
+- Pendiente: aprobacion formal antes de iniciar Incremento 7.
 
 ## Pendiente para fases posteriores
 
 - Registro completo de usuarios por correo.
-- Recuperación real de contraseña con proveedor SMTP.
+- Recuperacion real de contrasena con proveedor SMTP.
 - Roles y permisos.
-- Administración básica y avanzada de organización.
-- Mejora de extracción de PDF con tablas complejas.
+- Administracion basica y avanzada de organizacion.
+- Mejora de extraccion de PDF con tablas complejas.
 - OCR para documentos escaneados.
 - Sistema de licencias.
-- Eventos de sincronización en tiempo real.
+- Eventos de sincronizacion en tiempo real.
 - APK instalable.
-- Facturación.
-- Producción.
-- Inventario operativo.
-- Costos completos.
+- Compras completas.
+- Produccion completa.
+- Facturacion.
+- Calidad avanzada.
 - Laboratorio avanzado.
-- Motor de reglas químicas.
+- Motor de reglas quimicas.

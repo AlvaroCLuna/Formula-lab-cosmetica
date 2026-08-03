@@ -13,8 +13,17 @@ type Props = {
   children: ReactNode;
 };
 
+const viewCopy: Record<string, { title: string; search: string }> = {
+  inteligencia: { title: "Inteligencia de Insumos", search: "Buscar documentos, campos o evidencia" },
+  formulaciones: { title: "Gestor de Formulaciones", search: "Buscar formulaciones, versiones o ingredientes" },
+  materias: { title: "Materias Primas Maestras", search: "Buscar materias primas, INCI o funciones" },
+  costos: { title: "Motor de Costos", search: "Buscar escenarios, proveedores o precios" },
+  inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" }
+};
+
 export function AppShell({ user, activeView, onNavigate, onLogout, children }: Props) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const currentView = viewCopy[activeView] ?? viewCopy.inteligencia;
 
   return (
     <div className="app-shell" data-theme={theme}>
@@ -22,13 +31,13 @@ export function AppShell({ user, activeView, onNavigate, onLogout, children }: P
       <div className="workspace">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Organización demo</p>
-            <h1>Inteligencia de Insumos</h1>
+            <p className="eyebrow">Organizacion demo</p>
+            <h1>{currentView.title}</h1>
           </div>
           <div className="topbar-actions">
             <div className="search-box">
               <Search size={16} />
-              <input aria-label="Búsqueda rápida" placeholder="Buscar documentos, campos o evidencia" />
+              <input aria-label="Busqueda rapida" placeholder={currentView.search} />
             </div>
             <button className="icon-button" title="Notificaciones" aria-label="Notificaciones">
               <Bell size={18} />

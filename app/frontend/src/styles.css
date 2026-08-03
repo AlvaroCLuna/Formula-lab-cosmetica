@@ -800,6 +800,77 @@ textarea {
   padding: 12px;
 }
 
+.inventory-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 18px;
+  align-items: start;
+}
+
+.inventory-kpis {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.inventory-kpis article {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+}
+
+.inventory-kpis span,
+.inventory-row span {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.inventory-kpis strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 20px;
+}
+
+.inventory-list,
+.inventory-side {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.inventory-side {
+  position: sticky;
+  top: 16px;
+}
+
+.inventory-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) minmax(140px, 0.8fr) minmax(130px, 0.8fr) auto;
+  gap: 12px;
+  align-items: center;
+  width: calc(100% - 24px);
+  margin: 0 12px 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+  color: var(--text);
+  text-align: left;
+}
+
+.inventory-row.selected {
+  border-color: var(--primary);
+  background: #eff8f4;
+}
+
+.inventory-list .section-heading,
+.inventory-side .section-heading {
+  padding: 12px;
+}
+
 .module-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
@@ -1183,6 +1254,9 @@ textarea {
   .engine-add-ingredient,
   .cost-grid,
   .cost-kpis,
+  .inventory-grid,
+  .inventory-kpis,
+  .inventory-row,
   .module-hero,
   .filters-bar {
     grid-template-columns: 1fr;
@@ -1193,6 +1267,10 @@ textarea {
   .raw-material-quick-view {
     position: static;
     max-height: none;
+  }
+
+  .inventory-side {
+    position: static;
   }
 
   .draft-form,

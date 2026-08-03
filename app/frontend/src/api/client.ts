@@ -180,6 +180,23 @@ export const api = {
   async listCostScenarios(versionId: string) {
     return request<{ scenarios: any[] }>(`/cost-engine/versions/${versionId}/scenarios`);
   },
+  async inventoryDashboard() {
+    return request<{ indicators: any; warehouseStock: Record<string, number>; movements: any[] }>("/inventory/dashboard");
+  },
+  async listInventoryLots(filters: { search?: string; status?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ lots: any[] }>(`/inventory/lots${params.toString() ? `?${params}` : ""}`);
+  },
+  async lotKardex(id: string) {
+    return request<{ movements: any[] }>(`/inventory/lots/${id}/kardex`);
+  },
+  async inventoryAvailability(formulationVersionId: string, batchSize = 1000) {
+    return request<{ rows: any[]; batchSize: number }>(`/inventory/availability?formulationVersionId=${formulationVersionId}&batchSize=${batchSize}`);
+  },
+  async inventoryMovement(id: string, input: Record<string, unknown>) {
+    return request<{ lot: any; movement: any }>(`/inventory/lots/${id}/movements`, { method: "POST", body: JSON.stringify(input) });
+  },
   async listMasterRawMaterials(filters: { search?: string; status?: string; category?: string; family?: string } = {}) {
     const params = new URLSearchParams();
     Object.entries(filters).forEach(([key, value]) => {

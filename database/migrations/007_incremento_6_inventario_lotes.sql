@@ -1,0 +1,1 @@
+SOURCE app/backend/prisma/migrations/20260803005000_incremento_6_inventario_lotes/migration.sql;

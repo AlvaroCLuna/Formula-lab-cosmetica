@@ -8,6 +8,7 @@ import { draftsRouter } from "./routes/drafts.routes.js";
 import { formulationsRouter } from "./routes/formulations.routes.js";
 import { formulaEngineRouter } from "./routes/formula-engine.routes.js";
 import { costEngineRouter } from "./routes/cost-engine.routes.js";
+import { inventoryRouter } from "./routes/inventory.routes.js";
 import { rawMaterialsRouter } from "./routes/raw-materials.routes.js";
 import { ensureStorageFolders } from "./services/storage.service.js";
 
@@ -26,6 +27,7 @@ app.use("/drafts", draftsRouter);
 app.use("/formulations", formulationsRouter);
 app.use("/formula-engine", formulaEngineRouter);
 app.use("/cost-engine", costEngineRouter);
+app.use("/inventory", inventoryRouter);
 app.use("/raw-materials", rawMaterialsRouter);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
