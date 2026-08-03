@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.8 - Incremento 7.8 implementado
+
+- Se implemento Knowledge Document Engine como repositorio documental transversal del ERP.
+- Se amplio el modelo documental con tipos, versiones, etiquetas, relaciones, chunks, OCR preparado, permisos y fuentes de conocimiento.
+- Se agrego carga multiformato para PDF, DOCX, XLSX, CSV, TXT, imagenes, video y ZIP.
+- Se agregaron APIs de dashboard, busqueda, carga, detalle, vista previa, versionado, relaciones y etiquetas.
+- Se agrego UI ERP con explorador documental, drag & drop, tarjetas/lista, filtros, panel lateral, tags, versiones, relaciones y OCR/chunks.
+- Se agregaron 50 documentos demo KDE, catalogo de 35 tipos documentales, etiquetas, OCR demo y relaciones trazables.
+- Se agregaron pruebas del motor KDE y validacion documentada en `docs/25_Validacion_Incremento_7_8.md`.
+
 ## 0.7.5 - Incremento 7.5 implementado
 
 - Se implemento el Centro de Conocimiento Cosmetico como modulo navegable desde el AppShell.

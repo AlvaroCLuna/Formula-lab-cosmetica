@@ -152,6 +152,16 @@ model Organization {
   updatedAt DateTime     @default(now()) @updatedAt @map("updated_at")
   users     User[]
   documents Document[]
+  documentTypes KdeDocumentType[]
+  documentVersions DocumentVersion[]
+  documentTags DocumentTag[]
+  documentTagLinks DocumentTagLink[]
+  documentRelations DocumentRelation[]
+  documentChunks DocumentChunk[]
+  ocrResults OcrResult[]
+  documentStatusCatalog DocumentStatusCatalog[]
+  documentPermissions DocumentPermission[]
+  knowledgeSources KnowledgeSource[]
   drafts    RawMaterialDraft[]
   auditLogs AuditLog[]
   rawMaterialMasters RawMaterialMaster[]
@@ -203,6 +213,11 @@ model User {
   updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at")
   organization   Organization @relation(fields: [organizationId], references: [id])
   documents      Document[]
+  documentVersions DocumentVersion[]
+  documentRelations DocumentRelation[]
+  ocrResults OcrResult[]
+  documentPermissions DocumentPermission[]
+  knowledgeSources KnowledgeSource[]
   drafts         RawMaterialDraft[]
   approvals      RawMaterialValidatedVersion[]
   auditLogs      AuditLog[]
@@ -247,6 +262,24 @@ model Document {
   id                String                 @id @default(uuid())
   organizationId    String                 @map("organization_id")
   uploadedByUserId  String                 @map("uploaded_by_user_id")
+  permanentCode     String?                @unique @map("permanent_code")
+  knowledgeCode     String?                @unique @map("knowledge_code")
+  sourceCode        String?                @unique @map("source_code")
+  title             String?
+  documentTypeId    String?                @map("document_type_id")
+  language          String?                @default("es")
+  author            String?
+  supplier          String?
+  manufacturer      String?
+  detectedEntity    String?                @map("detected_entity")
+  documentDate      DateTime?              @map("document_date")
+  keywordsJson      Json?                  @map("keywords_json")
+  summary           String?                @db.Text
+  pageCount         Int?                   @map("page_count")
+  tableCount        Int?                   @map("table_count")
+  imageCount        Int?                   @map("image_count")
+  indexingStatus    String                 @default("pendiente") @map("indexing_status")
+  currentVersionId  String?                @map("current_version_id")
   originalFilename  String                 @map("original_filename")
   storedFilename    String                 @map("stored_filename")
   mimeType          String                 @map("mime_type")
@@ -259,13 +292,24 @@ model Document {
   updatedAt         DateTime               @default(now()) @updatedAt @map("updated_at")
   organization      Organization           @relation(fields: [organizationId], references: [id])
   uploadedBy        User                   @relation(fields: [uploadedByUserId], references: [id])
+  documentType      KdeDocumentType?       @relation(fields: [documentTypeId], references: [id])
   processingJobs    DocumentProcessingJob[]
   extractedValues   ExtractedValue[]
   rawMaterialLinks  RawMaterialDocument[]
   inventoryMovements InventoryMovement[]
+  versions          DocumentVersion[]
+  tagLinks          DocumentTagLink[]
+  relations         DocumentRelation[]
+  chunks            DocumentChunk[]
+  ocrResults        OcrResult[]
+  permissions       DocumentPermission[]
+  knowledgeSources  KnowledgeSource[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
+  @@index([documentTypeId])
+  @@index([status])
+  @@index([indexingStatus])
   @@map("documents")
 }
 
@@ -1243,4 +1287,202 @@ model CosmeticNeed {
   @@unique([organizationId, code])
   @@index([organizationId])
   @@map("cosmetic_needs")
+}
+
+model KdeDocumentType {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  code           String
+  name           String
+  category       String
+  description    String?      @db.Text
+  status         EntityStatus @default(activo)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  documents      Document[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([category])
+  @@map("document_types")
+}
+
+model DocumentVersion {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  documentId     String    @map("document_id")
+  versionNumber  Int       @default(1) @map("version_number")
+  originalFilename String  @map("original_filename")
+  storedFilename String    @map("stored_filename")
+  mimeType       String    @map("mime_type")
+  fileExtension  String    @map("file_extension")
+  sizeBytes      Int       @map("size_bytes")
+  storagePath    String    @map("storage_path")
+  checksumSha256 String?   @map("checksum_sha256")
+  changeReason   String?   @db.Text @map("change_reason")
+  createdByUserId String   @map("created_by_user_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  document       Document  @relation(fields: [documentId], references: [id])
+  createdBy      User      @relation(fields: [createdByUserId], references: [id])
+
+  @@unique([documentId, versionNumber])
+  @@index([organizationId])
+  @@index([documentId])
+  @@map("document_versions")
+}
+
+model DocumentTag {
+  id             String       @id @default(uuid())
+  organizationId String       @map("organization_id")
+  permanentCode  String       @unique @map("permanent_code")
+  name           String
+  color          String       @default("#2563eb")
+  status         EntityStatus @default(activo)
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @default(now()) @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  documentLinks  DocumentTagLink[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("document_tags")
+}
+
+model DocumentTagLink {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  documentId     String   @map("document_id")
+  tagId          String   @map("tag_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  document       Document @relation(fields: [documentId], references: [id])
+  tag            DocumentTag @relation(fields: [tagId], references: [id])
+
+  @@unique([documentId, tagId])
+  @@index([organizationId])
+  @@index([tagId])
+  @@map("document_tag_links")
+}
+
+model DocumentRelation {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  documentId     String   @map("document_id")
+  entityType     String   @map("entity_type")
+  entityId       String   @map("entity_id")
+  relationType   String   @default("evidencia") @map("relation_type")
+  sourceReference String? @map("source_reference")
+  confidence     Decimal  @default(0.80) @db.Decimal(5, 2)
+  validationStatus String @default("pendiente") @map("validation_status")
+  createdByUserId String  @map("created_by_user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  document       Document @relation(fields: [documentId], references: [id])
+  createdBy      User     @relation(fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([documentId])
+  @@index([entityType, entityId])
+  @@map("document_relations")
+}
+
+model DocumentChunk {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  documentId     String   @map("document_id")
+  chunkCode      String   @unique @map("chunk_code")
+  chunkIndex     Int      @map("chunk_index")
+  content        String   @db.Text
+  sourceReference String? @map("source_reference")
+  embeddingStatus String  @default("preparado") @map("embedding_status")
+  embeddingModel  String? @map("embedding_model")
+  embeddingVectorJson Json? @map("embedding_vector_json")
+  createdAt      DateTime @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  document       Document @relation(fields: [documentId], references: [id])
+
+  @@unique([documentId, chunkIndex])
+  @@index([organizationId])
+  @@index([documentId])
+  @@map("document_chunks")
+}
+
+model OcrResult {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  documentId     String   @map("document_id")
+  text           String   @db.Text
+  confidence     Decimal  @default(0.75) @db.Decimal(5, 2)
+  detectedLanguage String? @default("es") @map("detected_language")
+  engine         String   @default("demo_ocr_preparado")
+  sourceReference String? @map("source_reference")
+  createdByUserId String? @map("created_by_user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  document       Document @relation(fields: [documentId], references: [id])
+  createdBy      User?    @relation(fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([documentId])
+  @@map("ocr_results")
+}
+
+model DocumentStatusCatalog {
+  id             String       @id @default(uuid())
+  organizationId String?      @map("organization_id")
+  code           String
+  name           String
+  description    String?      @db.Text
+  status         EntityStatus @default(activo)
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("document_status")
+}
+
+model DocumentPermission {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  documentId     String?  @map("document_id")
+  documentTypeId String?  @map("document_type_id")
+  role           String
+  permission     String
+  status         EntityStatus @default(activo)
+  createdByUserId String? @map("created_by_user_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  document       Document? @relation(fields: [documentId], references: [id])
+  createdBy      User?    @relation(fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([documentId])
+  @@index([documentTypeId])
+  @@map("document_permissions")
+}
+
+model KnowledgeSource {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  permanentCode  String   @unique @map("permanent_code")
+  documentId     String?  @map("document_id")
+  sourceType     String   @map("source_type")
+  title          String
+  citation       String?  @db.Text
+  url            String?
+  evidenceLevel  String   @default("documental") @map("evidence_level")
+  validationStatus String @default("pendiente") @map("validation_status")
+  approvedByUserId String? @map("approved_by_user_id")
+  approvedAt     DateTime? @map("approved_at")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  document       Document? @relation(fields: [documentId], references: [id])
+  approvedBy     User?    @relation(fields: [approvedByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([documentId])
+  @@map("knowledge_sources")
 }

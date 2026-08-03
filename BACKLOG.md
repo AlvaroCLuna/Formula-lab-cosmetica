@@ -90,7 +90,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 7.5 - Centro de Conocimiento Cosmetico
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Menu Centro de Conocimiento implementado.
 - Categorias de productos cosmeticos implementadas.
@@ -100,7 +100,22 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Seleccion guiada implementada con reglas declarativas.
 - Glosario y modo aprendizaje implementados.
 - Validacion documentada con diagrama de flujo y diagrama ER Mermaid.
-- Pendiente: aprobacion formal antes de iniciar Incremento 8.
+
+## Incremento 7.8 - Knowledge Document Engine
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Repositorio documental transversal implementado sobre la tabla `documents` existente.
+- Tipos documentales implementados en `document_types`.
+- Versionado implementado en `document_versions`; no se sobrescribe documento aprobado ni versionado.
+- Etiquetas libres implementadas con codigos `TAG-000001`.
+- Relaciones reutilizables implementadas con multiples entidades.
+- Chunks y OCR preparado implementados para RAG futuro sin generar embeddings todavia.
+- Fuentes de conocimiento implementadas con codigos `SRC-000001`.
+- UI documental ERP implementada con drag & drop, filtros, tarjetas/lista, panel lateral y vista previa.
+- Seeds con 50 documentos demo KDE y relaciones trazables agregados.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
+- Pendiente: aprobacion formal antes de iniciar Incremento 8 LIMS.
 
 ## Pendiente para fases posteriores
 

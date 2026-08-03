@@ -34,6 +34,29 @@ export type LoadedDocument = {
   extractedValues?: ExtractedValue[];
 };
 
+export type KdeDocument = LoadedDocument & {
+  permanentCode?: string | null;
+  knowledgeCode?: string | null;
+  sourceCode?: string | null;
+  title?: string | null;
+  language?: string | null;
+  author?: string | null;
+  supplier?: string | null;
+  manufacturer?: string | null;
+  detectedEntity?: string | null;
+  summary?: string | null;
+  pageCount?: number | null;
+  tableCount?: number | null;
+  imageCount?: number | null;
+  indexingStatus?: string;
+  documentType?: { id: string; code: string; name: string; category: string } | null;
+  versions?: Array<{ id: string; versionNumber: number; originalFilename: string; changeReason?: string | null; createdAt: string }>;
+  tagLinks?: Array<{ tag: { id: string; name: string; color: string; permanentCode: string } }>;
+  relations?: Array<{ id: string; entityType: string; entityId: string; relationType: string; validationStatus: string; confidence: number }>;
+  chunks?: Array<{ id: string; chunkIndex: number; content: string; embeddingStatus: string }>;
+  ocrResults?: Array<{ id: string; text: string; confidence: number; detectedLanguage?: string | null }>;
+};
+
 export type Draft = {
   id: string;
   status: "borrador" | "aprobado" | "rechazado";

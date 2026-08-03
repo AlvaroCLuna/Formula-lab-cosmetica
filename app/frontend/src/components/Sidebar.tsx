@@ -1,9 +1,10 @@
-import { Beaker, BookOpen, Boxes, Calculator, ClipboardCheck, FileStack, FlaskConical, LayoutDashboard, LibraryBig, PackageSearch, UploadCloud } from "lucide-react";
+import { Archive, Beaker, BookOpen, Boxes, Calculator, ClipboardCheck, FileStack, FlaskConical, LayoutDashboard, LibraryBig, PackageSearch, UploadCloud } from "lucide-react";
 
 const items = [
   { id: "panel", label: "Panel", icon: LayoutDashboard, disabled: true },
   { id: "inteligencia", label: "Inteligencia", icon: UploadCloud },
   { id: "conocimiento", label: "Conocimiento", icon: LibraryBig },
+  { id: "documentos", label: "Documentos KDE", icon: Archive },
   { id: "formulaciones", label: "Formulaciones", icon: FileStack },
   { id: "materias", label: "Materias primas", icon: Boxes },
   { id: "costos", label: "Costos", icon: Calculator },

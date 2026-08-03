@@ -16,6 +16,7 @@ type Props = {
 const viewCopy: Record<string, { title: string; search: string }> = {
   inteligencia: { title: "Inteligencia de Insumos", search: "Buscar documentos, campos o evidencia" },
   conocimiento: { title: "Centro de Conocimiento", search: "Buscar productos, familias o necesidades" },
+  documentos: { title: "Knowledge Document Engine", search: "Buscar documentos, OCR, etiquetas o fuentes" },
   formulaciones: { title: "Gestor de Formulaciones", search: "Buscar formulaciones, versiones o ingredientes" },
   materias: { title: "Materias Primas Maestras", search: "Buscar materias primas, INCI o funciones" },
   costos: { title: "Motor de Costos", search: "Buscar escenarios, proveedores o precios" },

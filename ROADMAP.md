@@ -60,7 +60,7 @@ Laboratorio y Produccion MVP:
 
 Validacion documentada en `docs/23_Validacion_Incremento_7.md`.
 
-## Incremento 7.5 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 7.5 - COMPLETADO Y APROBADO
 
 Centro de Conocimiento Cosmetico:
 
@@ -72,6 +72,19 @@ Centro de Conocimiento Cosmetico:
 - Diagramas Mermaid requeridos en validacion.
 
 Validacion documentada en `docs/24_Validacion_Incremento_7_5.md`.
+
+## Incremento 7.8 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+Knowledge Document Engine:
+
+- Repositorio documental transversal para todos los modulos.
+- Tipos tecnicos, comerciales, cientificos, normativos, produccion y laboratorio.
+- Carga multiformato con versionado, tags, relaciones reutilizables, OCR preparado y chunks para RAG futuro.
+- Busqueda universal documental por metadata, etiquetas, texto extraido, OCR y relaciones.
+- Vista previa integrada para PDF, imagen, TXT y CSV.
+- Dashboard documental y panel lateral de trazabilidad.
+
+Validacion documentada en `docs/25_Validacion_Incremento_7_8.md`.
 
 ## Fases posteriores
 
@@ -87,4 +100,4 @@ Validacion documentada en `docs/24_Validacion_Incremento_7_5.md`.
 - Planificacion avanzada MRP.
 - Produccion avanzada.
 - Facturacion.
-- Calidad avanzada.
+- LIMS / calidad avanzada.

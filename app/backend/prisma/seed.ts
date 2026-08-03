@@ -741,6 +741,157 @@ async function main() {
       });
     }
   }
+
+  const kdeTypes = [
+    ["dt-tds", "TDS", "TDS", "Tecnico"],
+    ["dt-sds", "SDS", "SDS", "Tecnico"],
+    ["dt-coa", "COA", "COA", "Tecnico"],
+    ["dt-msds", "MSDS", "MSDS", "Tecnico"],
+    ["dt-especificacion", "ESPECIFICACION", "Especificacion", "Tecnico"],
+    ["dt-certificado", "CERTIFICADO", "Certificado", "Tecnico"],
+    ["dt-hoja-tecnica", "HOJA_TECNICA", "Hoja tecnica", "Tecnico"],
+    ["dt-cotizacion", "COTIZACION", "Cotizacion", "Comercial"],
+    ["dt-lista-precios", "LISTA_PRECIOS", "Lista de precios", "Comercial"],
+    ["dt-catalogo", "CATALOGO", "Catalogo", "Comercial"],
+    ["dt-ficha-comercial", "FICHA_COMERCIAL", "Ficha comercial", "Comercial"],
+    ["dt-articulo", "ARTICULO", "Articulo", "Cientifico"],
+    ["dt-patente", "PATENTE", "Patente", "Cientifico"],
+    ["dt-paper", "PAPER", "Paper", "Cientifico"],
+    ["dt-libro", "LIBRO", "Libro", "Cientifico"],
+    ["dt-investigacion", "INVESTIGACION", "Investigacion", "Cientifico"],
+    ["dt-iso", "ISO", "ISO", "Normativo"],
+    ["dt-nom", "NOM", "NOM", "Normativo"],
+    ["dt-astm", "ASTM", "ASTM", "Normativo"],
+    ["dt-usp", "USP", "USP", "Normativo"],
+    ["dt-farmacopea", "FARMACOPEA", "Farmacopea", "Normativo"],
+    ["dt-reglamento", "REGLAMENTO", "Reglamento", "Normativo"],
+    ["dt-procedimiento", "PROCEDIMIENTO", "Procedimiento", "Produccion"],
+    ["dt-instructivo", "INSTRUCTIVO", "Instructivo", "Produccion"],
+    ["dt-bitacora", "BITACORA", "Bitacora", "Produccion"],
+    ["dt-evidencia", "EVIDENCIA", "Evidencia", "Produccion"],
+    ["dt-fotografia", "FOTOGRAFIA", "Fotografia", "Produccion"],
+    ["dt-video", "VIDEO", "Video", "Produccion"],
+    ["dt-ensayo", "ENSAYO", "Ensayo", "Laboratorio"],
+    ["dt-reporte", "REPORTE", "Reporte", "Laboratorio"],
+    ["dt-estabilidad", "ESTABILIDAD", "Estabilidad", "Laboratorio"],
+    ["dt-cromatografia", "CROMATOGRAFIA", "Cromatografia", "Laboratorio"],
+    ["dt-microscopia", "MICROSCOPIA", "Microscopia", "Laboratorio"],
+    ["dt-resultado", "RESULTADO", "Resultado", "Laboratorio"],
+    ["dt-general", "DOCUMENTO_GENERAL", "Documento general", "General"]
+  ] as const;
+
+  for (const [id, code, name, category] of kdeTypes) {
+    await prisma.kdeDocumentType.upsert({
+      where: { id },
+      update: { code, name, category, status: "activo" },
+      create: { id, organizationId: organization.id, code, name, category, description: `Tipo documental KDE demo: ${name}.`, status: "activo" }
+    });
+  }
+
+  for (const [index, status] of ["pendiente", "procesando", "procesado", "requiere_revision", "rechazado"].entries()) {
+    await prisma.documentStatusCatalog.upsert({
+      where: { id: `ds-${status}` },
+      update: { name: status.replace("_", " "), status: "activo" },
+      create: { id: `ds-${status}`, organizationId: organization.id, code: status.toUpperCase(), name: status.replace("_", " "), description: `Estado documental ${index + 1}.`, status: "activo" }
+    });
+  }
+
+  const kdeTags = ["Natural", "Organico", "Vegano", "COSMOS", "Ecocert", "Sulfato", "Conservante", "Fragancia", "Capilar", "Facial", "Produccion", "Normativo"];
+  for (const [index, tag] of kdeTags.entries()) {
+    await prisma.documentTag.upsert({
+      where: { id: `tag-demo-${index + 1}` },
+      update: { name: tag, status: "activo" },
+      create: { id: `tag-demo-${index + 1}`, organizationId: organization.id, permanentCode: `TAG-${String(index + 1).padStart(6, "0")}`, name: tag, color: index % 2 === 0 ? "#2563eb" : "#059669", status: "activo" }
+    });
+  }
+
+  const kdeTypeIds = kdeTypes.map(([id]) => id);
+  for (let index = 1; index <= 50; index += 1) {
+    const typeId = kdeTypeIds[(index - 1) % kdeTypeIds.length];
+    const material = rawMaterials[(index - 1) % rawMaterials.length];
+    const extension = index % 10 === 0 ? "mp4" : index % 8 === 0 ? "png" : index % 6 === 0 ? "xlsx" : index % 5 === 0 ? "docx" : index % 3 === 0 ? "csv" : index % 2 === 0 ? "txt" : "pdf";
+    const title = `Documento KDE demo ${index} - ${material.commonName}`;
+    const documentId = `kde-doc-${String(index).padStart(3, "0")}`;
+    const versionId = `${documentId}-v1`;
+    await prisma.document.upsert({
+      where: { id: documentId },
+      update: {
+        title,
+        documentTypeId: typeId,
+        detectedEntity: material.commonName,
+        status: index % 11 === 0 ? "requiere_revision" : "procesado",
+        indexingStatus: "preparado",
+        summary: `Evidencia documental demo para ${material.commonName}. Fuente registrada para busqueda, trazabilidad y RAG futuro.`
+      },
+      create: {
+        id: documentId,
+        organizationId: organization.id,
+        uploadedByUserId: "demo-user",
+        permanentCode: `DOC-${String(index).padStart(6, "0")}`,
+        knowledgeCode: `KNW-${String(index).padStart(6, "0")}`,
+        sourceCode: `SRC-${String(index).padStart(6, "0")}`,
+        title,
+        documentTypeId: typeId,
+        language: index % 4 === 0 ? "en" : "es",
+        author: index % 7 === 0 ? "Equipo tecnico demo" : null,
+        supplier: index % 3 === 0 ? "Proveedor Demo Norte" : null,
+        manufacturer: index % 5 === 0 ? "Fabricante Demo Lab" : null,
+        detectedEntity: material.commonName,
+        documentDate: new Date(`2026-07-${String((index % 28) + 1).padStart(2, "0")}T00:00:00.000Z`),
+        keywordsJson: [material.commonName, material.cosmeticFunction, extension],
+        summary: `Evidencia documental demo para ${material.commonName}. Fuente registrada para busqueda, trazabilidad y RAG futuro.`,
+        pageCount: extension === "pdf" ? (index % 9) + 1 : null,
+        tableCount: ["csv", "xlsx"].includes(extension) ? 1 : 0,
+        imageCount: ["png", "jpg", "webp", "tiff"].includes(extension) ? 1 : 0,
+        indexingStatus: "preparado",
+        currentVersionId: versionId,
+        originalFilename: `${title.replace(/\s+/g, "_")}.${extension}`,
+        storedFilename: `${documentId}.${extension}`,
+        mimeType: extension === "pdf" ? "application/pdf" : extension === "txt" ? "text/plain" : extension === "csv" ? "text/csv" : extension === "png" ? "image/png" : "application/octet-stream",
+        fileExtension: extension,
+        sizeBytes: 24000 + index * 120,
+        storagePath: `storage/incoming/${documentId}.${extension}`,
+        status: index % 11 === 0 ? "requiere_revision" : "procesado"
+      }
+    });
+    await prisma.documentVersion.upsert({
+      where: { documentId_versionNumber: { documentId, versionNumber: 1 } },
+      update: { originalFilename: `${title.replace(/\s+/g, "_")}.${extension}`, sizeBytes: 24000 + index * 120 },
+      create: { id: versionId, organizationId: organization.id, documentId, versionNumber: 1, originalFilename: `${title.replace(/\s+/g, "_")}.${extension}`, storedFilename: `${documentId}.${extension}`, mimeType: extension === "pdf" ? "application/pdf" : "application/octet-stream", fileExtension: extension, sizeBytes: 24000 + index * 120, storagePath: `storage/incoming/${documentId}.${extension}`, checksumSha256: `demo-checksum-${index}`, changeReason: "Version demo inicial", createdByUserId: "demo-user" }
+    });
+    if (index % 10 === 0) {
+      await prisma.documentVersion.upsert({
+        where: { documentId_versionNumber: { documentId, versionNumber: 2 } },
+        update: { changeReason: "Actualizacion demo de evidencia" },
+        create: { id: `${documentId}-v2`, organizationId: organization.id, documentId, versionNumber: 2, originalFilename: `${title.replace(/\s+/g, "_")}_rev2.${extension}`, storedFilename: `${documentId}-v2.${extension}`, mimeType: "application/octet-stream", fileExtension: extension, sizeBytes: 25000 + index * 120, storagePath: `storage/incoming/${documentId}-v2.${extension}`, checksumSha256: `demo-checksum-${index}-v2`, changeReason: "Actualizacion demo de evidencia", createdByUserId: "demo-user" }
+      });
+    }
+    await prisma.documentRelation.upsert({
+      where: { id: `${documentId}-rel-material` },
+      update: { entityId: material.id, validationStatus: "pendiente" },
+      create: { id: `${documentId}-rel-material`, organizationId: organization.id, documentId, entityType: "raw_material_master", entityId: material.id, relationType: "evidencia", sourceReference: "seed demo", confidence: 0.82, validationStatus: "pendiente", createdByUserId: "demo-user" }
+    });
+    await prisma.documentChunk.upsert({
+      where: { chunkCode: `${documentId}-CHK-001` },
+      update: { content: `Chunk demo trazable de ${title}. Preparado para embeddings futuros sin generarlos todavia.` },
+      create: { id: `${documentId}-chunk-1`, organizationId: organization.id, documentId, chunkCode: `${documentId}-CHK-001`, chunkIndex: 1, content: `Chunk demo trazable de ${title}. Preparado para embeddings futuros sin generarlos todavia.`, sourceReference: "chunk 1", embeddingStatus: "preparado" }
+    });
+    await prisma.ocrResult.upsert({
+      where: { id: `${documentId}-ocr-1` },
+      update: { text: `OCR demo para ${title}.` },
+      create: { id: `${documentId}-ocr-1`, organizationId: organization.id, documentId, text: `OCR demo para ${title}.`, confidence: 0.76, detectedLanguage: "es", engine: "demo_ocr_preparado", sourceReference: "pagina 1", createdByUserId: "demo-user" }
+    });
+    await prisma.knowledgeSource.upsert({
+      where: { id: `${documentId}-source-1` },
+      update: { title, validationStatus: "pendiente" },
+      create: { id: `${documentId}-source-1`, organizationId: organization.id, permanentCode: `SRC-${String(index + 100).padStart(6, "0")}`, documentId, sourceType: "documento", title, citation: `Fuente demo KDE ${index}.`, evidenceLevel: "documental", validationStatus: "pendiente" }
+    });
+    await prisma.documentTagLink.upsert({
+      where: { documentId_tagId: { documentId, tagId: `tag-demo-${(index % kdeTags.length) + 1}` } },
+      update: {},
+      create: { id: `${documentId}-tag-link`, organizationId: organization.id, documentId, tagId: `tag-demo-${(index % kdeTags.length) + 1}` }
+    });
+  }
 }
 
 main()

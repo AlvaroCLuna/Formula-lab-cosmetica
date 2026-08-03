@@ -1,4 +1,4 @@
-import type { Draft, FormulaEnginePhase, FormulaEngineState, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
+import type { Draft, FormulaEnginePhase, FormulaEngineState, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, KdeDocument, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -55,6 +55,34 @@ export const api = {
     const formData = new FormData();
     files.forEach((file) => formData.append("files", file));
     return request<{ documents: LoadedDocument[] }>("/documents", { method: "POST", body: formData });
+  },
+  async kdeDashboard() {
+    return request<{ indicators: any }>("/kde/dashboard");
+  },
+  async kdeTypes() {
+    return request<{ types: any[] }>("/kde/types");
+  },
+  async kdeTags() {
+    return request<{ tags: any[] }>("/kde/tags");
+  },
+  async listKdeDocuments(filters: { q?: string; type?: string; status?: string; tag?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ documents: KdeDocument[] }>(`/kde/documents${params.toString() ? `?${params}` : ""}`);
+  },
+  async uploadKdeDocuments(files: File[]) {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+    return request<{ documents: KdeDocument[] }>("/kde/documents", { method: "POST", body: formData });
+  },
+  async getKdeDocument(id: string) {
+    return request<{ document: KdeDocument }>(`/kde/documents/${id}`);
+  },
+  async addKdeTag(id: string, input: { name: string; color?: string }) {
+    return request<{ tag: any; link: any }>(`/kde/documents/${id}/tags`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async addKdeRelation(id: string, input: Record<string, unknown>) {
+    return request<{ relation: any }>(`/kde/documents/${id}/relations`, { method: "POST", body: JSON.stringify(input) });
   },
   async latestDraft() {
     return request<{ draft: Draft | null }>("/drafts/latest");
