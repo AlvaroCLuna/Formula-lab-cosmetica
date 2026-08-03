@@ -57,6 +57,55 @@ export type KdeDocument = LoadedDocument & {
   ocrResults?: Array<{ id: string; text: string; confidence: number; detectedLanguage?: string | null }>;
 };
 
+export type LabProject = {
+  id: string;
+  permanentCode: string;
+  name: string;
+  projectType: string;
+  objective: string;
+  priority: string;
+  status: string;
+  responsible?: User;
+  samples?: LabSample[];
+  timelineEvents?: Array<{ id: string; eventType: string; title: string; description?: string | null; eventAt: string }>;
+};
+
+export type LabSample = {
+  id: string;
+  permanentCode: string;
+  projectId: string;
+  pilotLotCode?: string | null;
+  preparedAt: string;
+  quantity: number;
+  unit: string;
+  location?: string | null;
+  storageConditions?: string | null;
+  status: string;
+  released: boolean;
+  tests?: LabTest[];
+  stabilityStudies?: any[];
+  releases?: any[];
+  timelineEvents?: Array<{ id: string; eventType: string; title: string; description?: string | null; eventAt: string }>;
+  project?: LabProject;
+};
+
+export type LabTest = {
+  id: string;
+  permanentCode: string;
+  sampleId: string;
+  testType: string;
+  unit?: string | null;
+  specification?: string | null;
+  numericResult?: number | null;
+  qualitativeResult?: string | null;
+  status: string;
+  conformityStatus: string;
+  observations?: string | null;
+  method?: { id: string; permanentCode: string; name: string; validationStatus: string };
+  instrument?: { id: string; permanentCode: string; name: string; nextCalibrationAt?: string | null };
+  evidenceDocument?: KdeDocument | null;
+};
+
 export type Draft = {
   id: string;
   status: "borrador" | "aprobado" | "rechazado";

@@ -144,6 +144,42 @@ enum ProductionLogType {
   parametro
 }
 
+enum LabProjectStatus {
+  borrador
+  planeado
+  activo
+  pausado
+  completado
+  cancelado
+  archivado
+}
+
+enum LabSampleStatus {
+  preparada
+  en_evaluacion
+  aprobada
+  rechazada
+  agotada
+  retenida
+  archivada
+}
+
+enum LabTestStatus {
+  pendiente
+  en_proceso
+  completado
+  repetido
+  invalidado
+  aprobado_tecnicamente
+}
+
+enum LabReleaseDecision {
+  aprobada
+  aprobada_con_observaciones
+  rechazada
+  pendiente
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -197,6 +233,18 @@ model Organization {
   productSearchTerms ProductSearchTerm[]
   guidedSelectionRules GuidedSelectionRule[]
   cosmeticNeeds CosmeticNeed[]
+  labProjects LabProject[]
+  labSamples LabSample[]
+  labTestPlans LabTestPlan[]
+  labTestPlanItems LabTestPlanItem[]
+  labTestMethods LabTestMethod[]
+  labInstruments LabInstrument[]
+  labTests LabTest[]
+  labStabilityStudies LabStabilityStudy[]
+  labStabilityPoints LabStabilityPoint[]
+  labTimelineEvents LabTimelineEvent[]
+  labNonConformities LabNonConformity[]
+  labTechnicalReleases LabTechnicalRelease[]
 
   @@map("organizations")
 }
@@ -239,6 +287,14 @@ model User {
   productionConsumptions ProductionConsumption[]
   productionChecklistItems ProductionChecklistItem[]
   finishedProductLots FinishedProductLot[]
+  labProjectsResponsible LabProject[] @relation("LabProjectResponsible")
+  labSamplesResponsible LabSample[] @relation("LabSampleResponsible")
+  labTestMethodsCreated LabTestMethod[]
+  labInstrumentsResponsible LabInstrument[]
+  labTestsAnalyst LabTest[] @relation("LabTestAnalyst")
+  labTimelineEvents LabTimelineEvent[]
+  labNonConformitiesResponsible LabNonConformity[] @relation("LabNonConformityResponsible")
+  labTechnicalReleases LabTechnicalRelease[] @relation("LabReleaseResponsible")
 
   @@index([organizationId])
   @@map("users")
@@ -304,6 +360,8 @@ model Document {
   ocrResults        OcrResult[]
   permissions       DocumentPermission[]
   knowledgeSources  KnowledgeSource[]
+  labTestsEvidence  LabTest[]
+  labNonConformitiesEvidence LabNonConformity[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -818,6 +876,8 @@ model FormulationFamily {
   organization    Organization            @relation(fields: [organizationId], references: [id])
   createdBy       User                    @relation(fields: [createdByUserId], references: [id])
   versions        FormulationVersion[]
+  labProjects     LabProject[]
+  labSamples      LabSample[]
 
   @@unique([organizationId, permanentCode])
   @@index([organizationId])
@@ -851,6 +911,8 @@ model FormulationVersion {
   targetComparisons   FormulationVersionComparison[] @relation("TargetVersion")
   costScenarios       CostScenario[]
   productionOrders    ProductionOrder[]
+  labProjects         LabProject[]
+  labSamples          LabSample[]
 
   @@unique([formulationFamilyId, versionNumber])
   @@index([organizationId])
@@ -1485,4 +1547,333 @@ model KnowledgeSource {
   @@index([organizationId])
   @@index([documentId])
   @@map("knowledge_sources")
+}
+
+model LabProject {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  projectType String @map("project_type")
+  objective String @db.Text
+  responsibleUserId String @map("responsible_user_id")
+  priority ProductionPriority @default(media)
+  status LabProjectStatus @default(borrador)
+  startDate DateTime? @map("start_date")
+  targetDate DateTime? @map("target_date")
+  completedAt DateTime? @map("completed_at")
+  formulationFamilyId String? @map("formulation_family_id")
+  formulationVersionId String? @map("formulation_version_id")
+  observations String? @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("LabProjectResponsible", fields: [responsibleUserId], references: [id])
+  formulationFamily FormulationFamily? @relation(fields: [formulationFamilyId], references: [id])
+  formulationVersion FormulationVersion? @relation(fields: [formulationVersionId], references: [id])
+  samples LabSample[]
+  timelineEvents LabTimelineEvent[]
+  nonConformities LabNonConformity[]
+
+  @@index([organizationId])
+  @@index([responsibleUserId])
+  @@index([formulationVersionId])
+  @@index([status])
+  @@map("lab_projects")
+}
+
+model LabSample {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  projectId String @map("project_id")
+  formulationFamilyId String? @map("formulation_family_id")
+  formulationVersionId String? @map("formulation_version_id")
+  pilotLotCode String? @map("pilot_lot_code")
+  preparedAt DateTime @map("prepared_at")
+  responsibleUserId String @map("responsible_user_id")
+  quantity Decimal @db.Decimal(12, 3)
+  unit String @default("g")
+  location String?
+  storageConditions String? @db.Text @map("storage_conditions")
+  status LabSampleStatus @default(preparada)
+  observations String? @db.Text
+  released Boolean @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  project LabProject @relation(fields: [projectId], references: [id])
+  responsible User @relation("LabSampleResponsible", fields: [responsibleUserId], references: [id])
+  formulationFamily FormulationFamily? @relation(fields: [formulationFamilyId], references: [id])
+  formulationVersion FormulationVersion? @relation(fields: [formulationVersionId], references: [id])
+  tests LabTest[]
+  stabilityStudies LabStabilityStudy[]
+  timelineEvents LabTimelineEvent[]
+  releases LabTechnicalRelease[]
+  nonConformities LabNonConformity[]
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([formulationVersionId])
+  @@index([status])
+  @@map("lab_samples")
+}
+
+model LabTestPlan {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  code String
+  name String
+  formulationFamilyId String? @map("formulation_family_id")
+  productTypeId String? @map("product_type_id")
+  needId String? @map("need_id")
+  developmentStage String? @map("development_stage")
+  sampleType String? @map("sample_type")
+  status EntityStatus @default(activo)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  items LabTestPlanItem[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("lab_test_plans")
+}
+
+model LabTestPlanItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  planId String @map("plan_id")
+  methodId String @map("method_id")
+  testType String @map("test_type")
+  required Boolean @default(true)
+  orderIndex Int @default(0) @map("order_index")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  plan LabTestPlan @relation(fields: [planId], references: [id])
+  method LabTestMethod @relation(fields: [methodId], references: [id])
+
+  @@index([organizationId])
+  @@index([planId])
+  @@index([methodId])
+  @@map("lab_test_plan_items")
+}
+
+model LabTestMethod {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  description String @db.Text
+  preparation String? @db.Text
+  equipment String? @db.Text
+  conditions String? @db.Text
+  procedureText String @db.Text @map("procedure_text")
+  unit String?
+  acceptanceCriteria String? @db.Text @map("acceptance_criteria")
+  referencesText String? @db.Text @map("references_text")
+  versionNumber Int @default(1) @map("version_number")
+  validationStatus String @default("borrador") @map("validation_status")
+  locked Boolean @default(false)
+  createdByUserId String @map("created_by_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  createdBy User @relation(fields: [createdByUserId], references: [id])
+  planItems LabTestPlanItem[]
+  tests LabTest[]
+  nonConformities LabNonConformity[]
+
+  @@index([organizationId])
+  @@index([validationStatus])
+  @@map("lab_test_methods")
+}
+
+model LabInstrument {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  instrumentType String @map("instrument_type")
+  name String
+  manufacturer String?
+  model String?
+  serialNumber String? @map("serial_number")
+  location String?
+  status EntityStatus @default(activo)
+  lastCalibrationAt DateTime? @map("last_calibration_at")
+  nextCalibrationAt DateTime? @map("next_calibration_at")
+  responsibleUserId String? @map("responsible_user_id")
+  observations String? @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User? @relation(fields: [responsibleUserId], references: [id])
+  tests LabTest[]
+  nonConformities LabNonConformity[]
+
+  @@index([organizationId])
+  @@index([instrumentType])
+  @@index([nextCalibrationAt])
+  @@map("lab_instruments")
+}
+
+model LabTest {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  sampleId String @map("sample_id")
+  methodId String @map("method_id")
+  testType String @map("test_type")
+  unit String?
+  specification String? @db.Text
+  numericResult Decimal? @db.Decimal(12, 4) @map("numeric_result")
+  qualitativeResult String? @db.Text @map("qualitative_result")
+  instrumentId String? @map("instrument_id")
+  analystUserId String @map("analyst_user_id")
+  testedAt DateTime @map("tested_at")
+  status LabTestStatus @default(pendiente)
+  conformityStatus String @default("pendiente") @map("conformity_status")
+  observations String? @db.Text
+  evidenceDocumentId String? @map("evidence_document_id")
+  invalidatedReason String? @db.Text @map("invalidated_reason")
+  repeatedFromTestId String? @map("repeated_from_test_id")
+  releasedLocked Boolean @default(false) @map("released_locked")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  sample LabSample @relation(fields: [sampleId], references: [id])
+  method LabTestMethod @relation(fields: [methodId], references: [id])
+  instrument LabInstrument? @relation(fields: [instrumentId], references: [id])
+  analyst User @relation("LabTestAnalyst", fields: [analystUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+  stabilityPoints LabStabilityPoint[]
+  nonConformities LabNonConformity[]
+  releases LabTechnicalRelease[] @relation("LabReleaseTests")
+
+  @@index([organizationId])
+  @@index([sampleId])
+  @@index([methodId])
+  @@index([status])
+  @@index([conformityStatus])
+  @@map("lab_tests")
+}
+
+model LabStabilityStudy {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  sampleId String @map("sample_id")
+  conditionName String @map("condition_name")
+  temperature Decimal? @db.Decimal(8, 2)
+  humidity Decimal? @db.Decimal(8, 2)
+  light String?
+  packaging String?
+  durationDays Int @map("duration_days")
+  conclusion String? @db.Text
+  status EntityStatus @default(activo)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  sample LabSample @relation(fields: [sampleId], references: [id])
+  points LabStabilityPoint[]
+
+  @@index([organizationId])
+  @@index([sampleId])
+  @@map("lab_stability_studies")
+}
+
+model LabStabilityPoint {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  studyId String @map("study_id")
+  dayNumber Int @map("day_number")
+  scheduledAt DateTime @map("scheduled_at")
+  evaluatedAt DateTime? @map("evaluated_at")
+  testId String? @map("test_id")
+  resultSummary String? @db.Text @map("result_summary")
+  status String @default("pendiente")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  study LabStabilityStudy @relation(fields: [studyId], references: [id])
+  test LabTest? @relation(fields: [testId], references: [id])
+
+  @@index([organizationId])
+  @@index([studyId])
+  @@index([scheduledAt])
+  @@map("lab_stability_points")
+}
+
+model LabTimelineEvent {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  projectId String? @map("project_id")
+  sampleId String? @map("sample_id")
+  eventType String @map("event_type")
+  title String
+  description String? @db.Text
+  eventAt DateTime @default(now()) @map("event_at")
+  createdByUserId String @map("created_by_user_id")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  project LabProject? @relation(fields: [projectId], references: [id])
+  sample LabSample? @relation(fields: [sampleId], references: [id])
+  createdBy User @relation(fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([projectId])
+  @@index([sampleId])
+  @@index([eventAt])
+  @@map("lab_timeline_events")
+}
+
+model LabNonConformity {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  projectId String? @map("project_id")
+  sampleId String? @map("sample_id")
+  testId String? @map("test_id")
+  instrumentId String? @map("instrument_id")
+  methodId String? @map("method_id")
+  deviation String @db.Text
+  preliminaryCause String? @db.Text @map("preliminary_cause")
+  actionPlan String? @db.Text @map("action_plan")
+  responsibleUserId String @map("responsible_user_id")
+  evidenceDocumentId String? @map("evidence_document_id")
+  status String @default("abierta")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  project LabProject? @relation(fields: [projectId], references: [id])
+  sample LabSample? @relation(fields: [sampleId], references: [id])
+  test LabTest? @relation(fields: [testId], references: [id])
+  instrument LabInstrument? @relation(fields: [instrumentId], references: [id])
+  method LabTestMethod? @relation(fields: [methodId], references: [id])
+  responsible User @relation("LabNonConformityResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+
+  @@index([organizationId])
+  @@index([sampleId])
+  @@index([testId])
+  @@index([status])
+  @@map("lab_non_conformities")
+}
+
+model LabTechnicalRelease {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  sampleId String @map("sample_id")
+  decision LabReleaseDecision @default(pendiente)
+  responsibleUserId String @map("responsible_user_id")
+  releasedAt DateTime @default(now()) @map("released_at")
+  conclusion String @db.Text
+  digitalConfirmation String @map("digital_confirmation")
+  documentIdsJson Json? @map("document_ids_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  sample LabSample @relation(fields: [sampleId], references: [id])
+  responsible User @relation("LabReleaseResponsible", fields: [responsibleUserId], references: [id])
+  tests LabTest[] @relation("LabReleaseTests")
+
+  @@index([organizationId])
+  @@index([sampleId])
+  @@index([decision])
+  @@map("lab_technical_releases")
 }

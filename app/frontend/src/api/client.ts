@@ -1,4 +1,4 @@
-import type { Draft, FormulaEnginePhase, FormulaEngineState, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, KdeDocument, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
+import type { Draft, FormulaEnginePhase, FormulaEngineState, FormulationComparison, FormulationFamily, FormulationIngredient, FormulationVersion, KdeDocument, LabProject, LabSample, LabTest, LearningCard, LoadedDocument, RawMaterialLearning, RawMaterialMaster, RawMaterialMasterVersion, User, ValidationStatus } from "../types";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4000";
 
@@ -83,6 +83,57 @@ export const api = {
   },
   async addKdeRelation(id: string, input: Record<string, unknown>) {
     return request<{ relation: any }>(`/kde/documents/${id}/relations`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async limsDashboard() {
+    return request<{ indicators: any }>("/lims/dashboard");
+  },
+  async listLabProjects(filters: { search?: string; status?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ projects: LabProject[] }>(`/lims/projects${params.toString() ? `?${params}` : ""}`);
+  },
+  async createLabProject(input: Record<string, unknown>) {
+    return request<{ project: LabProject }>("/lims/projects", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listLabSamples(filters: { search?: string; status?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ samples: LabSample[] }>(`/lims/samples${params.toString() ? `?${params}` : ""}`);
+  },
+  async createLabSample(input: Record<string, unknown>) {
+    return request<{ sample: LabSample }>("/lims/samples", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listLabMethods() {
+    return request<{ methods: any[] }>("/lims/methods");
+  },
+  async listLabInstruments() {
+    return request<{ instruments: any[] }>("/lims/instruments");
+  },
+  async listLabTests(filters: { search?: string; status?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ tests: LabTest[] }>(`/lims/tests${params.toString() ? `?${params}` : ""}`);
+  },
+  async createLabTest(input: Record<string, unknown>) {
+    return request<{ test: LabTest }>("/lims/tests", { method: "POST", body: JSON.stringify(input) });
+  },
+  async updateLabResult(id: string, input: Record<string, unknown>) {
+    return request<{ test: LabTest }>(`/lims/tests/${id}/result`, { method: "PATCH", body: JSON.stringify(input) });
+  },
+  async invalidateLabTest(id: string, reason: string) {
+    return request<{ test: LabTest }>(`/lims/tests/${id}/invalidate`, { method: "POST", body: JSON.stringify({ reason }) });
+  },
+  async repeatLabTest(id: string, reason: string) {
+    return request<{ test: LabTest }>(`/lims/tests/${id}/repeat`, { method: "POST", body: JSON.stringify({ reason }) });
+  },
+  async listStabilityStudies() {
+    return request<{ studies: any[] }>("/lims/stability");
+  },
+  async listLabNonConformities() {
+    return request<{ nonConformities: any[] }>("/lims/non-conformities");
+  },
+  async releaseLabSample(id: string, input: Record<string, unknown>) {
+    return request<{ release: any }>(`/lims/samples/${id}/release`, { method: "POST", body: JSON.stringify(input) });
   },
   async latestDraft() {
     return request<{ draft: Draft | null }>("/drafts/latest");

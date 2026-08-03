@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.8.0 - Incremento 8 implementado
+
+- Se implemento LIMS como modulo de laboratorio para proyectos, muestras, ensayos, estabilidad, no conformidades y liberacion tecnica.
+- Se agregaron modelos Prisma, migracion MySQL, APIs, validaciones, seeds y pruebas.
+- Se integro LIMS con formulaciones aprobadas, muestras, metodos versionados, instrumentos, evidencias KDE y auditoria.
+- Se agrego bloqueo de resultados liberados, motivo obligatorio para invalidacion/repeticion y advertencia para instrumentos con calibracion vencida.
+- Se agrego UI ERP tipo laboratorio con dashboard, tarjetas, tabs, timeline, panel lateral, captura guiada y modo aprendizaje.
+- Se agregaron datos demo con proyectos, muestras, metodos, instrumentos, ensayos, estabilidad, no conformidades y liberaciones.
+- Se documento la validacion en `docs/26_Validacion_Incremento_8.md` con Flowchart y ER Diagram Mermaid.
+
 ## 0.7.8 - Incremento 7.8 implementado
 
 - Se implemento Knowledge Document Engine como repositorio documental transversal del ERP.

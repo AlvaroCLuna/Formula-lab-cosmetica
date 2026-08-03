@@ -10,6 +10,7 @@ const items = [
   { id: "costos", label: "Costos", icon: Calculator },
   { id: "inventario", label: "Inventario", icon: PackageSearch },
   { id: "produccion", label: "Laboratorio", icon: Beaker },
+  { id: "lims", label: "LIMS", icon: ClipboardCheck },
   { id: "calidad", label: "Calidad", icon: ClipboardCheck, disabled: true },
   { id: "aprendizaje", label: "Aprendizaje", icon: BookOpen, disabled: true }
 ];

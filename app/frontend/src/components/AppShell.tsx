@@ -21,7 +21,8 @@ const viewCopy: Record<string, { title: string; search: string }> = {
   materias: { title: "Materias Primas Maestras", search: "Buscar materias primas, INCI o funciones" },
   costos: { title: "Motor de Costos", search: "Buscar escenarios, proveedores o precios" },
   inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" },
-  produccion: { title: "Laboratorio y Produccion", search: "Buscar ordenes, lotes o formulaciones" }
+  produccion: { title: "Laboratorio y Produccion", search: "Buscar ordenes, lotes o formulaciones" },
+  lims: { title: "LIMS", search: "Buscar proyectos, muestras, ensayos o instrumentos" }
 };
 
 export function AppShell({ user, activeView, onNavigate, onLogout, children }: Props) {

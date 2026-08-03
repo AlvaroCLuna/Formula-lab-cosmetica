@@ -12,6 +12,7 @@ import { inventoryRouter } from "./routes/inventory.routes.js";
 import { productionRouter } from "./routes/production.routes.js";
 import { knowledgeCenterRouter } from "./routes/knowledge-center.routes.js";
 import { kdeRouter } from "./routes/kde.routes.js";
+import { limsRouter } from "./routes/lims.routes.js";
 import { rawMaterialsRouter } from "./routes/raw-materials.routes.js";
 import { ensureStorageFolders } from "./services/storage.service.js";
 
@@ -34,6 +35,7 @@ app.use("/inventory", inventoryRouter);
 app.use("/production", productionRouter);
 app.use("/knowledge-center", knowledgeCenterRouter);
 app.use("/kde", kdeRouter);
+app.use("/lims", limsRouter);
 app.use("/raw-materials", rawMaterialsRouter);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {

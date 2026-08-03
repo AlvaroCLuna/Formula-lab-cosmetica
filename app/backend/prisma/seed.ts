@@ -892,6 +892,196 @@ async function main() {
       create: { id: `${documentId}-tag-link`, organizationId: organization.id, documentId, tagId: `tag-demo-${(index % kdeTags.length) + 1}` }
     });
   }
+
+  const approvedVersion = await prisma.formulationVersion.findFirst({ where: { organizationId: organization.id, status: "aprobada" }, include: { family: true } });
+  const methodNames = ["Apariencia", "Color", "Olor", "pH", "Viscosidad", "Densidad", "Peso", "Rendimiento", "Espuma", "Estabilidad visual"];
+  for (const [index, name] of methodNames.entries()) {
+    await prisma.labTestMethod.upsert({
+      where: { id: `lab-method-${index + 1}` },
+      update: { name, validationStatus: index < 6 ? "validado" : "borrador", locked: index < 6 },
+      create: {
+        id: `lab-method-${index + 1}`,
+        organizationId: organization.id,
+        permanentCode: `LAB-MTH-${String(index + 1).padStart(6, "0")}`,
+        name,
+        description: `Metodo demo para evaluacion de ${name.toLowerCase()}.`,
+        preparation: "Preparar muestra homogenea y registrar condiciones.",
+        equipment: index === 3 ? "pH-metro calibrado" : index === 4 ? "Viscosimetro" : "Equipo basico de laboratorio",
+        conditions: "Temperatura ambiente controlada.",
+        procedureText: "Ejecutar procedimiento documentado. No inferir conclusiones sin evidencia.",
+        unit: index === 3 ? "pH" : index === 4 ? "cP" : index === 5 ? "g/mL" : null,
+        acceptanceCriteria: index === 3 ? "5.0-6.5" : index === 4 ? "1500-6000" : "Conforme a especificacion definida.",
+        referencesText: "Fuente KDE demo asociada al metodo.",
+        versionNumber: 1,
+        validationStatus: index < 6 ? "validado" : "borrador",
+        locked: index < 6,
+        createdByUserId: "demo-user"
+      }
+    });
+  }
+
+  const instrumentTypes = ["balanza", "pH-metro", "viscosimetro", "densimetro", "centrifuga", "microscopio", "termometro", "camara de estabilidad"];
+  for (const [index, type] of instrumentTypes.entries()) {
+    await prisma.labInstrument.upsert({
+      where: { id: `lab-instrument-${index + 1}` },
+      update: { name: `${type} demo`, nextCalibrationAt: new Date(`2026-${index === 1 ? "07" : "09"}-15T00:00:00.000Z`) },
+      create: {
+        id: `lab-instrument-${index + 1}`,
+        organizationId: organization.id,
+        permanentCode: `LAB-INS-${String(index + 1).padStart(6, "0")}`,
+        instrumentType: type,
+        name: `${type} demo`,
+        manufacturer: "Instrumentos Demo",
+        model: `MD-${index + 1}`,
+        serialNumber: `SN-LAB-${index + 1}`,
+        location: index < 4 ? "Laboratorio principal" : "Sala de estabilidad",
+        status: "activo",
+        lastCalibrationAt: new Date("2026-06-15T00:00:00.000Z"),
+        nextCalibrationAt: new Date(`2026-${index === 1 ? "07" : "09"}-15T00:00:00.000Z`),
+        responsibleUserId: "demo-user",
+        observations: index === 1 ? "Calibracion vencida demo para validar advertencia." : "Instrumento demo operativo."
+      }
+    });
+  }
+
+  for (let index = 1; index <= 5; index += 1) {
+    await prisma.labProject.upsert({
+      where: { id: `lab-project-${index}` },
+      update: { name: `Proyecto LIMS demo ${index}`, status: index === 5 ? "pausado" : index === 4 ? "completado" : "activo" },
+      create: {
+        id: `lab-project-${index}`,
+        organizationId: organization.id,
+        permanentCode: `LAB-PRJ-${String(index).padStart(6, "0")}`,
+        name: `Proyecto LIMS demo ${index}`,
+        projectType: ["desarrollo", "mejora", "sustitucion", "estabilidad", "incidencia tecnica"][index - 1],
+        objective: "Validar muestra cosmetica con evidencia documental y trazabilidad completa.",
+        responsibleUserId: "demo-user",
+        priority: index === 5 ? "alta" : "media",
+        status: index === 5 ? "pausado" : index === 4 ? "completado" : "activo",
+        startDate: new Date(`2026-08-0${index}T00:00:00.000Z`),
+        targetDate: new Date(`2026-09-0${index}T00:00:00.000Z`),
+        formulationFamilyId: approvedVersion?.formulationFamilyId,
+        formulationVersionId: approvedVersion?.id,
+        observations: "Proyecto demo integrado con formulacion aprobada y KDE."
+      }
+    });
+    await prisma.labTimelineEvent.upsert({
+      where: { id: `lab-project-${index}-event` },
+      update: { title: "Proyecto creado" },
+      create: { id: `lab-project-${index}-event`, organizationId: organization.id, projectId: `lab-project-${index}`, eventType: "creacion", title: "Proyecto creado", description: "Evento demo de timeline LIMS.", createdByUserId: "demo-user" }
+    });
+  }
+
+  for (let index = 1; index <= 12; index += 1) {
+    const projectId = `lab-project-${((index - 1) % 5) + 1}`;
+    await prisma.labSample.upsert({
+      where: { id: `lab-sample-${index}` },
+      update: { status: index % 6 === 0 ? "aprobada" : index % 4 === 0 ? "retenida" : "en_evaluacion" },
+      create: {
+        id: `lab-sample-${index}`,
+        organizationId: organization.id,
+        permanentCode: `LAB-SMP-${String(index).padStart(6, "0")}`,
+        projectId,
+        formulationFamilyId: approvedVersion?.formulationFamilyId,
+        formulationVersionId: approvedVersion?.id,
+        pilotLotCode: `PIL-${String(index).padStart(4, "0")}`,
+        preparedAt: new Date(`2026-08-${String((index % 20) + 1).padStart(2, "0")}T09:00:00.000Z`),
+        responsibleUserId: "demo-user",
+        quantity: 250 + index * 10,
+        unit: "g",
+        location: index % 2 === 0 ? "Camara 25 C" : "Anaquel laboratorio",
+        storageConditions: index % 2 === 0 ? "25 C protegido de luz" : "Ambiente controlado",
+        status: index % 6 === 0 ? "aprobada" : index % 4 === 0 ? "retenida" : "en_evaluacion",
+        observations: "Muestra demo para LIMS."
+      }
+    });
+  }
+
+  for (let index = 1; index <= 30; index += 1) {
+    const sampleId = `lab-sample-${((index - 1) % 12) + 1}`;
+    const methodId = `lab-method-${((index - 1) % 10) + 1}`;
+    const numeric = index % 5 === 0 ? 7.2 : index % 3 === 0 ? 5.6 : null;
+    const conformity = numeric === 7.2 ? "no_conforme" : numeric === 5.6 ? "conforme" : "pendiente";
+    await prisma.labTest.upsert({
+      where: { id: `lab-test-${index}` },
+      update: { conformityStatus: conformity },
+      create: {
+        id: `lab-test-${index}`,
+        organizationId: organization.id,
+        permanentCode: `LAB-TST-${String(index).padStart(6, "0")}`,
+        sampleId,
+        methodId,
+        testType: methodNames[(index - 1) % methodNames.length],
+        unit: index % 3 === 0 ? "pH" : null,
+        specification: index % 3 === 0 ? "5.0-6.5" : "Criterio cualitativo documentado",
+        numericResult: numeric,
+        qualitativeResult: numeric == null ? (index % 4 === 0 ? "Separacion leve observada" : "Apariencia uniforme") : null,
+        instrumentId: `lab-instrument-${((index - 1) % 8) + 1}`,
+        analystUserId: "demo-user",
+        testedAt: new Date(`2026-08-${String((index % 24) + 1).padStart(2, "0")}T11:00:00.000Z`),
+        status: "completado",
+        conformityStatus: conformity,
+        observations: "Resultado demo trazable.",
+        evidenceDocumentId: `kde-doc-${String(((index - 1) % 50) + 1).padStart(3, "0")}`
+      }
+    });
+  }
+
+  for (let index = 1; index <= 3; index += 1) {
+    await prisma.labStabilityStudy.upsert({
+      where: { id: `lab-stability-${index}` },
+      update: { conditionName: ["ambiente", "40 C", "ciclos frio/calor"][index - 1] },
+      create: {
+        id: `lab-stability-${index}`,
+        organizationId: organization.id,
+        permanentCode: `LAB-STB-${String(index).padStart(6, "0")}`,
+        sampleId: `lab-sample-${index}`,
+        conditionName: ["ambiente", "40 C", "ciclos frio/calor"][index - 1],
+        temperature: index === 2 ? 40 : index === 3 ? 4 : 25,
+        humidity: index === 2 ? 75 : 50,
+        light: index === 1 ? "protegido" : "controlada",
+        packaging: "Envase PET demo",
+        durationDays: index === 3 ? 30 : 90,
+        conclusion: null,
+        status: "activo"
+      }
+    });
+    for (const day of [0, 7, 14, 30]) {
+      await prisma.labStabilityPoint.upsert({
+        where: { id: `lab-stability-${index}-day-${day}` },
+        update: { status: day === 0 ? "evaluado" : "pendiente" },
+        create: { id: `lab-stability-${index}-day-${day}`, organizationId: organization.id, studyId: `lab-stability-${index}`, dayNumber: day, scheduledAt: new Date(`2026-08-${String(Math.min(day + 1, 28)).padStart(2, "0")}T09:00:00.000Z`), evaluatedAt: day === 0 ? new Date("2026-08-01T09:30:00.000Z") : null, testId: day === 0 ? `lab-test-${index}` : null, resultSummary: day === 0 ? "Punto inicial evaluado." : null, status: day === 0 ? "evaluado" : "pendiente" }
+      });
+    }
+  }
+
+  for (let index = 1; index <= 2; index += 1) {
+    await prisma.labNonConformity.upsert({
+      where: { id: `lab-ncf-${index}` },
+      update: { status: index === 1 ? "abierta" : "en_investigacion" },
+      create: { id: `lab-ncf-${index}`, organizationId: organization.id, permanentCode: `LAB-NCF-${String(index).padStart(6, "0")}`, projectId: `lab-project-${index}`, sampleId: `lab-sample-${index * 2}`, testId: `lab-test-${index * 5}`, instrumentId: `lab-instrument-${index}`, methodId: `lab-method-${index}`, deviation: "Resultado fuera de especificacion demo.", preliminaryCause: "Causa preliminar pendiente de confirmacion.", actionPlan: "Repetir ensayo y revisar instrumento.", responsibleUserId: "demo-user", evidenceDocumentId: `kde-doc-${String(index).padStart(3, "0")}`, status: index === 1 ? "abierta" : "en_investigacion" }
+    });
+  }
+
+  for (let index = 1; index <= 2; index += 1) {
+    await prisma.labTechnicalRelease.upsert({
+      where: { id: `lab-release-${index}` },
+      update: { conclusion: "Liberacion tecnica demo documentada." },
+      create: {
+        id: `lab-release-${index}`,
+        organizationId: organization.id,
+        sampleId: `lab-sample-${index}`,
+        decision: index === 1 ? "aprobada" : "aprobada_con_observaciones",
+        responsibleUserId: "demo-user",
+        conclusion: "Liberacion tecnica demo documentada.",
+        digitalConfirmation: "demo-user-confirmado",
+        documentIdsJson: [`kde-doc-${String(index).padStart(3, "0")}`],
+        tests: { connect: [{ id: `lab-test-${index}` }, { id: `lab-test-${index + 12}` }] }
+      }
+    });
+    await prisma.labSample.update({ where: { id: `lab-sample-${index}` }, data: { released: true, status: "aprobada" } });
+    await prisma.labTest.updateMany({ where: { id: { in: [`lab-test-${index}`, `lab-test-${index + 12}`] } }, data: { releasedLocked: true, status: "aprobado_tecnicamente" } });
+  }
 }
 
 main()

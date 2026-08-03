@@ -103,7 +103,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 7.8 - Knowledge Document Engine
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Repositorio documental transversal implementado sobre la tabla `documents` existente.
 - Tipos documentales implementados en `document_types`.
@@ -115,7 +115,25 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - UI documental ERP implementada con drag & drop, filtros, tarjetas/lista, panel lateral y vista previa.
 - Seeds con 50 documentos demo KDE y relaciones trazables agregados.
 - Validacion documentada con Flowchart y ER Diagram Mermaid.
-- Pendiente: aprobacion formal antes de iniciar Incremento 8 LIMS.
+
+## Incremento 8 - LIMS
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Proyectos de laboratorio implementados.
+- Muestras implementadas.
+- Planes y metodos de ensayo implementados.
+- Instrumentos con calibracion implementados.
+- Ensayos y resultados implementados.
+- Estabilidad con puntos de evaluacion implementada.
+- Timeline de seguimiento implementado.
+- No conformidades de laboratorio implementadas.
+- Liberacion tecnica implementada con bloqueo de resultados.
+- Integracion documental mediante KDE implementada por `evidence_document_id` y relaciones documentales reutilizables.
+- UI ERP tipo laboratorio implementada.
+- Seeds y pruebas agregadas.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
+- Pendiente: aprobacion formal antes de iniciar Incremento 9.
 
 ## Pendiente para fases posteriores
 

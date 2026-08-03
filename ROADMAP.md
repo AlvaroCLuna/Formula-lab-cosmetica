@@ -73,7 +73,7 @@ Centro de Conocimiento Cosmetico:
 
 Validacion documentada en `docs/24_Validacion_Incremento_7_5.md`.
 
-## Incremento 7.8 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 7.8 - COMPLETADO Y APROBADO
 
 Knowledge Document Engine:
 
@@ -85,6 +85,21 @@ Knowledge Document Engine:
 - Dashboard documental y panel lateral de trazabilidad.
 
 Validacion documentada en `docs/25_Validacion_Incremento_7_8.md`.
+
+## Incremento 8 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+LIMS - Laboratory Information Management System:
+
+- Proyectos de laboratorio con codigos permanentes, estados, responsables y formulacion/version aprobada relacionada.
+- Muestras con lote piloto, ubicacion, condiciones, estado y liberacion.
+- Catalogo versionado de metodos de ensayo con bloqueo de metodos validados.
+- Instrumentos con calibracion y advertencia de uso vencido.
+- Ensayos con metodo, instrumento, resultado, conformidad, evidencia KDE y auditoria.
+- Estudios de estabilidad con puntos de evaluacion.
+- No conformidades y liberacion tecnica con bloqueo de resultados usados.
+- Dashboard, timeline, captura guiada, comparacion visual preparada y modo aprendizaje.
+
+Validacion documentada en `docs/26_Validacion_Incremento_8.md`.
 
 ## Fases posteriores
 
