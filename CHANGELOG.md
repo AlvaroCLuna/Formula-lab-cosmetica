@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.11.0 - Incremento 11 implementado
+
+- Se implemento CRM, Ventas y Pedidos con prospectos, clientes, contactos, actividades, oportunidades, productos vendibles, listas de precios, cotizaciones, aprobaciones, pedidos, entregas y muestras comerciales.
+- Se agregaron modelos Prisma, migracion MySQL, SQL espejo, APIs, validaciones, seed y pruebas.
+- Se integro el modulo comercial con formulaciones aprobadas, costos de referencia, inventario/disponibilidad preparada, produccion sugerida, calidad por bloqueo de entrega, KDE y auditoria.
+- Se agregaron reglas para no duplicar prospectos convertidos, no vender formulaciones no aprobadas, no sobrescribir listas/cotizaciones historicas, no confirmar pedidos sin partidas y no entregar lotes no liberados.
+- Se agrego UI ERP de CRM/Ventas con dashboard, pipeline Kanban, perfil 360, cotizador guiado, pedidos, entregas, panel lateral y modo aprendizaje.
+- Se agregaron datos demo con 12 prospectos, 6 clientes, 18 contactos, 25 actividades, 10 oportunidades, 12 productos, 3 listas, 8 cotizaciones, 5 pedidos, 3 entregas y 4 muestras.
+- Se documento la validacion en `docs/29_Validacion_Incremento_11.md` con Flowchart y ER Diagram Mermaid.
+
 ## 0.10.0 - Incremento 10 implementado
 
 - Se implemento Compras y Abastecimiento con solicitudes, requisiciones, RFQ, cotizaciones, comparativas, ordenes de compra, aprobaciones, recepciones, devoluciones, evaluaciones de proveedores y sugerencias.

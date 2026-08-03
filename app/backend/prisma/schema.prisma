@@ -242,6 +242,52 @@ enum PurchaseRfqStatus {
   cerrada
 }
 
+enum CrmLeadStatus {
+  nuevo
+  contactado
+  calificado
+  en_seguimiento
+  convertido
+  descartado
+  inactivo
+}
+
+enum CrmOpportunityStage {
+  deteccion
+  calificacion
+  diagnostico
+  propuesta
+  negociacion
+  ganada
+  perdida
+  pausada
+}
+
+enum SalesQuoteStatus {
+  borrador
+  enviada
+  vista
+  en_negociacion
+  aceptada
+  rechazada
+  vencida
+  cancelada
+  convertida
+}
+
+enum SalesOrderStatus {
+  borrador
+  confirmado
+  en_validacion
+  en_preparacion
+  en_produccion
+  listo
+  parcialmente_entregado
+  entregado
+  cancelado
+  cerrado
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -333,6 +379,20 @@ model Organization {
   purchaseReturns PurchaseReturn[]
   supplierEvaluations SupplierEvaluation[]
   supplySuggestions SupplySuggestion[]
+  crmLeads CrmLead[]
+  crmCustomers CrmCustomer[]
+  crmContacts CrmContact[]
+  crmActivities CrmActivity[]
+  crmOpportunities CrmOpportunity[]
+  salesProducts SalesProduct[]
+  salesPriceLists SalesPriceList[]
+  salesQuotes SalesQuote[]
+  salesQuoteItems SalesQuoteItem[]
+  salesApprovals SalesApproval[]
+  salesOrders SalesOrder[]
+  salesOrderItems SalesOrderItem[]
+  salesDeliveries SalesDelivery[]
+  salesSamples SalesSample[]
 
   @@map("organizations")
 }
@@ -399,6 +459,14 @@ model User {
   purchaseReceiptsResponsible PurchaseReceipt[] @relation("PurchaseReceiptResponsible")
   purchaseReturnsResponsible PurchaseReturn[] @relation("PurchaseReturnResponsible")
   supplierEvaluationsResponsible SupplierEvaluation[] @relation("SupplierEvaluationResponsible")
+  crmLeadsResponsible CrmLead[] @relation("CrmLeadResponsible")
+  crmActivitiesCreated CrmActivity[] @relation("CrmActivityCreatedBy")
+  crmActivitiesResponsible CrmActivity[] @relation("CrmActivityResponsible")
+  crmOpportunitiesResponsible CrmOpportunity[] @relation("CrmOpportunityResponsible")
+  salesApprovalsApprover SalesApproval[] @relation("SalesApprovalApprover")
+  salesOrdersResponsible SalesOrder[] @relation("SalesOrderResponsible")
+  salesDeliveriesResponsible SalesDelivery[] @relation("SalesDeliveryResponsible")
+  salesSamplesResponsible SalesSample[] @relation("SalesSampleResponsible")
 
   @@index([organizationId])
   @@map("users")
@@ -480,6 +548,14 @@ model Document {
   purchaseOrdersDocuments PurchaseOrder[]
   purchaseReceiptsDocuments PurchaseReceipt[]
   purchaseReturnsDocuments PurchaseReturn[]
+  crmLeadsDocuments CrmLead[]
+  crmCustomersDocuments CrmCustomer[]
+  crmActivitiesDocuments CrmActivity[]
+  salesProductsDocuments SalesProduct[]
+  salesQuotesDocuments SalesQuote[]
+  salesOrdersDocuments SalesOrder[]
+  salesDeliveriesDocuments SalesDelivery[]
+  salesSamplesDocuments SalesSample[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -2649,4 +2725,407 @@ model SupplySuggestion {
 
   @@index([organizationId])
   @@map("supply_suggestions")
+}
+
+model CrmLead {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  commercialName String @map("commercial_name")
+  legalName String? @map("legal_name")
+  personType String @map("person_type")
+  industry String?
+  segment String?
+  channel String?
+  origin String?
+  status CrmLeadStatus @default(nuevo)
+  responsibleUserId String @map("responsible_user_id")
+  priority ProductionPriority @default(media)
+  city String?
+  state String?
+  country String? @default("Mexico")
+  website String?
+  observations String? @db.Text
+  tagsJson Json? @map("tags_json")
+  documentId String? @map("document_id")
+  convertedCustomerId String? @map("converted_customer_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  responsible User @relation("CrmLeadResponsible", fields: [responsibleUserId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  contacts CrmContact[]
+  activities CrmActivity[]
+  opportunities CrmOpportunity[]
+  customer CrmCustomer?
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("crm_leads")
+}
+
+model CrmCustomer {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  leadId String? @unique @map("lead_id")
+  legalName String @map("legal_name")
+  commercialName String @map("commercial_name")
+  rfcPrepared String? @map("rfc_prepared")
+  customerType String @map("customer_type")
+  segment String?
+  commercialTerms String? @db.Text @map("commercial_terms")
+  currency String @default("MXN")
+  priceListId String? @map("price_list_id")
+  creditPrepared Boolean @default(false) @map("credit_prepared")
+  addressesJson Json? @map("addresses_json")
+  status EntityStatus @default(activo)
+  documentId String? @map("document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  lead CrmLead? @relation(fields: [leadId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  contacts CrmContact[]
+  activities CrmActivity[]
+  opportunities CrmOpportunity[]
+  quotes SalesQuote[]
+  orders SalesOrder[]
+  samples SalesSample[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("crm_customers")
+}
+
+model CrmContact {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  leadId String? @map("lead_id")
+  customerId String? @map("customer_id")
+  fullName String @map("full_name")
+  position String?
+  area String?
+  email String?
+  phone String?
+  whatsapp String?
+  preferredChannel String? @map("preferred_channel")
+  purchasingResponsible Boolean @default(false) @map("purchasing_responsible")
+  technicalResponsible Boolean @default(false) @map("technical_responsible")
+  observations String? @db.Text
+  status EntityStatus @default(activo)
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  lead CrmLead? @relation(fields: [leadId], references: [id])
+  customer CrmCustomer? @relation(fields: [customerId], references: [id])
+  quotes SalesQuote[]
+
+  @@index([organizationId])
+  @@index([leadId])
+  @@index([customerId])
+  @@map("crm_contacts")
+}
+
+model CrmActivity {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  activityType String @map("activity_type")
+  relatedEntityType String @map("related_entity_type")
+  relatedEntityId String @map("related_entity_id")
+  leadId String? @map("lead_id")
+  customerId String? @map("customer_id")
+  createdByUserId String @map("created_by_user_id")
+  responsibleUserId String @map("responsible_user_id")
+  scheduledAt DateTime @map("scheduled_at")
+  result String? @db.Text
+  status String @default("pendiente")
+  reminderPrepared Boolean @default(false) @map("reminder_prepared")
+  evidenceDocumentId String? @map("evidence_document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  lead CrmLead? @relation(fields: [leadId], references: [id])
+  customer CrmCustomer? @relation(fields: [customerId], references: [id])
+  createdBy User @relation("CrmActivityCreatedBy", fields: [createdByUserId], references: [id])
+  responsible User @relation("CrmActivityResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+
+  @@index([organizationId])
+  @@index([relatedEntityType, relatedEntityId])
+  @@map("crm_activities")
+}
+
+model CrmOpportunity {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  leadId String? @map("lead_id")
+  customerId String? @map("customer_id")
+  name String
+  productsInterestJson Json? @map("products_interest_json")
+  estimatedQuantity Decimal? @db.Decimal(12, 3) @map("estimated_quantity")
+  estimatedValue Decimal @db.Decimal(14, 2) @map("estimated_value")
+  currency String @default("MXN")
+  probability Int @default(25)
+  estimatedCloseDate DateTime? @map("estimated_close_date")
+  responsibleUserId String @map("responsible_user_id")
+  competition String?
+  need String? @db.Text
+  observations String? @db.Text
+  stage CrmOpportunityStage @default(deteccion)
+  status String @default("activa")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  lead CrmLead? @relation(fields: [leadId], references: [id])
+  customer CrmCustomer? @relation(fields: [customerId], references: [id])
+  responsible User @relation("CrmOpportunityResponsible", fields: [responsibleUserId], references: [id])
+  quotes SalesQuote[]
+
+  @@index([organizationId])
+  @@index([stage])
+  @@map("crm_opportunities")
+}
+
+model SalesProduct {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  finishedProductLotId String? @map("finished_product_lot_id")
+  presentation String
+  salesUnit String @map("sales_unit")
+  formulationFamilyId String? @map("formulation_family_id")
+  formulationVersionId String? @map("formulation_version_id")
+  packaging String?
+  labelInfo String? @map("label_info")
+  status EntityStatus @default(activo)
+  price Decimal @db.Decimal(14, 2)
+  currency String @default("MXN")
+  taxPrepared Boolean @default(true) @map("tax_prepared")
+  availability String @default("consultar")
+  documentId String? @map("document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  quoteItems SalesQuoteItem[]
+  orderItems SalesOrderItem[]
+  samples SalesSample[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("sales_products")
+}
+
+model SalesPriceList {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  versionNumber Int @default(1) @map("version_number")
+  currency String @default("MXN")
+  channel String?
+  segment String?
+  customerId String? @map("customer_id")
+  volumeMin Decimal? @db.Decimal(12, 3) @map("volume_min")
+  validFrom DateTime @map("valid_from")
+  validUntil DateTime? @map("valid_until")
+  status String @default("vigente")
+  itemsJson Json @map("items_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("sales_price_lists")
+}
+
+model SalesQuote {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  customerId String @map("customer_id")
+  opportunityId String? @map("opportunity_id")
+  contactId String? @map("contact_id")
+  currency String @default("MXN")
+  exchangeRate Decimal? @db.Decimal(12, 4) @map("exchange_rate")
+  subtotal Decimal @db.Decimal(14, 2)
+  discountTotal Decimal @db.Decimal(14, 2) @default(0) @map("discount_total")
+  taxTotal Decimal @db.Decimal(14, 2) @default(0) @map("tax_total")
+  shippingTotal Decimal @db.Decimal(14, 2) @default(0) @map("shipping_total")
+  total Decimal @db.Decimal(14, 2)
+  validUntil DateTime? @map("valid_until")
+  conditions String? @db.Text
+  estimatedDate DateTime? @map("estimated_date")
+  notes String? @db.Text
+  documentId String? @map("document_id")
+  status SalesQuoteStatus @default(borrador)
+  convertedOrderId String? @map("converted_order_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  customer CrmCustomer @relation(fields: [customerId], references: [id])
+  opportunity CrmOpportunity? @relation(fields: [opportunityId], references: [id])
+  contact CrmContact? @relation(fields: [contactId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  items SalesQuoteItem[]
+  approvals SalesApproval[]
+  order SalesOrder?
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("sales_quotes")
+}
+
+model SalesQuoteItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  quoteId String @map("quote_id")
+  productId String @map("product_id")
+  quantity Decimal @db.Decimal(12, 3)
+  unit String
+  unitPrice Decimal @db.Decimal(14, 4) @map("unit_price")
+  discountRate Decimal @db.Decimal(8, 4) @default(0) @map("discount_rate")
+  taxRate Decimal @db.Decimal(8, 4) @default(0) @map("tax_rate")
+  costReference Decimal? @db.Decimal(14, 4) @map("cost_reference")
+  margin Decimal? @db.Decimal(8, 4)
+  lineTotal Decimal @db.Decimal(14, 2) @map("line_total")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  quote SalesQuote @relation(fields: [quoteId], references: [id])
+  product SalesProduct @relation(fields: [productId], references: [id])
+
+  @@index([organizationId])
+  @@index([quoteId])
+  @@map("sales_quote_items")
+}
+
+model SalesApproval {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  quoteId String @map("quote_id")
+  approvalType String @map("approval_type")
+  approverUserId String @map("approver_user_id")
+  decision String
+  comment String? @db.Text
+  reason String @db.Text
+  evidenceDocumentId String? @map("evidence_document_id")
+  decidedAt DateTime @default(now()) @map("decided_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  quote SalesQuote @relation(fields: [quoteId], references: [id])
+  approver User @relation("SalesApprovalApprover", fields: [approverUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([quoteId])
+  @@map("sales_approvals")
+}
+
+model SalesOrder {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  customerId String @map("customer_id")
+  quoteId String? @unique @map("quote_id")
+  currency String @default("MXN")
+  subtotal Decimal @db.Decimal(14, 2)
+  discountTotal Decimal @db.Decimal(14, 2) @default(0) @map("discount_total")
+  taxTotal Decimal @db.Decimal(14, 2) @default(0) @map("tax_total")
+  shippingTotal Decimal @db.Decimal(14, 2) @default(0) @map("shipping_total")
+  total Decimal @db.Decimal(14, 2)
+  requestedDate DateTime? @map("requested_date")
+  promisedDate DateTime? @map("promised_date")
+  deliveryAddressJson Json? @map("delivery_address_json")
+  responsibleUserId String @map("responsible_user_id")
+  status SalesOrderStatus @default(borrador)
+  availabilitySnapshotJson Json? @map("availability_snapshot_json")
+  productionSuggestionJson Json? @map("production_suggestion_json")
+  observations String? @db.Text
+  documentId String? @map("document_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  customer CrmCustomer @relation(fields: [customerId], references: [id])
+  quote SalesQuote? @relation(fields: [quoteId], references: [id])
+  responsible User @relation("SalesOrderResponsible", fields: [responsibleUserId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+  items SalesOrderItem[]
+  deliveries SalesDelivery[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("sales_orders")
+}
+
+model SalesOrderItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  orderId String @map("order_id")
+  productId String @map("product_id")
+  quantity Decimal @db.Decimal(12, 3)
+  quantityDelivered Decimal @db.Decimal(12, 3) @default(0) @map("quantity_delivered")
+  unit String
+  unitPrice Decimal @db.Decimal(14, 4) @map("unit_price")
+  discountRate Decimal @db.Decimal(8, 4) @default(0) @map("discount_rate")
+  lineTotal Decimal @db.Decimal(14, 2) @map("line_total")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order SalesOrder @relation(fields: [orderId], references: [id])
+  product SalesProduct @relation(fields: [productId], references: [id])
+
+  @@index([organizationId])
+  @@index([orderId])
+  @@map("sales_order_items")
+}
+
+model SalesDelivery {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  orderId String @map("order_id")
+  itemsJson Json @map("items_json")
+  lotIdsJson Json? @map("lot_ids_json")
+  deliveredAt DateTime? @map("delivered_at")
+  addressJson Json? @map("address_json")
+  responsibleUserId String @map("responsible_user_id")
+  carrierPrepared String? @map("carrier_prepared")
+  evidenceDocumentId String? @map("evidence_document_id")
+  status String @default("preparada")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  order SalesOrder @relation(fields: [orderId], references: [id])
+  responsible User @relation("SalesDeliveryResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+
+  @@index([organizationId])
+  @@index([orderId])
+  @@map("sales_deliveries")
+}
+
+model SalesSample {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  productId String @map("product_id")
+  finishedLotId String? @map("finished_lot_id")
+  quantity Decimal @db.Decimal(12, 3)
+  unit String
+  customerId String @map("customer_id")
+  contactId String? @map("contact_id")
+  sentAt DateTime @map("sent_at")
+  objective String @db.Text
+  cost Decimal? @db.Decimal(14, 2)
+  followUp String? @db.Text @map("follow_up")
+  result String? @db.Text
+  evidenceDocumentId String? @map("evidence_document_id")
+  responsibleUserId String @map("responsible_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  product SalesProduct @relation(fields: [productId], references: [id])
+  customer CrmCustomer @relation(fields: [customerId], references: [id])
+  responsible User @relation("SalesSampleResponsible", fields: [responsibleUserId], references: [id])
+  evidenceDocument Document? @relation(fields: [evidenceDocumentId], references: [id])
+
+  @@index([organizationId])
+  @@index([customerId])
+  @@map("sales_samples")
 }

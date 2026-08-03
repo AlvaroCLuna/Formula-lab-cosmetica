@@ -155,7 +155,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 10 - Compras y Abastecimiento
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Solicitudes de compra implementadas.
 - Requisiciones y RFQ implementados con identificadores permanentes.
@@ -170,7 +170,28 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - UI ERP moderna de Compras con dashboard, panel lateral, alertas y modo aprendizaje implementada.
 - Seeds y pruebas agregadas.
 - Validacion documentada con Flowchart y ER Diagram Mermaid.
-- Pendiente: aprobacion formal antes de iniciar Incremento 11.
+
+## Incremento 11 - CRM, Ventas y Pedidos
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Prospectos implementados.
+- Clientes implementados mediante conversion de prospectos sin duplicar informacion.
+- Contactos multiples implementados.
+- Actividades comerciales implementadas.
+- Oportunidades y pipeline implementados.
+- Productos vendibles implementados con relacion a formulacion aprobada.
+- Listas de precios versionadas implementadas.
+- Cotizaciones comerciales implementadas.
+- Aprobacion comercial basica implementada.
+- Pedidos implementados con validacion de disponibilidad y produccion sugerida.
+- Entregas parciales preparadas implementadas.
+- Muestras comerciales implementadas.
+- Integracion con KDE, auditoria, costos, produccion sugerida, calidad e inventario preparada/implementada segun alcance.
+- UI ERP moderna con dashboard, Kanban, perfil 360, cotizador guiado y modo aprendizaje implementada.
+- Seeds y pruebas agregadas.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
+- Pendiente: aprobacion formal antes de iniciar Incremento 12.
 
 ## Pendiente para fases posteriores
 

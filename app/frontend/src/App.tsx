@@ -14,6 +14,7 @@ import { KnowledgeDocumentEnginePage } from "./pages/KnowledgeDocumentEnginePage
 import { LimsPage } from "./pages/LimsPage";
 import { QualityPage } from "./pages/QualityPage";
 import { PurchasesPage } from "./pages/PurchasesPage";
+import { SalesPage } from "./pages/SalesPage";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -51,7 +52,7 @@ export function App() {
         setUser(null);
       }}
     >
-      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "compras" ? <PurchasesPage /> : view === "inventario" ? <InventoryPage /> : view === "produccion" ? <ProductionPage /> : view === "conocimiento" ? <KnowledgeCenterPage /> : view === "documentos" ? <KnowledgeDocumentEnginePage /> : view === "lims" ? <LimsPage /> : view === "calidad" ? <QualityPage /> : <IngredientIntelligencePage />}
+      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "compras" ? <PurchasesPage /> : view === "ventas" ? <SalesPage /> : view === "inventario" ? <InventoryPage /> : view === "produccion" ? <ProductionPage /> : view === "conocimiento" ? <KnowledgeCenterPage /> : view === "documentos" ? <KnowledgeDocumentEnginePage /> : view === "lims" ? <LimsPage /> : view === "calidad" ? <QualityPage /> : <IngredientIntelligencePage />}
     </AppShell>
   );
 }

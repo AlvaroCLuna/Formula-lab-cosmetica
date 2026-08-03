@@ -15,6 +15,7 @@ import { kdeRouter } from "./routes/kde.routes.js";
 import { limsRouter } from "./routes/lims.routes.js";
 import { qualityRouter } from "./routes/quality.routes.js";
 import { purchasesRouter } from "./routes/purchases.routes.js";
+import { salesRouter } from "./routes/sales.routes.js";
 import { rawMaterialsRouter } from "./routes/raw-materials.routes.js";
 import { ensureStorageFolders } from "./services/storage.service.js";
 
@@ -40,6 +41,7 @@ app.use("/kde", kdeRouter);
 app.use("/lims", limsRouter);
 app.use("/quality", qualityRouter);
 app.use("/purchases", purchasesRouter);
+app.use("/sales", salesRouter);
 app.use("/raw-materials", rawMaterialsRouter);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {

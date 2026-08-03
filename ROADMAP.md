@@ -116,7 +116,7 @@ Control de Calidad:
 
 Validacion documentada en `docs/27_Validacion_Incremento_9.md`.
 
-## Incremento 10 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 10 - COMPLETADO Y APROBADO
 
 Compras y Abastecimiento:
 
@@ -132,6 +132,24 @@ Compras y Abastecimiento:
 
 Validacion documentada en `docs/28_Validacion_Incremento_10.md`.
 
+## Incremento 11 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+CRM, Ventas y Pedidos:
+
+- Prospectos, clientes y contactos comerciales.
+- Actividades comerciales trazables con evidencia KDE preparada.
+- Pipeline de oportunidades con etapas iniciales.
+- Catalogo comercial de productos vendibles ligado a formulaciones aprobadas.
+- Listas de precios versionadas sin sobrescritura.
+- Cotizaciones historicas con partidas, descuentos, impuestos preparados, condiciones y aprobacion comercial.
+- Pedidos convertibles desde cotizacion y con validacion de disponibilidad.
+- Sugerencia de produccion cuando no existe disponibilidad suficiente.
+- Entregas parciales preparadas con bloqueo de lotes no liberados por calidad.
+- Muestras comerciales y perfil 360 del cliente.
+- Dashboard ERP, pipeline Kanban, panel lateral y modo aprendizaje.
+
+Validacion documentada en `docs/29_Validacion_Incremento_11.md`.
+
 ## Fases posteriores
 
 - Registro completo de usuarios.
@@ -146,4 +164,6 @@ Validacion documentada en `docs/28_Validacion_Incremento_10.md`.
 - Planificacion avanzada MRP.
 - Produccion avanzada.
 - Facturacion.
+- Cobranza bancaria.
+- E-commerce publico.
 - LIMS / calidad avanzada.

@@ -1,4 +1,4 @@
-import { Archive, Beaker, BookOpen, Boxes, Calculator, ClipboardCheck, FileStack, FlaskConical, LayoutDashboard, LibraryBig, PackageSearch, ShoppingCart, UploadCloud } from "lucide-react";
+import { Archive, Beaker, BookOpen, Boxes, Calculator, ClipboardCheck, FileStack, FlaskConical, Handshake, LayoutDashboard, LibraryBig, PackageSearch, ShoppingCart, UploadCloud } from "lucide-react";
 
 const items = [
   { id: "panel", label: "Panel", icon: LayoutDashboard, disabled: true },
@@ -9,6 +9,7 @@ const items = [
   { id: "materias", label: "Materias primas", icon: Boxes },
   { id: "costos", label: "Costos", icon: Calculator },
   { id: "compras", label: "Compras", icon: ShoppingCart },
+  { id: "ventas", label: "CRM/Ventas", icon: Handshake },
   { id: "inventario", label: "Inventario", icon: PackageSearch },
   { id: "produccion", label: "Laboratorio", icon: Beaker },
   { id: "lims", label: "LIMS", icon: ClipboardCheck },

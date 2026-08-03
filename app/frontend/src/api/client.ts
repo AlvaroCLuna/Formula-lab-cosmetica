@@ -455,5 +455,68 @@ export const api = {
   },
   async listSupplySuggestions() {
     return request<{ suggestions: any[] }>("/purchases/suggestions");
+  },
+  async salesDashboard() {
+    return request<any>("/sales/dashboard");
+  },
+  async listSalesLeads() {
+    return request<{ leads: any[] }>("/sales/leads");
+  },
+  async createSalesLead(input: Record<string, unknown>) {
+    return request<{ lead: any }>("/sales/leads", { method: "POST", body: JSON.stringify(input) });
+  },
+  async convertSalesLead(id: string, input: Record<string, unknown>) {
+    return request<{ customer: any }>(`/sales/leads/${id}/convert`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async listSalesCustomers() {
+    return request<{ customers: any[] }>("/sales/customers");
+  },
+  async listSalesContacts() {
+    return request<{ contacts: any[] }>("/sales/contacts");
+  },
+  async listSalesActivities() {
+    return request<{ activities: any[] }>("/sales/activities");
+  },
+  async listSalesOpportunities() {
+    return request<{ opportunities: any[] }>("/sales/opportunities");
+  },
+  async createSalesOpportunity(input: Record<string, unknown>) {
+    return request<{ opportunity: any }>("/sales/opportunities", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listSalesProducts() {
+    return request<{ products: any[] }>("/sales/products");
+  },
+  async listSalesPriceLists() {
+    return request<{ lists: any[] }>("/sales/price-lists");
+  },
+  async listSalesQuotes() {
+    return request<{ quotes: any[] }>("/sales/quotes");
+  },
+  async createSalesQuote(input: Record<string, unknown>) {
+    return request<{ quote: any }>("/sales/quotes", { method: "POST", body: JSON.stringify(input) });
+  },
+  async approveSalesQuote(id: string, input: Record<string, unknown>) {
+    return request<any>(`/sales/quotes/${id}/approve`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async listSalesOrders() {
+    return request<{ orders: any[] }>("/sales/orders");
+  },
+  async createSalesOrder(input: Record<string, unknown>) {
+    return request<{ order: any }>("/sales/orders", { method: "POST", body: JSON.stringify(input) });
+  },
+  async confirmSalesOrder(id: string, input: Record<string, unknown>) {
+    return request<{ order: any }>(`/sales/orders/${id}/confirm`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async salesAvailability(input: Record<string, unknown>) {
+    return request<{ availability: any[] }>("/sales/availability", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listSalesDeliveries() {
+    return request<{ deliveries: any[] }>("/sales/deliveries");
+  },
+  async createSalesDelivery(input: Record<string, unknown>) {
+    return request<{ delivery: any }>("/sales/deliveries", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listSalesSamples() {
+    return request<{ samples: any[] }>("/sales/samples");
   }
 };

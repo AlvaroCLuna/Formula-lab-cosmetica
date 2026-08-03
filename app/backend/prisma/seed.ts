@@ -1291,6 +1291,126 @@ async function main() {
       create: { id: `pur-sug-${index}`, organizationId: organization.id, rawMaterialMasterId: material.id, itemName: material.commonName, availableQuantity: index * 0.7, reservedQuantity: index % 2, reorderPoint: 5, suggestedQuantity: 6 + index, reason: index % 2 === 0 ? "Stock bajo contra punto de reorden." : "Cobertura insuficiente para formulacion escalada.", status: index % 3 === 0 ? "convertida" : "sugerida" }
     });
   }
+
+  const customerNames = ["Botanica Norte", "Spa Luna Azul", "Dermocosmetica Clara", "Hotel Aroma Vivo", "Tienda Verde", "Distribuidora Esencial"];
+  for (let index = 1; index <= 12; index += 1) {
+    const status = index <= 6 ? "convertido" : index % 5 === 0 ? "descartado" : index % 3 === 0 ? "calificado" : "nuevo";
+    await prisma.crmLead.upsert({
+      where: { id: `crm-lead-${index}` },
+      update: { status },
+      create: { id: `crm-lead-${index}`, organizationId: organization.id, permanentCode: `CRM-LEAD-${String(index).padStart(6, "0")}`, commercialName: index <= 6 ? customerNames[index - 1] : `Prospecto Cosmetico ${index}`, legalName: index <= 6 ? `${customerNames[index - 1]} SA de CV` : `Prospecto Cosmetico ${index} SA de CV`, personType: "moral", industry: "Cosmetica", segment: index % 2 === 0 ? "mayoreo" : "profesional", channel: index % 2 === 0 ? "distribuidor" : "directo", origin: index % 3 === 0 ? "referido" : "web", status, responsibleUserId: "demo-user", priority: index % 4 === 0 ? "alta" : "media", city: "Ciudad de Mexico", state: "CDMX", country: "Mexico", website: `https://cliente-demo-${index}.local`, observations: "Prospecto demo CRM.", tagsJson: ["cosmetica", index % 2 === 0 ? "mayoreo" : "spa"], documentId: `kde-doc-${String(index).padStart(3, "0")}` }
+    });
+  }
+
+  for (let index = 1; index <= 6; index += 1) {
+    await prisma.crmCustomer.upsert({
+      where: { id: `crm-customer-${index}` },
+      update: { status: "activo" },
+      create: { id: `crm-customer-${index}`, organizationId: organization.id, permanentCode: `CRM-CLI-${String(index).padStart(6, "0")}`, leadId: `crm-lead-${index}`, legalName: `${customerNames[index - 1]} SA de CV`, commercialName: customerNames[index - 1], rfcPrepared: "RFC preparado", customerType: index % 2 === 0 ? "Distribuidor" : "Cliente profesional", segment: index % 2 === 0 ? "mayoreo" : "profesional", commercialTerms: "Condiciones demo: anticipo 50%, entrega contra liberacion de calidad.", currency: index === 3 ? "USD" : "MXN", creditPrepared: index % 2 === 0, addressesJson: [{ city: "Ciudad de Mexico", state: "CDMX", country: "Mexico", street: `Calle Demo ${index}` }], documentId: `kde-doc-${String(index + 12).padStart(3, "0")}` }
+    });
+    await prisma.crmLead.update({ where: { id: `crm-lead-${index}` }, data: { convertedCustomerId: `crm-customer-${index}` } });
+  }
+
+  for (let index = 1; index <= 18; index += 1) {
+    const customerId = index <= 12 ? `crm-customer-${((index - 1) % 6) + 1}` : null;
+    const leadId = index > 12 ? `crm-lead-${index - 6}` : `crm-lead-${((index - 1) % 6) + 1}`;
+    await prisma.crmContact.upsert({
+      where: { id: `crm-contact-${index}` },
+      update: { status: "activo" },
+      create: { id: `crm-contact-${index}`, organizationId: organization.id, permanentCode: `CRM-CON-${String(index).padStart(6, "0")}`, leadId, customerId, fullName: `Contacto Comercial ${index}`, position: index % 2 === 0 ? "Compras" : "Direccion tecnica", area: index % 2 === 0 ? "Compras" : "Tecnica", email: `contacto${index}@cliente-demo.local`, phone: `555-010-${String(index).padStart(2, "0")}`, whatsapp: `+5255000${String(index).padStart(4, "0")}`, preferredChannel: index % 2 === 0 ? "correo" : "whatsapp", purchasingResponsible: index % 2 === 0, technicalResponsible: index % 2 !== 0, observations: "Contacto demo CRM." }
+    });
+  }
+
+  for (let index = 1; index <= 25; index += 1) {
+    const customerId = `crm-customer-${((index - 1) % 6) + 1}`;
+    await prisma.crmActivity.upsert({
+      where: { id: `crm-act-${index}` },
+      update: { status: index % 4 === 0 ? "pendiente" : "completada" },
+      create: { id: `crm-act-${index}`, organizationId: organization.id, permanentCode: `CRM-ACT-${String(index).padStart(6, "0")}`, activityType: ["llamada", "correo", "reunion", "muestra_enviada", "seguimiento"][index % 5], relatedEntityType: "cliente", relatedEntityId: customerId, leadId: `crm-lead-${((index - 1) % 12) + 1}`, customerId, createdByUserId: "demo-user", responsibleUserId: "demo-user", scheduledAt: new Date(`2026-08-${String((index % 24) + 1).padStart(2, "0")}T10:00:00.000Z`), result: "Actividad demo con resultado y seguimiento documentado.", status: index % 4 === 0 ? "pendiente" : "completada", reminderPrepared: index % 4 === 0, evidenceDocumentId: `kde-doc-${String(((index - 1) % 50) + 1).padStart(3, "0")}` }
+    });
+  }
+
+  for (let index = 1; index <= 10; index += 1) {
+    const stage = ["deteccion", "calificacion", "diagnostico", "propuesta", "negociacion", "ganada", "perdida", "pausada", "propuesta", "negociacion"][index - 1];
+    await prisma.crmOpportunity.upsert({
+      where: { id: `crm-opp-${index}` },
+      update: { stage },
+      create: { id: `crm-opp-${index}`, organizationId: organization.id, permanentCode: `CRM-OPP-${String(index).padStart(6, "0")}`, leadId: `crm-lead-${((index - 1) % 12) + 1}`, customerId: index <= 8 ? `crm-customer-${((index - 1) % 6) + 1}` : null, name: `Oportunidad linea cosmetica ${index}`, productsInterestJson: ["shampoo solido", "crema corporal"], estimatedQuantity: 100 + index * 25, estimatedValue: 15000 + index * 4300, currency: index === 4 ? "USD" : "MXN", probability: Math.min(90, 15 + index * 8), estimatedCloseDate: new Date(`2026-09-${String(index + 5).padStart(2, "0")}T00:00:00.000Z`), responsibleUserId: "demo-user", competition: "Marcas locales", need: "Desarrollar producto cosmético con respaldo tecnico y documentacion.", observations: "Oportunidad demo.", stage, status: ["ganada", "perdida", "pausada"].includes(stage) ? stage : "activa" }
+    });
+  }
+
+  const approvedVersionForSales = approvedVersion?.id;
+  for (let index = 1; index <= 12; index += 1) {
+    await prisma.salesProduct.upsert({
+      where: { id: `sales-product-${index}` },
+      update: { status: "activo" },
+      create: { id: `sales-product-${index}`, organizationId: organization.id, permanentCode: `SAL-PRD-${String(index).padStart(6, "0")}`, name: `Producto vendible demo ${index}`, finishedProductLotId: index <= 3 ? `prod-order-${index}-finished-lot` : null, presentation: index % 2 === 0 ? "Caja 12 pzas" : "Frasco 250 ml", salesUnit: index % 2 === 0 ? "caja" : "pieza", formulationFamilyId: approvedVersion?.formulationFamilyId, formulationVersionId: approvedVersionForSales, packaging: "Envase demo", labelInfo: "Etiqueta preparada", price: 180 + index * 35, currency: index === 5 ? "USD" : "MXN", taxPrepared: true, availability: index % 4 === 0 ? "consultar" : "disponible", documentId: `kde-doc-${String(index + 20).padStart(3, "0")}` }
+    });
+  }
+
+  for (let index = 1; index <= 3; index += 1) {
+    await prisma.salesPriceList.upsert({
+      where: { id: `sales-price-list-${index}` },
+      update: { status: "vigente" },
+      create: { id: `sales-price-list-${index}`, organizationId: organization.id, permanentCode: `SAL-PLS-${String(index).padStart(6, "0")}`, name: `Lista demo ${index}`, versionNumber: index, currency: index === 2 ? "USD" : "MXN", channel: index === 1 ? "directo" : "distribuidor", segment: index === 3 ? "mayoreo" : "profesional", customerId: index === 3 ? "crm-customer-1" : null, volumeMin: index * 10, validFrom: new Date("2026-08-01T00:00:00.000Z"), validUntil: new Date("2026-12-31T00:00:00.000Z"), itemsJson: Array.from({ length: 4 }, (_, row) => ({ productId: `sales-product-${row + 1}`, price: 180 + row * 40 + index * 10 })) }
+    });
+  }
+
+  for (let index = 1; index <= 8; index += 1) {
+    const status = index === 1 ? "aceptada" : index === 2 ? "convertida" : index === 3 ? "vencida" : index === 4 ? "rechazada" : "enviada";
+    const productId = `sales-product-${((index - 1) % 12) + 1}`;
+    const quantity = 10 + index;
+    const unitPrice = 220 + index * 30;
+    await prisma.salesQuote.upsert({
+      where: { id: `sales-quote-${index}` },
+      update: { status },
+      create: { id: `sales-quote-${index}`, organizationId: organization.id, permanentCode: `SAL-QUO-${String(index).padStart(6, "0")}`, customerId: `crm-customer-${((index - 1) % 6) + 1}`, opportunityId: `crm-opp-${((index - 1) % 10) + 1}`, contactId: `crm-contact-${((index - 1) % 18) + 1}`, currency: index === 5 ? "USD" : "MXN", exchangeRate: index === 5 ? 18.7 : null, subtotal: quantity * unitPrice, discountTotal: quantity * unitPrice * 0.05, taxTotal: quantity * unitPrice * 0.95 * 0.16, shippingTotal: 120, total: quantity * unitPrice * 0.95 * 1.16 + 120, validUntil: new Date(`2026-${index === 3 ? "07" : "09"}-${String(index + 10).padStart(2, "0")}T00:00:00.000Z`), conditions: "Condiciones comerciales demo.", estimatedDate: new Date(`2026-09-${String(index + 14).padStart(2, "0")}T00:00:00.000Z`), notes: "Cotizacion demo historica.", documentId: `kde-doc-${String(index + 30).padStart(3, "0")}`, status }
+    });
+    await prisma.salesQuoteItem.upsert({
+      where: { id: `sales-quote-${index}-item` },
+      update: { quantity },
+      create: { id: `sales-quote-${index}-item`, organizationId: organization.id, quoteId: `sales-quote-${index}`, productId, quantity, unit: "pieza", unitPrice, discountRate: 5, taxRate: 16, costReference: unitPrice * 0.55, margin: 45, lineTotal: quantity * unitPrice * 0.95 }
+    });
+    if (index <= 4) {
+      await prisma.salesApproval.upsert({
+        where: { id: `sales-approval-${index}` },
+        update: { decision: index === 4 ? "rechazada" : "aprobada" },
+        create: { id: `sales-approval-${index}`, organizationId: organization.id, quoteId: `sales-quote-${index}`, approvalType: index === 4 ? "precio_inferior" : "descuento", approverUserId: "demo-user", decision: index === 4 ? "rechazada" : "aprobada", comment: "Aprobacion comercial demo.", reason: "Margen, descuento y condiciones revisadas.", evidenceDocumentId: `kde-doc-${String(index + 38).padStart(3, "0")}` }
+      });
+    }
+  }
+
+  for (let index = 1; index <= 5; index += 1) {
+    const productId = `sales-product-${index}`;
+    const quantity = 8 + index;
+    const unitPrice = 260 + index * 25;
+    await prisma.salesOrder.upsert({
+      where: { id: `sales-order-${index}` },
+      update: { status: index === 5 ? "entregado" : index === 4 ? "en_produccion" : index === 3 ? "en_preparacion" : "confirmado" },
+      create: { id: `sales-order-${index}`, organizationId: organization.id, permanentCode: `SAL-ORD-${String(index).padStart(6, "0")}`, customerId: `crm-customer-${((index - 1) % 6) + 1}`, quoteId: index <= 2 ? `sales-quote-${index}` : null, currency: "MXN", subtotal: quantity * unitPrice, discountTotal: 0, taxTotal: quantity * unitPrice * 0.16, shippingTotal: 150, total: quantity * unitPrice * 1.16 + 150, requestedDate: new Date(`2026-09-${String(index + 5).padStart(2, "0")}T00:00:00.000Z`), promisedDate: new Date(`2026-09-${String(index + 12).padStart(2, "0")}T00:00:00.000Z`), deliveryAddressJson: { city: "CDMX", street: `Entrega Demo ${index}` }, responsibleUserId: "demo-user", status: index === 5 ? "entregado" : index === 4 ? "en_produccion" : index === 3 ? "en_preparacion" : "confirmado", availabilitySnapshotJson: [{ productId, requested: quantity, available: index <= 2 ? quantity : 0, missing: index <= 2 ? 0 : quantity, productionRequired: index > 2 }], productionSuggestionJson: index > 2 ? [{ productId, suggested: true, formulationVersionId: approvedVersionForSales }] : [], observations: "Pedido demo con disponibilidad documentada.", documentId: `kde-doc-${String(index + 42).padStart(3, "0")}` }
+    });
+    await prisma.salesOrderItem.upsert({
+      where: { id: `sales-order-${index}-item` },
+      update: { quantityDelivered: index === 5 ? quantity : index === 2 ? quantity / 2 : 0 },
+      create: { id: `sales-order-${index}-item`, organizationId: organization.id, orderId: `sales-order-${index}`, productId, quantity, quantityDelivered: index === 5 ? quantity : index === 2 ? quantity / 2 : 0, unit: "pieza", unitPrice, discountRate: 0, lineTotal: quantity * unitPrice }
+    });
+  }
+
+  for (let index = 1; index <= 3; index += 1) {
+    await prisma.salesDelivery.upsert({
+      where: { id: `sales-delivery-${index}` },
+      update: { status: index === 3 ? "entregada" : "preparada" },
+      create: { id: `sales-delivery-${index}`, organizationId: organization.id, permanentCode: `SAL-DLV-${String(index).padStart(6, "0")}`, orderId: `sales-order-${index}`, itemsJson: [{ orderItemId: `sales-order-${index}-item`, quantity: index === 2 ? 4 : 8 + index, qualityStatus: "liberado", lotId: `prod-order-${index}-finished-lot` }], lotIdsJson: [`prod-order-${index}-finished-lot`], deliveredAt: index === 3 ? new Date("2026-08-03T15:00:00.000Z") : null, addressJson: { city: "CDMX" }, responsibleUserId: "demo-user", carrierPrepared: "Transportista preparado demo", evidenceDocumentId: `kde-doc-${String(index + 45).padStart(3, "0")}`, status: index === 3 ? "entregada" : "preparada" }
+    });
+  }
+
+  for (let index = 1; index <= 4; index += 1) {
+    await prisma.salesSample.upsert({
+      where: { id: `sales-sample-${index}` },
+      update: { result: "Seguimiento demo registrado." },
+      create: { id: `sales-sample-${index}`, organizationId: organization.id, permanentCode: `SAL-SMP-${String(index).padStart(6, "0")}`, productId: `sales-product-${index}`, finishedLotId: `prod-order-${index}-finished-lot`, quantity: 3 + index, unit: "pieza", customerId: `crm-customer-${index}`, contactId: `crm-contact-${index}`, sentAt: new Date(`2026-08-${String(index + 5).padStart(2, "0")}T11:00:00.000Z`), objective: "Enviar muestra comercial para validacion sensorial y tecnica.", cost: 120 + index * 20, followUp: "Dar seguimiento en 7 dias.", result: "Seguimiento demo registrado.", evidenceDocumentId: `kde-doc-${String(index + 44).padStart(3, "0")}`, responsibleUserId: "demo-user" }
+    });
+  }
 }
 
 main()
