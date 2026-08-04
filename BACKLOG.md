@@ -212,7 +212,7 @@ Estado: COMPLETADO Y APROBADO.
 
 ## Incremento 13 - Reportes, BI y Tablero Ejecutivo
 
-Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+Estado: COMPLETADO Y APROBADO.
 
 - Tablero ejecutivo implementado.
 - Dashboards configurables por modulo implementados.
@@ -223,6 +223,24 @@ Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
 - Programaciones de reportes preparadas sin envio automatico externo.
 - Integracion BI de solo lectura con modulos operativos implementada.
 - UI ERP responsive con KPIs, graficas, panel lateral, filtros, drilldown basico y modo aprendizaje implementada.
+- Seeds y pruebas agregadas.
+- Validacion documentada con Flowchart y ER Diagram Mermaid.
+
+## Incremento 14 - Digital Twin + Knowledge Graph
+
+Estado: IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL.
+
+- Catalogo de tipos de entidad implementado.
+- Catalogo de tipos de relacion implementado.
+- Gemelos digitales implementados sobre entidades existentes.
+- Relaciones tipificadas implementadas con evidencia obligatoria y no duplicacion.
+- Inactivacion de relaciones implementada sin borrado fisico.
+- Timeline universal implementado.
+- Eventos, snapshots, metricas y vistas implementados.
+- Dashboard del grafo implementado.
+- Buscador universal implementado.
+- Vista 360 y grafo navegable implementados.
+- UI ERP de conocimiento con grafo, arbol, timeline, tabla, tarjetas y modo aprendizaje implementada.
 - Seeds y pruebas agregadas.
 - Validacion documentada con Flowchart y ER Diagram Mermaid.
 

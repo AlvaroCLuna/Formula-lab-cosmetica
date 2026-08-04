@@ -321,6 +321,22 @@ enum BiExportFormat {
   json
 }
 
+enum GraphRelationStatus {
+  activa
+  inactiva
+  obsoleta
+}
+
+enum EntityViewKind {
+  gemelo
+  grafo
+  arbol
+  timeline
+  tabla
+  tarjetas
+  vista_360
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -439,6 +455,15 @@ model Organization {
   biExecutiveAlerts BiExecutiveAlert[]
   biExports BiExport[]
   biSchedules BiSchedule[]
+  graphEntityTypes GraphEntityType[]
+  graphEntities GraphEntity[]
+  graphRelationTypes GraphRelationType[]
+  graphRelations GraphEntityRelation[]
+  graphTimeline GraphEntityTimeline[]
+  graphEvents GraphEntityEvent[]
+  graphSnapshots GraphEntitySnapshot[]
+  graphMetrics GraphEntityMetric[]
+  graphViews GraphEntityView[]
 
   @@map("organizations")
 }
@@ -521,6 +546,10 @@ model User {
   biReportsCreated BiReport[] @relation("BiReportCreatedBy")
   biExportsUser BiExport[] @relation("BiExportUser")
   biSchedulesResponsible BiSchedule[] @relation("BiScheduleResponsible")
+  graphEntitiesResponsible GraphEntity[] @relation("GraphEntityResponsible")
+  graphRelationsCreated GraphEntityRelation[] @relation("GraphRelationCreatedBy")
+  graphEventsUser GraphEntityEvent[] @relation("GraphEventUser")
+  graphTimelineUser GraphEntityTimeline[] @relation("GraphTimelineUser")
 
   @@index([organizationId])
   @@map("users")
@@ -3502,4 +3531,217 @@ model BiSchedule {
   @@index([organizationId])
   @@index([status])
   @@map("bi_schedules")
+}
+
+model GraphEntityType {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  code String
+  name String
+  module String
+  description String? @db.Text
+  icon String?
+  color String?
+  status String @default("activo")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  entities GraphEntity[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@index([module])
+  @@map("entity_types")
+}
+
+model GraphRelationType {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  code String
+  name String
+  description String? @db.Text
+  bidirectionalDefault Boolean @default(false) @map("bidirectional_default")
+  status String @default("activo")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  relations GraphEntityRelation[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("relation_types")
+}
+
+model GraphEntity {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  entityTypeId String @map("entity_type_id")
+  permanentCode String @unique @map("permanent_code")
+  sourceEntityType String @map("source_entity_type")
+  sourceEntityId String @map("source_entity_id")
+  title String
+  subtitle String?
+  status String @default("activo")
+  module String
+  summary String? @db.Text
+  tagsJson Json? @map("tags_json")
+  kpisJson Json? @map("kpis_json")
+  responsibleUserId String? @map("responsible_user_id")
+  lastSyncedAt DateTime? @map("last_synced_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  entityType GraphEntityType @relation(fields: [entityTypeId], references: [id])
+  responsible User? @relation("GraphEntityResponsible", fields: [responsibleUserId], references: [id])
+  outgoingRelations GraphEntityRelation[] @relation("GraphRelationFrom")
+  incomingRelations GraphEntityRelation[] @relation("GraphRelationTo")
+  timeline GraphEntityTimeline[]
+  events GraphEntityEvent[]
+  snapshots GraphEntitySnapshot[]
+  metrics GraphEntityMetric[]
+  views GraphEntityView[]
+
+  @@unique([organizationId, sourceEntityType, sourceEntityId])
+  @@index([organizationId])
+  @@index([entityTypeId])
+  @@index([module])
+  @@index([title])
+  @@map("entities")
+}
+
+model GraphEntityRelation {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  relationTypeId String @map("relation_type_id")
+  fromEntityId String @map("from_entity_id")
+  toEntityId String @map("to_entity_id")
+  direction String @default("directa")
+  weight Decimal @db.Decimal(8, 4) @default(1)
+  validFrom DateTime? @map("valid_from")
+  validUntil DateTime? @map("valid_until")
+  status GraphRelationStatus @default(activa)
+  evidence String @db.Text
+  evidenceDocumentId String? @map("evidence_document_id")
+  metadataJson Json? @map("metadata_json")
+  createdByUserId String @map("created_by_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  relationType GraphRelationType @relation(fields: [relationTypeId], references: [id])
+  fromEntity GraphEntity @relation("GraphRelationFrom", fields: [fromEntityId], references: [id])
+  toEntity GraphEntity @relation("GraphRelationTo", fields: [toEntityId], references: [id])
+  createdBy User @relation("GraphRelationCreatedBy", fields: [createdByUserId], references: [id])
+
+  @@unique([organizationId, relationTypeId, fromEntityId, toEntityId])
+  @@index([organizationId])
+  @@index([fromEntityId])
+  @@index([toEntityId])
+  @@index([status])
+  @@map("entity_relations")
+}
+
+model GraphEntityTimeline {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  entityId String @map("entity_id")
+  eventAt DateTime @map("event_at")
+  userId String? @map("user_id")
+  module String
+  action String
+  objectType String @map("object_type")
+  objectId String @map("object_id")
+  version String?
+  result String?
+  evidence String? @db.Text
+  metadataJson Json? @map("metadata_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  entity GraphEntity @relation(fields: [entityId], references: [id])
+  user User? @relation("GraphTimelineUser", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityId])
+  @@index([module])
+  @@index([eventAt])
+  @@map("entity_timeline")
+}
+
+model GraphEntityEvent {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  entityId String @map("entity_id")
+  eventType String @map("event_type")
+  title String
+  description String? @db.Text
+  severity String @default("informativa")
+  sourceModule String @map("source_module")
+  sourceType String @map("source_type")
+  sourceId String @map("source_id")
+  userId String? @map("user_id")
+  evidence String? @db.Text
+  metadataJson Json? @map("metadata_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  entity GraphEntity @relation(fields: [entityId], references: [id])
+  user User? @relation("GraphEventUser", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityId])
+  @@index([eventType])
+  @@map("entity_events")
+}
+
+model GraphEntitySnapshot {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  entityId String @map("entity_id")
+  snapshotType String @map("snapshot_type")
+  payloadJson Json @map("payload_json")
+  sourceJson Json @map("source_json")
+  capturedAt DateTime @default(now()) @map("captured_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  entity GraphEntity @relation(fields: [entityId], references: [id])
+
+  @@index([organizationId])
+  @@index([entityId])
+  @@index([snapshotType])
+  @@map("entity_snapshots")
+}
+
+model GraphEntityMetric {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  entityId String @map("entity_id")
+  metricKey String @map("metric_key")
+  label String
+  valueJson Json @map("value_json")
+  source String @db.Text
+  calculatedAt DateTime @default(now()) @map("calculated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  entity GraphEntity @relation(fields: [entityId], references: [id])
+
+  @@unique([organizationId, entityId, metricKey])
+  @@index([organizationId])
+  @@index([metricKey])
+  @@map("entity_metrics")
+}
+
+model GraphEntityView {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  entityId String? @map("entity_id")
+  viewKind EntityViewKind @map("view_kind")
+  name String
+  configJson Json @map("config_json")
+  status String @default("activo")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  entity GraphEntity? @relation(fields: [entityId], references: [id])
+
+  @@index([organizationId])
+  @@index([viewKind])
+  @@map("entity_views")
 }

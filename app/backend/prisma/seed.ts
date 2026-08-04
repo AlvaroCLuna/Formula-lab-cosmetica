@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { prisma as graphPrisma } from "../src/db.js";
+import { syncGraph } from "../src/services/graph.service.js";
 
 const prisma = new PrismaClient();
 
@@ -1551,14 +1553,18 @@ async function main() {
       create: { id: `bi-schedule-${index}`, organizationId: organization.id, permanentCode: `BI-SCH-${String(index).padStart(6, "0")}`, reportId: `bi-report-${index}`, frequency: ["semanal", "mensual", "trimestral"][index - 1], responsibleUserId: "demo-user", nextRunAt: new Date(`2026-09-0${index}T08:00:00.000Z`), status: "preparado" }
     });
   }
+
+  await syncGraph(organization.id, "demo-user");
 }
 
 main()
   .then(async () => {
     await prisma.$disconnect();
+    await graphPrisma.$disconnect();
   })
   .catch(async (error) => {
     console.error(error);
     await prisma.$disconnect();
+    await graphPrisma.$disconnect();
     process.exit(1);
   });

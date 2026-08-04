@@ -24,6 +24,7 @@ const viewCopy: Record<string, { title: string; search: string }> = {
   ventas: { title: "CRM, Ventas y Pedidos", search: "Buscar clientes, oportunidades, cotizaciones o pedidos" },
   ia: { title: "IA Responsable y Motor de Reglas", search: "Buscar reglas, alertas, fuentes o consultas" },
   bi: { title: "Reportes, BI y Tablero Ejecutivo", search: "Buscar dashboards, reportes, alertas o exportaciones" },
+  gemelo: { title: "Digital Twin + Knowledge Graph", search: "Buscar cualquier entidad, relacion o evento" },
   inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" },
   produccion: { title: "Laboratorio y Produccion", search: "Buscar ordenes, lotes o formulaciones" },
   lims: { title: "LIMS", search: "Buscar proyectos, muestras, ensayos o instrumentos" },

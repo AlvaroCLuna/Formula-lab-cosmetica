@@ -579,5 +579,30 @@ export const api = {
   },
   async listAiSources() {
     return request<{ sources: any[] }>("/ai/sources");
+  },
+  async graphDashboard() {
+    return request<any>("/graph/dashboard");
+  },
+  async syncGraph() {
+    return request<any>("/graph/sync", { method: "POST" });
+  },
+  async listGraphTypes() {
+    return request<any>("/graph/types");
+  },
+  async searchGraph(filters: { q?: string; type?: string; module?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ entities: any[] }>(`/graph/entities${params.toString() ? `?${params}` : ""}`);
+  },
+  async getGraph(entityId?: string, depth = 2) {
+    const params = new URLSearchParams({ depth: String(depth) });
+    if (entityId) params.set("entityId", entityId);
+    return request<{ nodes: any[]; edges: any[] }>(`/graph/graph?${params}`);
+  },
+  async getTwin(entityId: string) {
+    return request<any>(`/graph/entities/${entityId}/twin`);
+  },
+  async createGraphRelation(input: Record<string, unknown>) {
+    return request<{ relation: any }>("/graph/relations", { method: "POST", body: JSON.stringify(input) });
   }
 };

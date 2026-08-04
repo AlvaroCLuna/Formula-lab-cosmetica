@@ -166,7 +166,7 @@ IA Responsable y Motor de Reglas:
 
 Validacion documentada en `docs/30_Validacion_Incremento_12.md`.
 
-## Incremento 13 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+## Incremento 13 - COMPLETADO Y APROBADO
 
 Reportes, BI y Tablero Ejecutivo:
 
@@ -180,6 +180,21 @@ Reportes, BI y Tablero Ejecutivo:
 - UI ERP con graficas, filtros, panel lateral, drilldown basico y modo aprendizaje.
 
 Validacion documentada en `docs/31_Validacion_Incremento_13.md`.
+
+## Incremento 14 - IMPLEMENTADO, PENDIENTE DE APROBACION FORMAL
+
+Digital Twin + Knowledge Graph:
+
+- Gemelos digitales para entidades principales del ERP.
+- Grafo transversal navegable sobre entidades existentes sin duplicar datos operativos.
+- Relaciones tipificadas con direccion, peso, vigencia, estado y evidencia.
+- Timeline universal con usuario, modulo, accion, objeto, resultado y evidencia.
+- Eventos, snapshots, metricas y vistas configurables.
+- Buscador universal y vista 360 de cualquier entidad.
+- Dashboard del grafo con entidades, relaciones, nodos huerfanos y alertas estructurales.
+- UI moderna de conocimiento con vista grafo, arbol, timeline, tabla, tarjetas y modo aprendizaje.
+
+Validacion documentada en `docs/32_Validacion_Incremento_14.md`.
 
 ## Fases posteriores
 

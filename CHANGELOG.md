@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.14.0 - Incremento 14 implementado
+
+- Se implemento Digital Twin + Knowledge Graph como capa transversal de conocimiento.
+- Se agregaron tablas `entity_types`, `entities`, `entity_relations`, `relation_types`, `entity_timeline`, `entity_events`, `entity_snapshots`, `entity_metrics` y `entity_views`.
+- Se agregaron APIs para dashboard del grafo, busqueda universal, gemelo 360, grafo navegable, timeline, eventos, snapshots, KPIs, sincronizacion y relaciones auditadas.
+- Se sincronizaron gemelos digitales desde entidades existentes sin duplicar datos operativos.
+- Se agregaron relaciones tipificadas con evidencia obligatoria, estado y bloqueo de duplicados.
+- Se agrego UI ERP de Gemelo Digital con buscador universal, vista grafo, arbol, timeline, tabla, tarjetas, vista 360 y modo aprendizaje.
+- Se agregaron datos demo con 283 gemelos, 157 relaciones activas, timeline/evento/snapshot por entidad y vistas `GRF`.
+- Se documento la validacion en `docs/32_Validacion_Incremento_14.md` con Flowchart y ER Diagram Mermaid.
+
 ## 0.13.0 - Incremento 13 implementado
 
 - Se implemento Reportes, BI y Tablero Ejecutivo con dashboards, reportes configurables, snapshots, alertas ejecutivas, exportaciones y programaciones preparadas.

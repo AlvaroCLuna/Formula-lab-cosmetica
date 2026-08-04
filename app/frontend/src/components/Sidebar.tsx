@@ -1,4 +1,4 @@
-import { Archive, BarChart3, Beaker, BookOpen, Bot, Boxes, Calculator, ClipboardCheck, FileStack, FlaskConical, Handshake, LayoutDashboard, LibraryBig, PackageSearch, ShoppingCart, UploadCloud } from "lucide-react";
+import { Archive, BarChart3, Beaker, BookOpen, Bot, Boxes, Calculator, ClipboardCheck, FileStack, FlaskConical, GitBranch, Handshake, LayoutDashboard, LibraryBig, PackageSearch, ShoppingCart, UploadCloud } from "lucide-react";
 
 const items = [
   { id: "panel", label: "Panel", icon: LayoutDashboard, disabled: true },
@@ -12,6 +12,7 @@ const items = [
   { id: "ventas", label: "CRM/Ventas", icon: Handshake },
   { id: "ia", label: "IA Responsable", icon: Bot },
   { id: "bi", label: "BI Ejecutivo", icon: BarChart3 },
+  { id: "gemelo", label: "Gemelo Digital", icon: GitBranch },
   { id: "inventario", label: "Inventario", icon: PackageSearch },
   { id: "produccion", label: "Laboratorio", icon: Beaker },
   { id: "lims", label: "LIMS", icon: ClipboardCheck },
