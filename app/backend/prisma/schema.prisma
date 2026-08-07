@@ -351,6 +351,33 @@ enum StudioInstanceStatus {
   cancelada
 }
 
+enum PilotProductStatus {
+  piloto
+  archivado
+}
+
+enum PilotImportStatus {
+  previsualizado
+  importado
+  requiere_revision
+  rechazado
+}
+
+enum PilotTrialStatus {
+  planeada
+  en_proceso
+  terminada
+  cancelada
+}
+
+enum PilotTrialResult {
+  pendiente
+  satisfactorio
+  requiere_ajuste
+  fallido
+  repetir
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -495,6 +522,13 @@ model Organization {
   workflowExecutionLogs WorkflowExecutionLog[]
   workflowPermissions WorkflowPermission[]
   workflowMarketplace WorkflowMarketplace[]
+  pilotProducts PilotProduct[]
+  pilotImportBatches PilotImportBatch[]
+  pilotImportItems PilotImportItem[]
+  pilotLabTrials PilotLabTrial[]
+  pilotLabTrialParameters PilotLabTrialParameter[]
+  pilotLabTrialPhotos PilotLabTrialPhoto[]
+  pilotExperimentalVersions PilotExperimentalVersion[]
 
   @@map("organizations")
 }
@@ -585,6 +619,10 @@ model User {
   studioWorkflowVersionAuthors WorkflowVersion[] @relation("StudioWorkflowVersionAuthor")
   studioInstances WorkflowInstance[] @relation("StudioInstanceUser")
   studioExecutionLogs WorkflowExecutionLog[] @relation("StudioExecutionUser")
+  pilotImportBatches PilotImportBatch[] @relation("PilotImportUser")
+  pilotLabTrials PilotLabTrial[] @relation("PilotTrialResponsible")
+  pilotTrialParameters PilotLabTrialParameter[] @relation("PilotParameterUser")
+  pilotExperimentalVersions PilotExperimentalVersion[] @relation("PilotExperimentalCreator")
 
   @@index([organizationId])
   @@map("users")
@@ -678,6 +716,7 @@ model Document {
   aiAlertsEvidence AiAlert[]
   aiResponsesDocuments AiResponse[]
   aiSourceConfigsDocuments AiSourceConfig[]
+  pilotLabTrialPhotos PilotLabTrialPhoto[]
 
   @@index([organizationId])
   @@index([uploadedByUserId])
@@ -1194,6 +1233,8 @@ model FormulationFamily {
   versions        FormulationVersion[]
   labProjects     LabProject[]
   labSamples      LabSample[]
+  pilotProducts   PilotProduct[]
+  pilotLabTrials  PilotLabTrial[]
 
   @@unique([organizationId, permanentCode])
   @@index([organizationId])
@@ -1229,6 +1270,10 @@ model FormulationVersion {
   productionOrders    ProductionOrder[]
   labProjects         LabProject[]
   labSamples          LabSample[]
+  pilotProducts       PilotProduct[]
+  pilotLabTrials      PilotLabTrial[]
+  pilotExperimentalSources PilotExperimentalVersion[] @relation("PilotExperimentalSource")
+  pilotExperimentalCreated PilotExperimentalVersion[] @relation("PilotExperimentalCreated")
 
   @@unique([formulationFamilyId, versionNumber])
   @@index([organizationId])
@@ -1890,6 +1935,7 @@ model LabProject {
   samples LabSample[]
   timelineEvents LabTimelineEvent[]
   nonConformities LabNonConformity[]
+  pilotLabTrials PilotLabTrial[]
 
   @@index([organizationId])
   @@index([responsibleUserId])
@@ -1927,6 +1973,7 @@ model LabSample {
   timelineEvents LabTimelineEvent[]
   releases LabTechnicalRelease[]
   nonConformities LabNonConformity[]
+  pilotLabTrials PilotLabTrial[]
 
   @@index([organizationId])
   @@index([projectId])
@@ -4108,4 +4155,170 @@ model WorkflowMarketplace {
   @@index([organizationId])
   @@index([itemType])
   @@map("workflow_marketplace")
+}
+
+model PilotProduct {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  category String
+  description String? @db.Text
+  status PilotProductStatus @default(piloto)
+  formulationFamilyId String? @map("formulation_family_id")
+  currentFormulationVersionId String? @map("current_formulation_version_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  formulationFamily FormulationFamily? @relation(fields: [formulationFamilyId], references: [id])
+  currentFormulationVersion FormulationVersion? @relation(fields: [currentFormulationVersionId], references: [id])
+  trials PilotLabTrial[]
+
+  @@index([organizationId])
+  @@index([category])
+  @@index([status])
+  @@map("pilot_products")
+}
+
+model PilotImportBatch {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  sourceName String @map("source_name")
+  sourceType String @map("source_type")
+  importKind String @map("import_kind")
+  status PilotImportStatus @default(previsualizado)
+  summaryJson Json? @map("summary_json")
+  createdByUserId String @map("created_by_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  createdBy User @relation("PilotImportUser", fields: [createdByUserId], references: [id])
+  items PilotImportItem[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("pilot_import_batches")
+}
+
+model PilotImportItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  batchId String @map("batch_id")
+  rowReference String @map("row_reference")
+  targetEntity String @map("target_entity")
+  action String
+  status PilotImportStatus @default(previsualizado)
+  payloadJson Json @map("payload_json")
+  conflictJson Json? @map("conflict_json")
+  message String? @db.Text
+  organization Organization @relation(fields: [organizationId], references: [id])
+  batch PilotImportBatch @relation(fields: [batchId], references: [id])
+
+  @@index([organizationId])
+  @@index([batchId])
+  @@index([status])
+  @@map("pilot_import_items")
+}
+
+model PilotLabTrial {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  pilotProductId String? @map("pilot_product_id")
+  labProjectId String? @map("lab_project_id")
+  labSampleId String? @map("lab_sample_id")
+  formulationFamilyId String? @map("formulation_family_id")
+  formulationVersionId String? @map("formulation_version_id")
+  trialSize Decimal @db.Decimal(12, 3) @map("trial_size")
+  unit String @default("g")
+  objective String @db.Text
+  status PilotTrialStatus @default(planeada)
+  result PilotTrialResult @default(pendiente)
+  responsibleUserId String @map("responsible_user_id")
+  startedAt DateTime? @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  whatWorked String? @db.Text @map("what_worked")
+  whatFailed String? @db.Text @map("what_failed")
+  suggestedChanges String? @db.Text @map("suggested_changes")
+  observations String? @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  pilotProduct PilotProduct? @relation(fields: [pilotProductId], references: [id])
+  labProject LabProject? @relation(fields: [labProjectId], references: [id])
+  labSample LabSample? @relation(fields: [labSampleId], references: [id])
+  formulationFamily FormulationFamily? @relation(fields: [formulationFamilyId], references: [id])
+  formulationVersion FormulationVersion? @relation(fields: [formulationVersionId], references: [id])
+  responsible User @relation("PilotTrialResponsible", fields: [responsibleUserId], references: [id])
+  parameters PilotLabTrialParameter[]
+  photos PilotLabTrialPhoto[]
+  experimentalVersions PilotExperimentalVersion[]
+
+  @@index([organizationId])
+  @@index([pilotProductId])
+  @@index([formulationVersionId])
+  @@index([status])
+  @@map("pilot_lab_trials")
+}
+
+model PilotLabTrialParameter {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  trialId String @map("trial_id")
+  permanentCode String @unique @map("permanent_code")
+  parameterType String @map("parameter_type")
+  label String
+  valueText String? @map("value_text")
+  valueNumber Decimal? @db.Decimal(12, 4) @map("value_number")
+  unit String?
+  recordedAt DateTime @default(now()) @map("recorded_at")
+  userId String? @map("user_id")
+  notes String? @db.Text
+  organization Organization @relation(fields: [organizationId], references: [id])
+  trial PilotLabTrial @relation(fields: [trialId], references: [id])
+  user User? @relation("PilotParameterUser", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([trialId])
+  @@map("pilot_lab_trial_parameters")
+}
+
+model PilotLabTrialPhoto {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  trialId String @map("trial_id")
+  permanentCode String @unique @map("permanent_code")
+  documentId String? @map("document_id")
+  caption String? @db.Text
+  storagePath String? @map("storage_path")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  trial PilotLabTrial @relation(fields: [trialId], references: [id])
+  document Document? @relation(fields: [documentId], references: [id])
+
+  @@index([organizationId])
+  @@index([trialId])
+  @@map("pilot_lab_trial_photos")
+}
+
+model PilotExperimentalVersion {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  trialId String @map("trial_id")
+  sourceFormulationVersionId String @map("source_formulation_version_id")
+  experimentalFormulationVersionId String? @map("experimental_formulation_version_id")
+  changeSummary String @db.Text @map("change_summary")
+  status String @default("borrador")
+  createdByUserId String @map("created_by_user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  trial PilotLabTrial @relation(fields: [trialId], references: [id])
+  sourceFormulationVersion FormulationVersion @relation("PilotExperimentalSource", fields: [sourceFormulationVersionId], references: [id])
+  experimentalFormulationVersion FormulationVersion? @relation("PilotExperimentalCreated", fields: [experimentalFormulationVersionId], references: [id])
+  createdBy User @relation("PilotExperimentalCreator", fields: [createdByUserId], references: [id])
+
+  @@index([organizationId])
+  @@index([trialId])
+  @@map("pilot_experimental_versions")
 }

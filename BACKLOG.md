@@ -1,5 +1,17 @@
 # Backlog
 
+## Incremento Piloto - Datos Reales y Laboratorio de Pruebas
+
+Estado: IMPLEMENTADO / PENDIENTE DE APROBACION FORMAL.
+
+- Modo visible `PILOTO / NO PRODUCTIVO` implementado.
+- Importacion preliminar con clasificacion de nuevos, duplicados, conflictos, rechazados y revision implementada.
+- Productos piloto implementados.
+- Pruebas LAB piloto con proyecto/muestra LIMS no productivos implementadas.
+- Hoja de trabajo guiada con calculo por tamano de prueba implementada.
+- Registro de parametros, resultado y version experimental propuesta implementado.
+- Documentacion `docs/34_Migracion_Datos_Reales.md` y `docs/35_Validacion_Piloto_Datos_Reales.md` generada.
+
 ## Incremento 15 - Formula Lab Studio / Visual Workflow Engine + BPM
 
 Estado: IMPLEMENTADO / PENDIENTE DE APROBACION FORMAL.

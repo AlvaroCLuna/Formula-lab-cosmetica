@@ -25,6 +25,7 @@ const viewCopy: Record<string, { title: string; search: string }> = {
   ia: { title: "IA Responsable y Motor de Reglas", search: "Buscar reglas, alertas, fuentes o consultas" },
   bi: { title: "Reportes, BI y Tablero Ejecutivo", search: "Buscar dashboards, reportes, alertas o exportaciones" },
   gemelo: { title: "Digital Twin + Knowledge Graph", search: "Buscar cualquier entidad, relacion o evento" },
+  piloto: { title: "Laboratorio Piloto", search: "Buscar pruebas, importaciones o productos piloto" },
   inventario: { title: "Inventario y Lotes", search: "Buscar lotes, ubicaciones o materias primas" },
   produccion: { title: "Laboratorio y Produccion", search: "Buscar ordenes, lotes o formulaciones" },
   lims: { title: "LIMS", search: "Buscar proyectos, muestras, ensayos o instrumentos" },
@@ -66,6 +67,10 @@ export function AppShell({ user, activeView, onNavigate, onLogout, children }: P
             </div>
           </div>
         </header>
+        <div className="pilot-mode-banner">
+          <strong>PILOTO / NO PRODUCTIVO</strong>
+          <span>Datos reales de prueba sin facturacion, liberacion comercial ni consumo irreversible.</span>
+        </div>
         <HybridDashboard />
         {children}
       </div>

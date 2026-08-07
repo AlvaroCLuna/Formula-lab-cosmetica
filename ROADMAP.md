@@ -1,5 +1,18 @@
 # Roadmap
 
+## Incremento Piloto - IMPLEMENTADO / PENDIENTE DE APROBACION FORMAL
+
+Datos reales y Laboratorio de Pruebas:
+
+- Modo global `PILOTO / NO PRODUCTIVO`.
+- Importacion preliminar de datos reales XLSX, CSV, PDF y TXT.
+- Importador preparado para legado Shampoo Solido.
+- Productos piloto no comerciales.
+- Pruebas de laboratorio desde formulaciones existentes.
+- Hoja guiada con gramos calculados, parametros reales y resultado.
+- Version experimental propuesta sin aprobacion automatica.
+- Validacion documentada en `docs/35_Validacion_Piloto_Datos_Reales.md`.
+
 ## Incremento 15 - IMPLEMENTADO / PENDIENTE DE APROBACION FORMAL
 
 Formula Lab Studio - Visual Workflow Engine + BPM:

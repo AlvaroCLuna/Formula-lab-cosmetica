@@ -651,5 +651,44 @@ export const api = {
   },
   async syncStudioGraph() {
     return request<any>("/studio/sync-graph", { method: "POST" });
+  },
+  async pilotDashboard() {
+    return request<any>("/pilot/dashboard");
+  },
+  async listPilotProducts() {
+    return request<{ products: any[] }>("/pilot/products");
+  },
+  async createPilotProduct(input: Record<string, unknown>) {
+    return request<{ product: any }>("/pilot/products", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listPilotImports() {
+    return request<{ imports: any[] }>("/pilot/imports");
+  },
+  async previewPilotImport(files: File[], importKind = "shampoo_solido_legacy") {
+    const formData = new FormData();
+    formData.append("importKind", importKind);
+    files.forEach((file) => formData.append("files", file));
+    return request<any>("/pilot/imports/preview", { method: "POST", body: formData });
+  },
+  async commitPilotImport(id: string) {
+    return request<{ batch: any }>(`/pilot/imports/${id}/commit`, { method: "POST" });
+  },
+  async listPilotTrials() {
+    return request<{ trials: any[] }>("/pilot/trials");
+  },
+  async createPilotTrial(input: Record<string, unknown>) {
+    return request<{ trial: any }>("/pilot/trials", { method: "POST", body: JSON.stringify(input) });
+  },
+  async pilotWorksheet(id: string) {
+    return request<any>(`/pilot/trials/${id}/worksheet`);
+  },
+  async recordPilotParameter(id: string, input: Record<string, unknown>) {
+    return request<{ parameter: any }>(`/pilot/trials/${id}/parameters`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async finishPilotTrial(id: string, input: Record<string, unknown>) {
+    return request<{ trial: any }>(`/pilot/trials/${id}/result`, { method: "POST", body: JSON.stringify(input) });
+  },
+  async createPilotExperimentalVersion(id: string, input: Record<string, unknown>) {
+    return request<{ experimentalVersion: any }>(`/pilot/trials/${id}/experimental-version`, { method: "POST", body: JSON.stringify(input) });
   }
 };

@@ -1555,6 +1555,51 @@ async function main() {
     });
   }
 
+  const pilotProducts = [
+    ["pilot-product-shampoo-solido", "PIL-PROD-000001", "Shampoo solido", "Cuidado capilar"],
+    ["pilot-product-acondicionador-solido", "PIL-PROD-000002", "Acondicionador solido", "Cuidado capilar"],
+    ["pilot-product-shampoo-liquido", "PIL-PROD-000003", "Shampoo liquido", "Cuidado capilar"],
+    ["pilot-product-crema", "PIL-PROD-000004", "Crema", "Cuidado facial"],
+    ["pilot-product-serum", "PIL-PROD-000005", "Serum", "Cuidado facial"]
+  ] as const;
+  const approvedPilotVersions = await prisma.formulationVersion.findMany({ where: { organizationId: organization.id }, include: { family: true }, orderBy: { versionNumber: "asc" }, take: 5 });
+  for (const [index, [id, permanentCode, name, category]] of pilotProducts.entries()) {
+    const version = approvedPilotVersions[index % Math.max(approvedPilotVersions.length, 1)];
+    await prisma.pilotProduct.upsert({
+      where: { id },
+      update: { name, category, status: "piloto", formulationFamilyId: version?.formulationFamilyId, currentFormulationVersionId: version?.id },
+      create: { id, organizationId: organization.id, permanentCode, name, category, description: "Producto piloto no liberado comercialmente.", status: "piloto", formulationFamilyId: version?.formulationFamilyId, currentFormulationVersionId: version?.id }
+    });
+  }
+
+  await prisma.pilotImportBatch.upsert({
+    where: { id: "pilot-import-shampoo-solido" },
+    update: { status: "requiere_revision" },
+    create: { id: "pilot-import-shampoo-solido", organizationId: organization.id, permanentCode: "PIL-IMP-000001", sourceName: "ShampooSolido_Mercado.xlsx, recetas.xlsx", sourceType: "xlsx", importKind: "shampoo_solido_legacy", status: "requiere_revision", createdByUserId: "demo-user", summaryJson: { total: 7, newRecords: 4, duplicates: 1, conflicts: 1, review: 2, rejected: 0 } }
+  });
+  for (let index = 1; index <= 7; index += 1) {
+    await prisma.pilotImportItem.upsert({
+      where: { id: `pilot-import-item-${index}` },
+      update: { status: index === 3 || index === 6 ? "requiere_revision" : "previsualizado" },
+      create: { id: `pilot-import-item-${index}`, organizationId: organization.id, batchId: "pilot-import-shampoo-solido", rowReference: `recetas.xlsx:L${index}`, targetEntity: index % 2 === 0 ? "formulaciones" : "materias_primas", action: index === 3 ? "posible_duplicado" : index === 6 ? "conflicto" : "nuevo", status: index === 3 || index === 6 ? "requiere_revision" : "previsualizado", payloadJson: { origen: "legacy_shampoo_solido", fila: index, nota: "Dato real pendiente de validacion humana si falta evidencia." }, message: "Previsualizacion piloto; no se importo automaticamente como aprobado." }
+    });
+  }
+
+  for (let index = 1; index <= Math.min(5, approvedPilotVersions.length); index += 1) {
+    const version = approvedPilotVersions[index - 1];
+    const product = pilotProducts[index - 1];
+    await prisma.pilotLabTrial.upsert({
+      where: { id: `pilot-trial-${index}` },
+      update: { result: index <= 2 ? "satisfactorio" : index === 3 ? "requiere_ajuste" : "pendiente" },
+      create: { id: `pilot-trial-${index}`, organizationId: organization.id, permanentCode: `PIL-TRI-${String(index).padStart(6, "0")}`, pilotProductId: product[0], formulationFamilyId: version.formulationFamilyId, formulationVersionId: version.id, trialSize: [100, 250, 500, 1000, 250][index - 1], unit: "g", objective: "Prueba piloto no productiva con datos reales controlados.", status: index <= 3 ? "terminada" : "planeada", result: index <= 2 ? "satisfactorio" : index === 3 ? "requiere_ajuste" : "pendiente", responsibleUserId: "demo-user", finishedAt: index <= 3 ? new Date("2026-08-03T16:00:00.000Z") : null, observations: "No libera producto comercial ni aprueba formulacion automaticamente." }
+    });
+    await prisma.pilotLabTrialParameter.upsert({
+      where: { id: `pilot-param-${index}` },
+      update: { valueNumber: 5 + index / 10 },
+      create: { id: `pilot-param-${index}`, organizationId: organization.id, trialId: `pilot-trial-${index}`, permanentCode: `PIL-PAR-${String(index).padStart(6, "0")}`, parameterType: "proceso", label: "pH", valueNumber: 5 + index / 10, unit: "pH", userId: "demo-user", notes: "Parametro demo de laboratorio piloto." }
+    });
+  }
+
   await seedStudioDemo(organization.id, "demo-user");
   await syncGraph(organization.id, "demo-user");
 }

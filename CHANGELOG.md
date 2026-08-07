@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.16.0 - Incremento Piloto implementado
+
+- Se implemento modo visible `PILOTO / NO PRODUCTIVO` en el AppShell para separar pruebas reales de operacion comercial.
+- Se agregaron modelos Prisma, migracion MySQL, SQL espejo, APIs, validadores, seed y pruebas para productos piloto, importaciones reales, pruebas LAB piloto, parametros, fotos y versiones experimentales propuestas.
+- Se agrego importacion preliminar XLSX/CSV/PDF/TXT con vista previa de nuevos, duplicados, conflictos, rechazados y registros en revision.
+- Se integro Laboratorio Piloto con LIMS mediante proyectos y muestras no productivas, sin liberar producto ni consumir inventario irreversible.
+- Se agrego UI ERP de Laboratorio Piloto con dashboard, previsualizacion de importaciones, flujo de prueba, hoja guiada, registro de parametros, resultado y creacion de version experimental trazable.
+- Se documentaron migracion y validacion en `docs/34_Migracion_Datos_Reales.md` y `docs/35_Validacion_Piloto_Datos_Reales.md` con diagramas Mermaid de flujo y ER.
+
 ## 0.15.0 - Incremento 15 implementado
 
 - Se implemento Formula Lab Studio como Visual Workflow Engine + BPM transversal.
