@@ -337,6 +337,20 @@ enum EntityViewKind {
   vista_360
 }
 
+enum StudioWorkflowStatus {
+  borrador
+  publicado
+  archivado
+}
+
+enum StudioInstanceStatus {
+  pendiente
+  en_proceso
+  completada
+  fallida
+  cancelada
+}
+
 model Organization {
   id        String       @id @default(uuid())
   name      String
@@ -464,6 +478,23 @@ model Organization {
   graphSnapshots GraphEntitySnapshot[]
   graphMetrics GraphEntityMetric[]
   graphViews GraphEntityView[]
+  workflowCategories WorkflowCategory[]
+  workflowDefinitions WorkflowDefinition[]
+  workflowVersions WorkflowVersion[]
+  workflowNodes WorkflowNode[]
+  workflowEdges WorkflowEdge[]
+  workflowInstances WorkflowInstance[]
+  workflowEvents WorkflowEvent[]
+  workflowVariables WorkflowVariable[]
+  dynamicForms DynamicForm[]
+  dynamicFormFields DynamicFormField[]
+  dynamicFormVersions DynamicFormVersion[]
+  checklists Checklist[]
+  checklistItems ChecklistItem[]
+  workflowTemplates WorkflowTemplate[]
+  workflowExecutionLogs WorkflowExecutionLog[]
+  workflowPermissions WorkflowPermission[]
+  workflowMarketplace WorkflowMarketplace[]
 
   @@map("organizations")
 }
@@ -550,6 +581,10 @@ model User {
   graphRelationsCreated GraphEntityRelation[] @relation("GraphRelationCreatedBy")
   graphEventsUser GraphEntityEvent[] @relation("GraphEventUser")
   graphTimelineUser GraphEntityTimeline[] @relation("GraphTimelineUser")
+  studioWorkflowAuthors WorkflowDefinition[] @relation("StudioWorkflowAuthor")
+  studioWorkflowVersionAuthors WorkflowVersion[] @relation("StudioWorkflowVersionAuthor")
+  studioInstances WorkflowInstance[] @relation("StudioInstanceUser")
+  studioExecutionLogs WorkflowExecutionLog[] @relation("StudioExecutionUser")
 
   @@index([organizationId])
   @@map("users")
@@ -3744,4 +3779,333 @@ model GraphEntityView {
   @@index([organizationId])
   @@index([viewKind])
   @@map("entity_views")
+}
+
+model WorkflowCategory {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  code String
+  name String
+  description String? @db.Text
+  sortOrder Int @default(0) @map("sort_order")
+  status String @default("activo")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  definitions WorkflowDefinition[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("workflow_categories")
+}
+
+model WorkflowDefinition {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  categoryId String? @map("category_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  description String? @db.Text
+  moduleScope String @default("transversal") @map("module_scope")
+  status StudioWorkflowStatus @default(borrador)
+  currentVersionId String? @map("current_version_id")
+  authorUserId String @map("author_user_id")
+  tagsJson Json? @map("tags_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  category WorkflowCategory? @relation(fields: [categoryId], references: [id])
+  author User @relation("StudioWorkflowAuthor", fields: [authorUserId], references: [id])
+  versions WorkflowVersion[]
+  instances WorkflowInstance[]
+  events WorkflowEvent[]
+  permissions WorkflowPermission[]
+  marketplace WorkflowMarketplace[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("workflow_definitions")
+}
+
+model WorkflowVersion {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  workflowDefinitionId String @map("workflow_definition_id")
+  permanentCode String @unique @map("permanent_code")
+  versionNumber Int @map("version_number")
+  status StudioWorkflowStatus @default(borrador)
+  canvasJson Json @map("canvas_json")
+  configJson Json @map("config_json")
+  validationJson Json? @map("validation_json")
+  comments String? @db.Text
+  authorUserId String @map("author_user_id")
+  publishedAt DateTime? @map("published_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  definition WorkflowDefinition @relation(fields: [workflowDefinitionId], references: [id])
+  author User @relation("StudioWorkflowVersionAuthor", fields: [authorUserId], references: [id])
+  nodes WorkflowNode[]
+  edges WorkflowEdge[]
+  instances WorkflowInstance[]
+  templates WorkflowTemplate[]
+
+  @@unique([workflowDefinitionId, versionNumber])
+  @@index([organizationId])
+  @@index([status])
+  @@map("workflow_versions")
+}
+
+model WorkflowNode {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  workflowVersionId String @map("workflow_version_id")
+  nodeKey String @map("node_key")
+  nodeType String @map("node_type")
+  label String
+  positionX Float @default(0) @map("position_x")
+  positionY Float @default(0) @map("position_y")
+  configJson Json @map("config_json")
+  groupKey String? @map("group_key")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  version WorkflowVersion @relation(fields: [workflowVersionId], references: [id])
+
+  @@unique([workflowVersionId, nodeKey])
+  @@index([organizationId])
+  @@map("workflow_nodes")
+}
+
+model WorkflowEdge {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  workflowVersionId String @map("workflow_version_id")
+  edgeKey String @map("edge_key")
+  fromNodeKey String @map("from_node_key")
+  toNodeKey String @map("to_node_key")
+  label String?
+  conditionJson Json? @map("condition_json")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  version WorkflowVersion @relation(fields: [workflowVersionId], references: [id])
+
+  @@unique([workflowVersionId, edgeKey])
+  @@index([organizationId])
+  @@map("workflow_edges")
+}
+
+model WorkflowInstance {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  workflowDefinitionId String @map("workflow_definition_id")
+  workflowVersionId String @map("workflow_version_id")
+  currentNodeKey String? @map("current_node_key")
+  status StudioInstanceStatus @default(pendiente)
+  entityType String? @map("entity_type")
+  entityId String? @map("entity_id")
+  inputJson Json? @map("input_json")
+  outputJson Json? @map("output_json")
+  errorMessage String? @db.Text @map("error_message")
+  startedByUserId String @map("started_by_user_id")
+  startedAt DateTime @default(now()) @map("started_at")
+  finishedAt DateTime? @map("finished_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  definition WorkflowDefinition @relation(fields: [workflowDefinitionId], references: [id])
+  version WorkflowVersion @relation(fields: [workflowVersionId], references: [id])
+  startedBy User @relation("StudioInstanceUser", fields: [startedByUserId], references: [id])
+  logs WorkflowExecutionLog[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("workflow_instances")
+}
+
+model WorkflowEvent {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  workflowDefinitionId String? @map("workflow_definition_id")
+  eventType String @map("event_type")
+  moduleScope String @map("module_scope")
+  triggerConfigJson Json @map("trigger_config_json")
+  actionConfigJson Json @map("action_config_json")
+  status String @default("activo")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  definition WorkflowDefinition? @relation(fields: [workflowDefinitionId], references: [id])
+
+  @@index([organizationId])
+  @@index([eventType])
+  @@map("workflow_events")
+}
+
+model WorkflowVariable {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  scope String
+  name String
+  dataType String @map("data_type")
+  defaultValueJson Json? @map("default_value_json")
+  description String? @db.Text
+  status String @default("activo")
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  @@index([organizationId])
+  @@index([scope])
+  @@map("workflow_variables")
+}
+
+model DynamicForm {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  description String? @db.Text
+  status StudioWorkflowStatus @default(borrador)
+  currentVersionId String? @map("current_version_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  fields DynamicFormField[]
+  versions DynamicFormVersion[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("dynamic_forms")
+}
+
+model DynamicFormField {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  formId String @map("form_id")
+  fieldKey String @map("field_key")
+  label String
+  fieldType String @map("field_type")
+  required Boolean @default(false)
+  optionsJson Json? @map("options_json")
+  validationJson Json? @map("validation_json")
+  sortOrder Int @default(0) @map("sort_order")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  form DynamicForm @relation(fields: [formId], references: [id])
+
+  @@unique([formId, fieldKey])
+  @@index([organizationId])
+  @@map("dynamic_form_fields")
+}
+
+model DynamicFormVersion {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  formId String @map("form_id")
+  permanentCode String @unique @map("permanent_code")
+  versionNumber Int @map("version_number")
+  schemaJson Json @map("schema_json")
+  status StudioWorkflowStatus @default(borrador)
+  publishedAt DateTime? @map("published_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  form DynamicForm @relation(fields: [formId], references: [id])
+
+  @@unique([formId, versionNumber])
+  @@index([organizationId])
+  @@map("dynamic_form_versions")
+}
+
+model Checklist {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  name String
+  description String? @db.Text
+  moduleScope String @default("transversal") @map("module_scope")
+  status StudioWorkflowStatus @default(borrador)
+  organization Organization @relation(fields: [organizationId], references: [id])
+  items ChecklistItem[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@map("checklists")
+}
+
+model ChecklistItem {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  checklistId String @map("checklist_id")
+  section String
+  question String @db.Text
+  responseType String @map("response_type")
+  required Boolean @default(false)
+  configJson Json? @map("config_json")
+  sortOrder Int @default(0) @map("sort_order")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  checklist Checklist @relation(fields: [checklistId], references: [id])
+
+  @@index([organizationId])
+  @@index([checklistId])
+  @@map("checklist_items")
+}
+
+model WorkflowTemplate {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  permanentCode String @unique @map("permanent_code")
+  workflowVersionId String? @map("workflow_version_id")
+  name String
+  templateType String @map("template_type")
+  payloadJson Json @map("payload_json")
+  status String @default("activo")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  workflowVersion WorkflowVersion? @relation(fields: [workflowVersionId], references: [id])
+
+  @@index([organizationId])
+  @@index([templateType])
+  @@map("workflow_templates")
+}
+
+model WorkflowExecutionLog {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  workflowInstanceId String @map("workflow_instance_id")
+  nodeKey String? @map("node_key")
+  action String
+  result String
+  durationMs Int? @map("duration_ms")
+  errorMessage String? @db.Text @map("error_message")
+  userId String? @map("user_id")
+  metadataJson Json? @map("metadata_json")
+  createdAt DateTime @default(now()) @map("created_at")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  instance WorkflowInstance @relation(fields: [workflowInstanceId], references: [id])
+  user User? @relation("StudioExecutionUser", fields: [userId], references: [id])
+
+  @@index([organizationId])
+  @@index([workflowInstanceId])
+  @@map("workflow_execution_log")
+}
+
+model WorkflowPermission {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  workflowDefinitionId String @map("workflow_definition_id")
+  roleOrUser String @map("role_or_user")
+  permission String
+  status String @default("activo")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  definition WorkflowDefinition @relation(fields: [workflowDefinitionId], references: [id])
+
+  @@index([organizationId])
+  @@index([workflowDefinitionId])
+  @@map("workflow_permissions")
+}
+
+model WorkflowMarketplace {
+  id String @id @default(uuid())
+  organizationId String @map("organization_id")
+  workflowDefinitionId String? @map("workflow_definition_id")
+  permanentCode String @unique @map("permanent_code")
+  itemType String @map("item_type")
+  name String
+  description String? @db.Text
+  payloadJson Json @map("payload_json")
+  status String @default("interno")
+  organization Organization @relation(fields: [organizationId], references: [id])
+  definition WorkflowDefinition? @relation(fields: [workflowDefinitionId], references: [id])
+
+  @@index([organizationId])
+  @@index([itemType])
+  @@map("workflow_marketplace")
 }

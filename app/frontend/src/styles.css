@@ -511,6 +511,298 @@
   gap: 18px;
 }
 
+.studio-page {
+  display: grid;
+  gap: 18px;
+}
+
+.studio-hero {
+  align-items: center;
+  background: linear-gradient(135deg, #0f766e, #1d4f72);
+  border-radius: 8px;
+  color: #fff;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+  min-height: 176px;
+  padding: 24px;
+}
+
+.studio-hero h2 {
+  font-size: 28px;
+  margin: 4px 0 8px;
+}
+
+.studio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+  max-width: 620px;
+}
+
+.studio-actions .search-box {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+.studio-actions input {
+  color: #fff;
+}
+
+.studio-actions input::placeholder {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.studio-actions button {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 8px;
+  color: #fff;
+  display: inline-flex;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
+.studio-kpis {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.studio-kpis button {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 30px 1fr;
+  min-height: 86px;
+  padding: 14px;
+  text-align: left;
+}
+
+.studio-kpis strong {
+  font-size: 24px;
+}
+
+.studio-layout {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 280px minmax(0, 1fr) 320px;
+}
+
+.studio-list,
+.studio-main,
+.studio-side {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.studio-list,
+.studio-side {
+  display: grid;
+  gap: 10px;
+  max-height: 760px;
+  overflow: auto;
+  position: sticky;
+  top: 14px;
+}
+
+.studio-modules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.studio-modules span {
+  background: #eef5f3;
+  border-radius: 999px;
+  color: var(--primary-strong);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 8px;
+}
+
+.studio-workflow {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  text-align: left;
+}
+
+.studio-workflow.active {
+  border-color: #0f766e;
+  box-shadow: inset 3px 0 0 #0f766e;
+}
+
+.studio-workflow span,
+.studio-workflow small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.studio-designer {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 220px minmax(0, 1fr);
+}
+
+.studio-palette {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  max-height: 620px;
+  overflow: auto;
+  padding: 12px;
+}
+
+.studio-palette div {
+  display: grid;
+  gap: 6px;
+}
+
+.studio-palette button {
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  display: inline-flex;
+  gap: 7px;
+  justify-content: flex-start;
+  min-height: 34px;
+  padding: 7px 9px;
+}
+
+.studio-canvas {
+  background:
+    linear-gradient(rgba(15, 118, 110, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 118, 110, 0.08) 1px, transparent 1px),
+    var(--page);
+  background-size: 34px 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 560px;
+  overflow: hidden;
+  position: relative;
+}
+
+.studio-node {
+  background: #fff;
+  border: 1px solid rgba(15, 118, 110, 0.35);
+  border-left: 5px solid #0f766e;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  color: var(--text);
+  display: grid;
+  gap: 3px;
+  min-height: 64px;
+  padding: 10px;
+  position: absolute;
+  text-align: left;
+  width: 164px;
+}
+
+.studio-node.aprobacion,
+.studio-node.decision {
+  border-left-color: #d97706;
+}
+
+.studio-node.fin {
+  border-left-color: #2563eb;
+}
+
+.studio-node small {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.studio-edge {
+  background: rgba(15, 118, 110, 0.12);
+  border: 1px solid rgba(15, 118, 110, 0.24);
+  border-radius: 999px;
+  color: #0f5f53;
+  font-size: 12px;
+  font-weight: 800;
+  left: calc(18% + var(--edge-offset, 0px));
+  padding: 5px 9px;
+  position: absolute;
+  top: calc(48% + var(--edge-offset, 0px));
+}
+
+.studio-edge.edge-1 { --edge-offset: 34px; }
+.studio-edge.edge-2 { --edge-offset: 68px; }
+
+.studio-simulator,
+.studio-learning {
+  display: grid;
+  gap: 12px;
+}
+
+.studio-simulator button {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  gap: 8px;
+  justify-content: center;
+  justify-self: start;
+}
+
+.simulation-card,
+.studio-card,
+.studio-learning {
+  background: var(--page);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.simulation-card.ok {
+  border-left: 5px solid #0f766e;
+}
+
+.simulation-card.warn {
+  border-left: 5px solid #d97706;
+}
+
+.simulation-card small {
+  color: var(--muted);
+  display: block;
+  margin-top: 6px;
+}
+
+.studio-card-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+}
+
+.studio-card h3 {
+  margin: 4px 0 8px;
+}
+
+.studio-card p,
+.studio-side p {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 .twin-hero {
   align-items: center;
   background: linear-gradient(135deg, #123c69, #0f766e);
@@ -2719,6 +3011,9 @@ textarea {
   .bi-hero,
   .twin-layout,
   .twin-hero,
+  .studio-layout,
+  .studio-hero,
+  .studio-designer,
   .filters-bar {
     grid-template-columns: 1fr;
   }
@@ -2733,11 +3028,20 @@ textarea {
     display: grid;
   }
 
+  .studio-hero {
+    align-items: stretch;
+    display: grid;
+  }
+
   .bi-actions {
     justify-content: flex-start;
   }
 
   .twin-search {
+    justify-content: flex-start;
+  }
+
+  .studio-actions {
     justify-content: flex-start;
   }
 
@@ -2766,7 +3070,9 @@ textarea {
   }
 
   .twin-entities,
-  .twin-side {
+  .twin-side,
+  .studio-list,
+  .studio-side {
     max-height: none;
     position: static;
   }

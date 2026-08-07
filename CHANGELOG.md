@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.15.0 - Incremento 15 implementado
+
+- Se implemento Formula Lab Studio como Visual Workflow Engine + BPM transversal.
+- Se agregaron modelos Prisma, migracion MySQL acotada, SQL espejo, APIs, validadores, seed y pruebas para workflows, versiones, nodos, conexiones, instancias, eventos, variables, formularios dinamicos, checklists, templates, permisos, execution log y marketplace.
+- Se agrego diseñador visual con paleta de componentes, canvas BPM, simulador, publicacion, creacion de instancias, formularios, checklists, eventos, marketplace y modo aprendizaje.
+- Se implemento validador de grafos BPM con inicio/fin, conexiones, nodos sin salida, ciclos advertidos, ruta y tiempo estimado.
+- Se integraron workflows e instancias con Digital Twin + Knowledge Graph sin duplicar datos operativos.
+- Se agregaron datos demo con 12 workflows, 8 formularios, 10 checklists, 5 templates, 20+ instancias, eventos, variables y marketplace interno.
+- Se documento la validacion en `docs/33_Validacion_Incremento_15.md` con Flowchart BPM, ER Diagram Mermaid y ejemplo completo de workflow.
+
 ## 0.14.0 - Incremento 14 implementado
 
 - Se implemento Digital Twin + Knowledge Graph como capa transversal de conocimiento.

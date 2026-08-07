@@ -1,5 +1,19 @@
 # Backlog
 
+## Incremento 15 - Formula Lab Studio / Visual Workflow Engine + BPM
+
+Estado: IMPLEMENTADO / PENDIENTE DE APROBACION FORMAL.
+
+- Motor transversal de workflows configurables implementado.
+- Definiciones, versiones, nodos y conexiones implementadas.
+- Instancias, eventos, variables, formularios dinamicos, checklists, templates, permisos y marketplace implementados.
+- Execution log por instancia implementado.
+- Simulador BPM implementado con validacion de inicio, fin, conexiones y ciclos.
+- UI ERP Studio implementada con diseñador visual, paleta, canvas, simulador, panel lateral y modo aprendizaje.
+- Integracion con Digital Twin + Knowledge Graph implementada.
+- Seeds demo con 12 workflows, 8 formularios, 10 checklists, 5 templates y 20+ instancias agregados.
+- Validacion documentada con diagrama BPM, diagrama ER y ejemplo completo Mermaid.
+
 ## Incremento 1
 
 Estado: COMPLETADO Y APROBADO.

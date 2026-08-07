@@ -604,5 +604,52 @@ export const api = {
   },
   async createGraphRelation(input: Record<string, unknown>) {
     return request<{ relation: any }>("/graph/relations", { method: "POST", body: JSON.stringify(input) });
+  },
+  async studioDashboard() {
+    return request<any>("/studio/dashboard");
+  },
+  async studioPalette() {
+    return request<{ categories: any[] }>("/studio/palette");
+  },
+  async listStudioWorkflows(filters: { q?: string; status?: string; module?: string } = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => { if (value) params.set(key, value); });
+    return request<{ workflows: any[] }>(`/studio/workflows${params.toString() ? `?${params}` : ""}`);
+  },
+  async getStudioWorkflow(id: string) {
+    return request<{ workflow: any }>(`/studio/workflows/${id}`);
+  },
+  async createStudioWorkflow(input: Record<string, unknown>) {
+    return request<{ workflow: any }>("/studio/workflows", { method: "POST", body: JSON.stringify(input) });
+  },
+  async simulateStudioWorkflow(workflowId: string, versionId: string) {
+    return request<any>(`/studio/workflows/${workflowId}/versions/${versionId}/simulate`, { method: "POST" });
+  },
+  async publishStudioWorkflow(workflowId: string, versionId: string) {
+    return request<any>(`/studio/workflows/${workflowId}/versions/${versionId}/publish`, { method: "POST" });
+  },
+  async listStudioForms() {
+    return request<{ forms: any[] }>("/studio/forms");
+  },
+  async listStudioChecklists() {
+    return request<{ checklists: any[] }>("/studio/checklists");
+  },
+  async listStudioTemplates() {
+    return request<{ templates: any[] }>("/studio/templates");
+  },
+  async listStudioInstances() {
+    return request<{ instances: any[] }>("/studio/instances");
+  },
+  async createStudioInstance(input: Record<string, unknown>) {
+    return request<{ instance: any }>("/studio/instances", { method: "POST", body: JSON.stringify(input) });
+  },
+  async listStudioEvents() {
+    return request<{ events: any[] }>("/studio/events");
+  },
+  async listStudioVariables() {
+    return request<{ variables: any[] }>("/studio/variables");
+  },
+  async syncStudioGraph() {
+    return request<any>("/studio/sync-graph", { method: "POST" });
   }
 };

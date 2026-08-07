@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { prisma as graphPrisma } from "../src/db.js";
 import { syncGraph } from "../src/services/graph.service.js";
+import { seedStudioDemo } from "../src/services/studio.service.js";
 
 const prisma = new PrismaClient();
 
@@ -1554,6 +1555,7 @@ async function main() {
     });
   }
 
+  await seedStudioDemo(organization.id, "demo-user");
   await syncGraph(organization.id, "demo-user");
 }
 

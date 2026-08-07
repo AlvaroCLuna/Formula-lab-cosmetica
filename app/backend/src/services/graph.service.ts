@@ -35,6 +35,8 @@ const entityTypeSeeds = [
   ["pedido", "Pedido", "ventas"],
   ["cliente", "Cliente", "ventas"],
   ["proyecto", "Proyecto", "conocimiento"],
+  ["workflow", "Workflow Studio", "studio"],
+  ["instancia_workflow", "Instancia Workflow", "studio"],
   ["usuario", "Usuario", "seguridad"],
   ["organizacion", "Organizacion", "seguridad"]
 ] as const;
@@ -91,7 +93,7 @@ async function relate(organizationId: string, userId: string, from: GraphEntity 
 
 export async function syncGraph(organizationId: string, userId: string) {
   await ensureGraphCatalogs(organizationId);
-  const [organization, users, rawMaterials, suppliers, products, documents, formulations, versions, projects, samples, tests, methods, instruments, orders, lots, finishedLots, specs, ncfs, capas, quotes, salesOrders, customers, aiAlerts, biAlerts] = await Promise.all([
+  const [organization, users, rawMaterials, suppliers, products, documents, formulations, versions, projects, samples, tests, methods, instruments, orders, lots, finishedLots, specs, ncfs, capas, quotes, salesOrders, customers, aiAlerts, biAlerts, workflows, workflowInstances] = await Promise.all([
     prisma.organization.findUnique({ where: { id: organizationId } }),
     prisma.user.findMany({ where: { organizationId }, take: 10 }),
     prisma.rawMaterialMaster.findMany({ where: { organizationId }, take: 30 }),
@@ -115,7 +117,9 @@ export async function syncGraph(organizationId: string, userId: string) {
     prisma.salesOrder.findMany({ where: { organizationId }, take: 20 }),
     prisma.crmCustomer.findMany({ where: { organizationId }, take: 20 }),
     prisma.aiAlert.findMany({ where: { organizationId }, take: 20 }),
-    prisma.biExecutiveAlert.findMany({ where: { organizationId }, take: 20 })
+    prisma.biExecutiveAlert.findMany({ where: { organizationId }, take: 20 }),
+    prisma.workflowDefinition.findMany({ where: { organizationId }, take: 40 }),
+    prisma.workflowInstance.findMany({ where: { organizationId }, include: { definition: true }, take: 40 })
   ]);
 
   const entityMap = new Map<string, GraphEntity>();
@@ -147,6 +151,8 @@ export async function syncGraph(organizationId: string, userId: string) {
   for (const item of quotes) await add({ sourceEntityType: "cotizacion", sourceEntityId: item.id, title: item.permanentCode, subtitle: item.status, status: item.status, module: "ventas", kpis: { total: Number(item.total), currency: item.currency } });
   for (const item of salesOrders) await add({ sourceEntityType: "pedido", sourceEntityId: item.id, title: item.permanentCode, subtitle: item.status, status: item.status, module: "ventas", responsibleUserId: item.responsibleUserId, kpis: { total: Number(item.total), currency: item.currency } });
   for (const item of customers) await add({ sourceEntityType: "cliente", sourceEntityId: item.id, title: item.commercialName, subtitle: item.permanentCode, status: item.status, module: "ventas" });
+  for (const item of workflows) await add({ sourceEntityType: "workflow", sourceEntityId: item.id, title: item.name, subtitle: item.permanentCode, status: item.status, module: "studio", summary: item.description, responsibleUserId: item.authorUserId });
+  for (const item of workflowInstances) await add({ sourceEntityType: "instancia_workflow", sourceEntityId: item.id, title: item.permanentCode, subtitle: item.definition.name, status: item.status, module: "studio", responsibleUserId: item.startedByUserId, kpis: { currentNode: item.currentNodeKey } });
 
   for (const product of products) {
     await relate(organizationId, userId, entityMap.get(`producto_comercial:${product.id}`) ?? null, entityMap.get(`materia_prima:${product.rawMaterialMasterId}`) ?? null, "referencia", "Producto comercial vinculado a materia prima maestra por tabla raw_material_commercial_products.", { source: "seed_sync" });
@@ -159,6 +165,7 @@ export async function syncGraph(organizationId: string, userId: string) {
   for (const test of tests) await relate(organizationId, userId, entityMap.get(`muestra:${test.sampleId}`) ?? null, entityMap.get(`ensayo:${test.id}`) ?? null, "requiere", "Ensayo asignado a muestra LIMS.", {});
   for (const quote of quotes) await relate(organizationId, userId, entityMap.get(`cliente:${quote.customerId}`) ?? null, entityMap.get(`cotizacion:${quote.id}`) ?? null, "referencia", "Cotizacion comercial vinculada a cliente.", {});
   for (const order of salesOrders) await relate(organizationId, userId, entityMap.get(`cliente:${order.customerId}`) ?? null, entityMap.get(`pedido:${order.id}`) ?? null, "requiere", "Pedido comercial vinculado a cliente.", {});
+  for (const instance of workflowInstances) await relate(organizationId, userId, entityMap.get(`workflow:${instance.workflowDefinitionId}`) ?? null, entityMap.get(`instancia_workflow:${instance.id}`) ?? null, "genera", "Instancia generada desde Formula Lab Studio.", { status: instance.status });
   for (const alert of aiAlerts) await relate(organizationId, userId, entityMap.get(`${alert.entityType === "raw_material_lot" ? "lote" : "pedido"}:${alert.entityId}`) ?? null, entityMap.get(`documento:${alert.evidenceDocumentId}`) ?? null, "documenta", "Alerta IA con evidencia documental registrada.", { alert: alert.permanentCode });
   for (const alert of biAlerts) await relate(organizationId, userId, entityMap.get(`${alert.entityType === "raw_material_lot" ? "lote" : "pedido"}:${alert.entityId}`) ?? null, null, "afecta", alert.source, { alert: alert.permanentCode });
 

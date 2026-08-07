@@ -19,6 +19,7 @@ import { salesRouter } from "./routes/sales.routes.js";
 import { aiRouter } from "./routes/ai.routes.js";
 import { biRouter } from "./routes/bi.routes.js";
 import { graphRouter } from "./routes/graph.routes.js";
+import { studioRouter } from "./routes/studio.routes.js";
 import { rawMaterialsRouter } from "./routes/raw-materials.routes.js";
 import { ensureStorageFolders } from "./services/storage.service.js";
 
@@ -48,6 +49,7 @@ app.use("/sales", salesRouter);
 app.use("/ai", aiRouter);
 app.use("/bi", biRouter);
 app.use("/graph", graphRouter);
+app.use("/studio", studioRouter);
 app.use("/raw-materials", rawMaterialsRouter);
 
 app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {

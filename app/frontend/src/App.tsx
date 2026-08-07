@@ -18,6 +18,7 @@ import { SalesPage } from "./pages/SalesPage";
 import { AiPage } from "./pages/AiPage";
 import { BiPage } from "./pages/BiPage";
 import { DigitalTwinPage } from "./pages/DigitalTwinPage";
+import { StudioPage } from "./pages/StudioPage";
 
 export function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -55,7 +56,7 @@ export function App() {
         setUser(null);
       }}
     >
-      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "compras" ? <PurchasesPage /> : view === "ventas" ? <SalesPage /> : view === "ia" ? <AiPage /> : view === "bi" ? <BiPage /> : view === "gemelo" ? <DigitalTwinPage /> : view === "inventario" ? <InventoryPage /> : view === "produccion" ? <ProductionPage /> : view === "conocimiento" ? <KnowledgeCenterPage /> : view === "documentos" ? <KnowledgeDocumentEnginePage /> : view === "lims" ? <LimsPage /> : view === "calidad" ? <QualityPage /> : <IngredientIntelligencePage />}
+      {view === "formulaciones" ? <FormulationListPage /> : view === "materias" ? <RawMaterialsPage /> : view === "costos" ? <CostEnginePage /> : view === "compras" ? <PurchasesPage /> : view === "ventas" ? <SalesPage /> : view === "ia" ? <AiPage /> : view === "bi" ? <BiPage /> : view === "gemelo" ? <DigitalTwinPage /> : view === "studio" ? <StudioPage /> : view === "inventario" ? <InventoryPage /> : view === "produccion" ? <ProductionPage /> : view === "conocimiento" ? <KnowledgeCenterPage /> : view === "documentos" ? <KnowledgeDocumentEnginePage /> : view === "lims" ? <LimsPage /> : view === "calidad" ? <QualityPage /> : <IngredientIntelligencePage />}
     </AppShell>
   );
 }

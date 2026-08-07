@@ -1,5 +1,19 @@
 # Roadmap
 
+## Incremento 15 - IMPLEMENTADO / PENDIENTE DE APROBACION FORMAL
+
+Formula Lab Studio - Visual Workflow Engine + BPM:
+
+- Constructor transversal de workflows configurables.
+- Versionado de definiciones y versiones de flujo.
+- Nodos, conexiones, formularios dinamicos, checklists, eventos, variables, permisos, templates y marketplace interno.
+- Ejecucion de instancias con log trazable.
+- Simulador BPM con validaciones de inicio, fin, conexiones y ciclos.
+- Integracion con Digital Twin + Knowledge Graph y timeline universal.
+- UI ERP con diseñador visual, paleta de componentes, simulador, panel lateral y modo aprendizaje.
+
+Validacion documentada en `docs/33_Validacion_Incremento_15.md`.
+
 ## Incremento 1 - COMPLETADO Y APROBADO
 
 Base ERP funcional con autenticacion, shell principal, MySQL/MariaDB, Inteligencia de Insumos, carga documental, extraccion inicial, trazabilidad, auditoria basica, validacion funcional completa y respaldo en GitHub.
